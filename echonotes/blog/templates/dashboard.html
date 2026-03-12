@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+ <!-- Sidebar -->
+<div class="col-md-3">
+    <div class="card shadow-sm mb-4">
+        <div class="card-body text-center">
+            {% if user.profile.profile_pic %}
+                <img src="{{ user.profile.profile_pic.url }}" class="rounded-circle mb-3" width="100" height="100" style="object-fit: cover;">
+            {% else %}
+                <i class="fas fa-user-circle fa-5x text-primary mb-3"></i>
+            {% endif %}
+            <h5>{{ user.username }}</h5>
+            <p class="text-muted">{{ user.email }}</p>
+            <p class="small">{{ user.profile.bio|truncatewords:20 }}</p>
+            <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Your Stats</h5>
+        </div>
+        <div class="card-body">
+            <p><i class="fas fa-pen-fancy text-primary"></i> Posts: {{ post_count }}</p>
+            <p><i class="fas fa-heart text-danger"></i> Likes Received: {{ total_likes_received }}</p>
+            <p><i class="fas fa-comment text-primary"></i> Comments: {{ total_comments_received }}</p>
+        </div>
+    </div>
+</div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Your Posts -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Your Recent Posts</h5>
+                    <a href="{% url 'create-post' %}" class="btn btn-light btn-sm">Write New Post</a>
+                </div>
+                <div class="card-body">
+                    {% if user_posts %}
+                        {% for post in user_posts|slice:":5" %}
+                            <div class="border-bottom mb-3 pb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5><a href="{% url 'post-detail' post.pk %}" class="text-decoration-none">{{ post.title }}</a></h5>
+                                    <small class="text-muted">{{ post.created_date|date:"M d, Y" }}</small>
+                                </div>
+                                <p class="text-muted">{{ post.content|truncatewords:30 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="me-3"><i class="fas fa-heart text-danger"></i> {{ post.total_likes }}</span>
+                                        <span><i class="fas fa-comment text-primary"></i> {{ post.total_comments }}</span>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'update-post' post.pk %}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+                                        <a href="{% url 'delete-post' post.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {% if user_posts.count > 5 %}
+                            <div class="text-center">
+                                <a href="#" class="btn btn-outline-primary btn-sm">View All Posts</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-center text-muted my-3">You haven't written any posts yet.</p>
+                        <div class="text-center">
+                            <a href="{% url 'create-post' %}" class="btn btn-primary">Write Your First Post</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Feed -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent from Community</h5>
+                </div>
+                <div class="card-body">
+                    {% for post in feed_posts %}
+                        <div class="border-bottom mb-3 pb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">
+                                        <a href="{% url 'profile-detail' post.author.username %}" class="text-decoration-none">
+                                            <i class="fas fa-user-circle"></i> {{ post.author.username }}
+                                        </a>
+                                    </h6>
+                                    <h5><a href="{% url 'post-detail' post.pk %}" class="text-decoration-none">{{ post.title }}</a></h5>
+                                </div>
+                                <small class="text-muted">{{ post.created_date|timesince }} ago</small>
+                            </div>
+                            <p class="text-muted">{{ post.content|truncatewords:40 }}</p>
+                            <div>
+                                <span class="me-3"><i class="fas fa-heart text-danger"></i> {{ post.total_likes }}</span>
+                                <span><i class="fas fa-comment text-primary"></i> {{ post.total_comments }}</span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-center text-muted my-3">No posts from the community yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

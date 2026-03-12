@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Welcome to EchoNotes - Your Voice Echoes Here{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center text-white py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container py-5">
+        <h1 class="display-3 fw-bold">EchoNotes</h1>
+        <p class="lead fs-2">Your Voice Echoes Here</p>
+        <p class="fs-5 mb-4">Empowering those who are inspired to write their story, ideas, and creativeness.</p>
+        {% if not user.is_authenticated %}
+            <div class="mt-4">
+                <a href="{% url 'register' %}" class="btn btn-light btn-lg me-2">Get Started</a>
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg">Login</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="container my-5">
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-pen-fancy fa-3x text-primary mb-3"></i>
+                    <h3>{{ total_posts }}+</h3>
+                    <p class="text-muted">Stories Shared</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                    <h3>{{ total_users }}+</h3>
+                    <p class="text-muted">Active Voices</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-comments fa-3x text-primary mb-3"></i>
+                    <h3>24/7</h3>
+                    <p class="text-muted">Community Support</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Posts -->
+<section class="container my-5">
+    <h2 class="text-center mb-4">Recent Echoes</h2>
+    <div class="row">
+        {% for post in recent_posts %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text text-muted">
+                            <small>
+                                <i class="fas fa-user"></i> {{ post.author.username }} | 
+                                <i class="fas fa-calendar"></i> {{ post.created_date|date:"M d, Y" }}
+                            </small>
+                        </p>
+                        <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="me-2"><i class="fas fa-heart text-danger"></i> {{ post.total_likes }}</span>
+                                <span><i class="fas fa-comment text-primary"></i> {{ post.total_comments }}</span>
+                            </div>
+                            <a href="{% url 'post-detail' post.pk %}" class="btn btn-outline-primary btn-sm">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No posts yet. Be the first to share your story!</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Popular Posts -->
+<section class="container my-5">
+    <h2 class="text-center mb-4">Most Liked Posts</h2>
+    <div class="row">
+        {% for post in popular_posts %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ post.title }}</h5>
+                        <p class="card-text text-muted">
+                            <small>
+                                <i class="fas fa-user"></i> {{ post.author.username }} | 
+                                <i class="fas fa-calendar"></i> {{ post.created_date|date:"M d, Y" }}
+                            </small>
+                        </p>
+                        <p class="card-text">{{ post.content|truncatewords:25 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="me-2"><i class="fas fa-heart text-danger"></i> {{ post.total_likes }}</span>
+                                <span><i class="fas fa-comment text-primary"></i> {{ post.total_comments }}</span>
+                            </div>
+                            <a href="{% url 'post-detail' post.pk %}" class="btn btn-outline-warning btn-sm">Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No popular posts yet.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="bg-primary text-white text-center py-5">
+    <div class="container">
+        <h2 class="mb-3">Ready to Share Your Voice?</h2>
+        <p class="lead mb-4">Join our community of writers and creators today.</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn btn-light btn-lg">Start Writing</a>
+        {% else %}
+            <a href="{% url 'create-post' %}" class="btn btn-light btn-lg">Write Your Story</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
