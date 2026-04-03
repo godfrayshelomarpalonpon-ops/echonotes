@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}Leaderboard - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <span class="section-eyebrow">Community Rankings</span>
+        <h1 class="section-title">Leaderboard</h1>
+        <hr class="section-divider">
+    </div>
+
+    <!-- Period Tabs -->
+    <div class="d-flex gap-2 mb-4">
+        <a href="?period=weekly" class="btn {% if period == 'weekly' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            This Week
+        </a>
+        <a href="?period=monthly" class="btn {% if period == 'monthly' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            This Month
+        </a>
+        <a href="?period=alltime" class="btn {% if period == 'alltime' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            All Time
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Most Liked -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-heart me-2" style="color:#ff8080"></i>Most Liked Writers</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for user in most_liked %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-family:var(--font-display);font-size:1.2rem;color:var(--cream-border);width:24px">
+                                    {% if forloop.counter == 1 %}👑
+                                    {% elif forloop.counter == 2 %}🥈
+                                    {% elif forloop.counter == 3 %}🥉
+                                    {% else %}{{ forloop.counter }}{% endif %}
+                                </span>
+                                <a href="{% url 'profile-detail' user.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">
+                                    {{ user.username }}
+                                </a>
+                            </div>
+                            <span class="badge" style="background:rgba(200,71,43,0.1);color:var(--accent)">
+                                <i class="fas fa-heart me-1"></i>{{ user.total_likes }}
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted py-3">No data yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Posts -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-pen-fancy me-2" style="color:#ffd700"></i>Most Active Writers</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for user in most_posts %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-family:var(--font-display);font-size:1.2rem;color:var(--cream-border);width:24px">
+                                    {% if forloop.counter == 1 %}👑
+                                    {% elif forloop.counter == 2 %}🥈
+                                    {% elif forloop.counter == 3 %}🥉
+                                    {% else %}{{ forloop.counter }}{% endif %}
+                                </span>
+                                <a href="{% url 'profile-detail' user.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">
+                                    {{ user.username }}
+                                </a>
+                            </div>
+                            <span class="badge" style="background:rgba(212,168,67,0.1);color:var(--gold)">
+                                <i class="fas fa-pen me-1"></i>{{ user.post_count }}
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted py-3">No data yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Most Comments -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-comments me-2" style="color:#80c0ff"></i>Top Commenters</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for user in most_comments %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <span style="font-family:var(--font-display);font-size:1.2rem;color:var(--cream-border);width:24px">
+                                    {% if forloop.counter == 1 %}👑
+                                    {% elif forloop.counter == 2 %}🥈
+                                    {% elif forloop.counter == 3 %}🥉
+                                    {% else %}{{ forloop.counter }}{% endif %}
+                                </span>
+                                <a href="{% url 'profile-detail' user.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">
+                                    {{ user.username }}
+                                </a>
+                            </div>
+                            <span class="badge" style="background:rgba(44,111,173,0.1);color:#2c6fad">
+                                <i class="fas fa-comment me-1"></i>{{ user.comment_count }}
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted py-3">No data yet</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

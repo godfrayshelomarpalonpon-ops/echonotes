@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Submit Entry - {{ contest.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-pen me-2"></i>Submit Entry — {{ contest.title }}
+                    </h4>
+                    <small class="text-white-50">Theme: {{ contest.theme }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Submission deadline: <strong>{{ contest.submission_deadline|date:"F d, Y H:i" }}</strong>
+                    </div>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small id="word-count" class="text-muted">0 words · 1 min read</small>
+                            <div>
+                                <a href="{% url 'contest-detail' contest.pk %}" class="btn btn-outline-secondary me-2">Cancel</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Submit Entry
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+const contentField = document.getElementById('entry-content');
+const wordCountEl = document.getElementById('word-count');
+
+function updateWordCount() {
+    const text = contentField.value.trim();
+    const words = text ? text.split(/\s+/).length : 0;
+    const minutes = Math.max(1, Math.ceil(words / 200));
+    wordCountEl.textContent = `${words} words · ${minutes} min read`;
+}
+
+if (contentField) {
+    contentField.addEventListener('input', updateWordCount);
+}
+</script>
+{% endblock %}
+{% endblock %}

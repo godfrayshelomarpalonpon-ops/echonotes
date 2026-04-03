@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Daily Prompts - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Manage Daily Prompts</h2>
+        <a href="{% url 'admin-dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Create New Prompt</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Prompt Text</label>
+                        <textarea name="prompt" class="form-control" rows="3"
+                                  placeholder="Write a story about..." required></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Date</label>
+                        <input type="date" name="date" class="form-control" value="{{ today }}" required>
+                        <small class="text-muted mt-1 d-block">Leave as today for the daily prompt</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus me-2"></i>Create Prompt
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">All Prompts</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Prompt</th>
+                            <th>Responses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prompt in prompts %}
+                        <tr>
+                            <td><strong>{{ prompt.date|date:"M d, Y" }}</strong></td>
+                            <td>{{ prompt.prompt|truncatewords:20 }}</td>
+                            <td>{{ prompt.total_responses }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">No prompts yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

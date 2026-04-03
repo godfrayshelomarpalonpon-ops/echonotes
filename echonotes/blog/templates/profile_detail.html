@@ -1,53 +1,419 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ profile_user.username }}'s Profile{% endblock %}
+{% block title %}{{ profile_user.username }} — EchoNotes{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-body text-center">
-                    {% if profile_user.profile.profile_pic %}
-                        <img src="{{ profile_user.profile.profile_pic.url }}" class="profile-img mb-3">
-                    {% else %}
-                        <i class="fas fa-user-circle fa-6x text-primary mb-3"></i>
-                    {% endif %}
-                    <h4>{{ profile_user.username }}</h4>
-                    <p class="text-muted">{{ profile_user.email }}</p>
-                    {% if profile_user.profile.bio %}
-                        <p class="mt-3">{{ profile_user.profile.bio }}</p>
-                    {% endif %}
-                    <p class="text-muted mt-3">
-                        <i class="fas fa-calendar"></i> Joined: {{ profile_user.date_joined|date:"F d, Y" }}
-                    </p>
-                    <p><i class="fas fa-pen-fancy"></i> Posts: {{ post_count }}</p>
-                </div>
-            </div>
+<style>
+  .pd-wrapper { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+
+  /* Hero card */
+  .pd-hero {
+    background: white;
+    border: 1px solid var(--cream-border);
+    border-radius: 24px;
+    backdrop-filter: blur(14px);
+    padding: 2rem;
+    display: flex;
+    gap: 1.8rem;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .pd-avatar-wrap { flex-shrink: 0; }
+
+  .pd-avatar {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(124,58,237,0.5);
+  }
+  .pd-avatar-ph {
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; font-weight: 700; color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    text-transform: uppercase;
+    border: 3px solid rgba(124,58,237,0.5);
+  }
+
+  .pd-info { flex: 1; min-width: 0; }
+
+  .pd-username {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem; color: var(--ink); margin: 0 0 0.25rem;
+  }
+  .pd-bio {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; color: rgba(255,255,255,0.55);
+    margin-bottom: 1rem; line-height: 1.6;
+  }
+  .pd-joined {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; color: var(--ink-muted);
+    display: flex; align-items: center; gap: 5px; margin-bottom: 1rem;
+  }
+
+  /* Stats row */
+  .pd-stats {
+    display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.2rem;
+  }
+  .pd-stat { text-align: center; }
+  .pd-stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; color: var(--ink); display: block; line-height: 1;
+  }
+  .pd-stat-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem; color: var(--ink-muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+
+  /* Action buttons */
+  .pd-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+  .pd-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.5rem 1.1rem; border-radius: 11px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+    border: none; cursor: pointer; text-decoration: none;
+    transition: all 0.18s;
+  }
+  .pd-btn-primary {
+    background: linear-gradient(135deg,#7c3aed,#a855f7);
+    color: var(--ink);
+  }
+  .pd-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(124,58,237,0.4); color: var(--ink); }
+
+  .pd-btn-outline {
+    background: var(--cream-dark);
+    border: 1px solid var(--cream-border);
+    color: var(--ink);
+  }
+  .pd-btn-outline:hover { background: var(--cream-border); color: var(--ink); }
+
+  .pd-btn-danger {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.25);
+    color: #f87171;
+  }
+  .pd-btn-danger:hover { background: rgba(239,68,68,0.22); color: var(--ink); }
+
+  .pd-btn-success {
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #4ade80;
+  }
+  .pd-btn-success:hover { background: rgba(34,197,94,0.25); color: var(--ink); }
+
+  .pd-btn-yellow {
+    background: rgba(245,158,11,0.12);
+    border: 1px solid rgba(245,158,11,0.25);
+    color: #fbbf24;
+  }
+  .pd-btn-yellow:hover { background: rgba(245,158,11,0.22); color: var(--ink); }
+
+  /* Bottom grid */
+  .pd-grid { display: grid; grid-template-columns: 1fr 280px; gap: 1.2rem; }
+  @media(max-width:768px) { .pd-grid { grid-template-columns: 1fr; } }
+
+  /* Card shared */
+  .pd-card {
+    background: white;
+    border: 1px solid var(--cream-border);
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+  .pd-card-header {
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--cream-border);
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem; color: var(--ink);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  /* Post row */
+  .pd-post-item {
+    display: block; padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--cream-border);
+    text-decoration: none; transition: background 0.18s;
+  }
+  .pd-post-item:last-child { border-bottom: none; }
+  .pd-post-item:hover { background: white; }
+  .pd-post-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem; color: var(--ink); margin-bottom: 0.2rem;
+  }
+  .pd-post-meta {
+    font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
+    color: var(--ink-muted);
+    display: flex; gap: 0.8rem; align-items: center;
+  }
+
+  /* Badges */
+  .pd-badge-grid {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    padding: 1rem 1.4rem;
+  }
+  .pd-badge-chip {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    padding: 0.3rem 0.75rem;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
+    color: #c4b5fd;
+  }
+
+  .pd-empty {
+    padding: 2rem; text-align: center;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    color: var(--ink-muted);
+  }
+</style>
+
+<div class="container">
+<div class="pd-wrapper">
+
+  <!-- Hero -->
+  <div class="pd-hero">
+    <div class="pd-avatar-wrap">
+      {% if profile_user.profile.profile_pic and profile_user.profile.profile_pic.name != 'default.jpg' %}
+        <img src="{{ profile_user.profile.profile_pic.url }}" class="pd-avatar" alt="{{ profile_user.username }}">
+      {% else %}
+        <div class="pd-avatar-ph"
+             style="background:linear-gradient(135deg,{% if profile_user.username|length|divisibleby:2 %}#0ea5e9,#38bdf8{% else %}#7c3aed,#a855f7{% endif %})">
+          {{ profile_user.username|slice:":1" }}
         </div>
-        
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">{{ profile_user.username }}'s Posts</h5>
-                </div>
-                <div class="card-body">
-                    {% for post in user_posts %}
-                        <div class="border-bottom mb-3 pb-3">
-                            <h5><a href="{% url 'post-detail' post.pk %}" class="text-decoration-none">{{ post.title }}</a></h5>
-                            <small class="text-muted">{{ post.created_date|date:"F d, Y" }}</small>
-                            <p class="mt-2">{{ post.content|truncatewords:50 }}</p>
-                            <div>
-                                <span class="me-3"><i class="fas fa-heart text-danger"></i> {{ post.total_likes }}</span>
-                                <span><i class="fas fa-comment text-primary"></i> {{ post.total_comments }}</span>
-                            </div>
-                        </div>
-                    {% empty %}
-                        <p class="text-muted text-center">No posts yet.</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+      {% endif %}
     </div>
+
+    <div class="pd-info">
+      <h1 class="pd-username">{{ profile_user.username }}</h1>
+      {% if profile_user.profile.bio %}
+        <p class="pd-bio">{{ profile_user.profile.bio }}</p>
+      {% endif %}
+      <div class="pd-joined">
+        <i class="fas fa-calendar-alt"></i> Joined {{ profile_user.date_joined|date:"F Y" }}
+      </div>
+
+      <div class="pd-stats">
+        <div class="pd-stat">
+          <span class="pd-stat-num">{{ post_count }}</span>
+          <span class="pd-stat-label">Posts</span>
+        </div>
+        <div class="pd-stat">
+          <span class="pd-stat-num" id="pd-follower-count">{{ follower_count }}</span>
+          <span class="pd-stat-label">Followers</span>
+        </div>
+        <div class="pd-stat">
+          <span class="pd-stat-num">{{ following_count }}</span>
+          <span class="pd-stat-label">Following</span>
+        </div>
+        <div class="pd-stat">
+          <span class="pd-stat-num">{{ streak.current_streak }}</span>
+          <span class="pd-stat-label">🔥 Streak</span>
+        </div>
+      </div>
+
+      {% if user.is_authenticated and user != profile_user %}
+      <div class="pd-actions">
+        <!-- Follow / Unfollow -->
+        <button class="pd-btn {% if is_following %}pd-btn-outline{% else %}pd-btn-primary{% endif %}"
+                id="pd-follow-btn" data-username="{{ profile_user.username }}">
+          {% if is_following %}
+            <i class="fas fa-user-minus"></i> Unfollow
+          {% else %}
+            <i class="fas fa-user-plus"></i> Follow
+          {% endif %}
+        </button>
+
+        <!-- Friend actions -->
+        {% if is_friend %}
+          <button class="pd-btn pd-btn-success" disabled>
+            <i class="fas fa-user-check"></i> Friends
+          </button>
+          <button class="pd-btn pd-btn-danger" id="pd-remove-friend-btn"
+                  data-username="{{ profile_user.username }}">
+            <i class="fas fa-user-times"></i> Remove
+          </button>
+        {% elif friend_request_received %}
+          <button class="pd-btn pd-btn-success" id="pd-accept-btn"
+                  data-pk="{{ friend_request_received.pk }}">
+            <i class="fas fa-check"></i> Accept Request
+          </button>
+          <button class="pd-btn pd-btn-danger" id="pd-decline-btn"
+                  data-pk="{{ friend_request_received.pk }}">
+            <i class="fas fa-times"></i> Decline
+          </button>
+        {% elif friend_request_sent %}
+          <button class="pd-btn pd-btn-yellow" disabled>
+            <i class="fas fa-clock"></i> Request Sent
+          </button>
+        {% else %}
+          <button class="pd-btn pd-btn-outline" id="pd-add-friend-btn"
+                  data-username="{{ profile_user.username }}">
+            <i class="fas fa-user-plus"></i> Add Friend
+          </button>
+        {% endif %}
+
+        <!-- Message -->
+        <a href="{% url 'conversation' profile_user.username %}" class="pd-btn pd-btn-outline">
+          <i class="fas fa-envelope"></i> Message
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="pd-grid">
+    <!-- Posts -->
+    <div class="pd-card">
+      <div class="pd-card-header">
+        <i class="fas fa-feather" style="color:var(--accent,#7c3aed)"></i>
+        {{ profile_user.username }}'s Posts
+      </div>
+      {% if user_posts %}
+        {% for post in user_posts %}
+          <a href="{% url 'post-detail' post.pk %}" class="pd-post-item">
+            <div class="pd-post-title">{{ post.title }}</div>
+            <div class="pd-post-meta">
+              <span><i class="fas fa-calendar" style="font-size:.65rem"></i> {{ post.created_date|date:"M d, Y" }}</span>
+              <span><i class="fas fa-heart" style="color:#f43f5e;font-size:.65rem"></i> {{ post.total_likes }}</span>
+              <span><i class="fas fa-comment" style="color:#60a5fa;font-size:.65rem"></i> {{ post.total_comments }}</span>
+              <span><i class="fas fa-clock" style="font-size:.65rem"></i> {{ post.reading_time }} min</span>
+            </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <div class="pd-empty">No posts yet.</div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div style="display:flex;flex-direction:column;gap:1.2rem;">
+      <!-- Badges -->
+      <div class="pd-card">
+        <div class="pd-card-header">
+          <i class="fas fa-award" style="color:#f59e0b"></i> Badges
+        </div>
+        {% if user_badges %}
+          <div class="pd-badge-grid">
+            {% for ub in user_badges %}
+              <div class="pd-badge-chip" title="{{ ub.badge.description }}">
+                {{ ub.badge.icon }} {{ ub.badge.get_name_display }}
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="pd-empty">No badges yet.</div>
+        {% endif %}
+      </div>
+
+      <!-- Writing streak -->
+      <div class="pd-card">
+        <div class="pd-card-header">
+          <i class="fas fa-fire" style="color:#f97316"></i> Writing Streak
+        </div>
+        <div style="padding:1rem 1.4rem;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:.6rem;">
+            <span style="font-family:'DM Sans',sans-serif;font-size:.82rem;color:rgba(255,255,255,.5)">Current</span>
+            <span style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#f97316">{{ streak.current_streak }} days</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-family:'DM Sans',sans-serif;font-size:.82rem;color:rgba(255,255,255,.5)">Best</span>
+            <span style="font-family:'DM Sans',sans-serif;font-size:.9rem;color:rgba(255,255,255,.7)">{{ streak.longest_streak }} days</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
+</div>
+
+{% block extra_js %}
+<script>
+(function(){
+  const CSRF = '{{ csrf_token }}';
+  function post(url, cb) {
+    fetch(url, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/x-www-form-urlencoded' }
+    }).then(r => r.json()).then(cb).catch(() => {});
+  }
+
+  // Follow / Unfollow
+  const followBtn = document.getElementById('pd-follow-btn');
+  if (followBtn) {
+    followBtn.addEventListener('click', function() {
+      const uname = this.dataset.username;
+      post('/follow/' + uname + '/', data => {
+        if (data.following) {
+          this.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
+          this.classList.replace('pd-btn-primary', 'pd-btn-outline');
+        } else {
+          this.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
+          this.classList.replace('pd-btn-outline', 'pd-btn-primary');
+        }
+        document.getElementById('pd-follower-count').textContent = data.follower_count;
+      });
+    });
+  }
+
+  // Add friend
+  const addFriendBtn = document.getElementById('pd-add-friend-btn');
+  if (addFriendBtn) {
+    addFriendBtn.addEventListener('click', function() {
+      const uname = this.dataset.username;
+      post('/friend/request/' + uname + '/', data => {
+        if (data.status === 'sent' || data.status === 'already_friends') {
+          this.innerHTML = '<i class="fas fa-clock"></i> Request Sent';
+          this.classList.add('pd-btn-yellow');
+          this.classList.remove('pd-btn-outline');
+          this.disabled = true;
+        }
+      });
+    });
+  }
+
+  // Accept request
+  const acceptBtn = document.getElementById('pd-accept-btn');
+  if (acceptBtn) {
+    acceptBtn.addEventListener('click', function() {
+      post('/friend/accept/' + this.dataset.pk + '/', data => {
+        if (data.status === 'accepted') {
+          location.reload();
+        }
+      });
+    });
+  }
+
+  // Decline request
+  const declineBtn = document.getElementById('pd-decline-btn');
+  if (declineBtn) {
+    declineBtn.addEventListener('click', function() {
+      post('/friend/decline/' + this.dataset.pk + '/', data => {
+        if (data.status === 'declined') {
+          this.closest('.pd-actions').querySelectorAll('[id^="pd-accept"], [id^="pd-decline"]').forEach(b => b.remove());
+        }
+      });
+    });
+  }
+
+  // Remove friend
+  const removeBtn = document.getElementById('pd-remove-friend-btn');
+  if (removeBtn) {
+    removeBtn.addEventListener('click', function() {
+      if (!confirm('Remove this friend?')) return;
+      post('/friend/remove/' + this.dataset.username + '/', () => location.reload());
+    });
+  }
+})();
+</script>
+{% endblock %}
 {% endblock %}

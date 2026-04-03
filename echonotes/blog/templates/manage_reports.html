@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Reports - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            Manage Reports
+            {% if pending_count > 0 %}
+                <span class="badge bg-danger ms-2">{{ pending_count }} pending</span>
+            {% endif %}
+        </h2>
+        <a href="{% url 'admin-dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Filter -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body py-2">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'manage-reports' %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-outline-primary{% endif %}">All</a>
+                <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-danger{% else %}btn-outline-danger{% endif %}">Pending</a>
+                <a href="?status=reviewed" class="btn btn-sm {% if status_filter == 'reviewed' %}btn-warning{% else %}btn-outline-warning{% endif %}">Under Review</a>
+                <a href="?status=resolved" class="btn btn-sm {% if status_filter == 'resolved' %}btn-success{% else %}btn-outline-success{% endif %}">Resolved</a>
+                <a href="?status=dismissed" class="btn btn-sm {% if status_filter == 'dismissed' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Dismissed</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Post</th>
+                            <th>Reported By</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'post-detail' report.post.pk %}" class="text-decoration-none" target="_blank">
+                                    {{ report.post.title|truncatechars:30 }}
+                                </a>
+                                <br>
+                                <small class="text-muted">by {{ report.post.author.username }}</small>
+                            </td>
+                            <td>{{ report.reported_by.username }}</td>
+                            <td><span class="badge bg-warning text-dark">{{ report.get_reason_display }}</span></td>
+                            <td>
+                                {% if report.status == 'pending' %}
+                                    <span class="badge bg-danger">Pending</span>
+                                {% elif report.status == 'reviewed' %}
+                                    <span class="badge bg-warning text-dark">Under Review</span>
+                                {% elif report.status == 'resolved' %}
+                                    <span class="badge bg-success">Resolved</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Dismissed</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ report.created_date|date:"M d, Y" }}</small></td>
+                            <td>
+                                {% if report.status == 'pending' or report.status == 'reviewed' %}
+                                    <a href="{% url 'review-report' report.pk %}" class="btn btn-sm btn-outline-primary">
+                                        Review
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'review-report' report.pk %}" class="btn btn-sm btn-outline-secondary">
+                                        View
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No reports found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

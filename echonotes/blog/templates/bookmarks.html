@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}My Bookmarks - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-bookmark me-2"></i>My Bookmarks</h4>
+                </div>
+                <div class="card-body">
+                    {% for bookmark in bookmarks %}
+                        <div class="border-bottom mb-3 pb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5>
+                                    <a href="{% url 'post-detail' bookmark.post.pk %}" class="text-decoration-none">
+                                        {{ bookmark.post.title }}
+                                    </a>
+                                </h5>
+                                {% if bookmark.post.category %}
+                                    <a href="{% url 'category-posts' bookmark.post.category.slug %}" class="badge bg-primary text-decoration-none">
+                                        {{ bookmark.post.category.name }}
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <small class="text-muted">
+                                <a href="{% url 'profile-detail' bookmark.post.author.username %}" class="text-decoration-none">
+                                    <i class="fas fa-user"></i> {{ bookmark.post.author.username }}
+                                </a>
+                                · <i class="fas fa-clock"></i> {{ bookmark.post.reading_time }} min read
+                                · Saved {{ bookmark.created_date|timesince }} ago
+                            </small>
+                            <p class="mt-2">{{ bookmark.post.content|truncatewords:40 }}</p>
+                            <div>
+                                <span class="me-3"><i class="fas fa-heart text-danger"></i> {{ bookmark.post.total_likes }}</span>
+                                <span><i class="fas fa-comment text-primary"></i> {{ bookmark.post.total_comments }}</span>
+                                <a href="{% url 'post-detail' bookmark.post.pk %}" class="btn btn-outline-primary btn-sm float-end">Read More</a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-bookmark fa-4x text-muted mb-3"></i>
+                            <p class="lead text-muted">You haven't saved any posts yet.</p>
+                            <a href="{% url 'landing' %}" class="btn btn-primary">Explore Posts</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

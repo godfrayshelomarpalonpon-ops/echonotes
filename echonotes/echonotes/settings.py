@@ -31,7 +31,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',              # ← must be FIRST
     'django.contrib.admin',
+    'grappelli',    # ← before django.contrib.admin
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -40,20 +42,22 @@ INSTALLED_APPS = [
      'blog',
     'crispy_forms',
     'crispy_bootstrap5',
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'api',  
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',          # ← ADD THIS
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+    ]
 
 ROOT_URLCONF = 'echonotes.urls'
 
@@ -68,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'blog.context_processors.categories',
             ],
         },
     },
@@ -105,6 +110,37 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+JAZZMIN_SETTINGS = {
+    'site_title': 'EchoNotes Admin',
+    'site_header': 'EchoNotes',
+    'site_brand': 'EchoNotes',
+    'welcome_sign': 'Welcome to EchoNotes Admin',
+    'copyright': 'EchoNotes',
+    'search_model': ['auth.User', 'blog.Post'],
+}
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day',
+    },
+}
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 

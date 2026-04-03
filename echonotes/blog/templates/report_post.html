@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Report Post - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-flag me-2"></i>Report Post</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-4">
+                        <strong>Reporting:</strong> "{{ post.title }}"
+                        <br><small class="text-muted">by {{ post.author.username }}</small>
+                    </div>
+                    <p class="text-muted">Please select a reason for reporting this post. False reports may result in account action.</p>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-grid gap-2 mt-3">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-flag me-2"></i>Submit Report
+                            </button>
+                            <a href="{% url 'post-detail' post.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

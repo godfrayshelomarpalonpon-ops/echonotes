@@ -7,7 +7,14 @@
 <div class="container py-4">
     <div class="row">
         <div class="col-lg-8 mx-auto">
-            <!-- Post Card -->
+
+            {% if post.status == 'draft' %}
+            <div class="alert alert-warning">
+                <i class="fas fa-file-alt me-2"></i> This post is a <strong>Draft</strong> — only you can see it.
+                <a href="{% url 'update-post' post.pk %}" class="alert-link ms-2">Publish it</a>
+            </div>
+            {% endif %}
+
             <div class="card shadow mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">{{ post.title }}</h4>
@@ -19,35 +26,48 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                         <div>
                             <a href="{% url 'profile-detail' post.author.username %}" class="text-decoration-none">
                                 <i class="fas fa-user-circle"></i> {{ post.author.username }}
                             </a>
                             <small class="text-muted ms-2">
                                 <i class="fas fa-calendar"></i> {{ post.created_date|date:"F d, Y" }}
-                                {% if post.updated_date != post.created_date %}
-                                    (edited)
-                                {% endif %}
+                                {% if post.updated_date != post.created_date %}(edited){% endif %}
+                            </small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            {% if post.category %}
+                                <a href="{% url 'category-posts' post.category.slug %}" class="badge bg-primary text-decoration-none">
+                                    {{ post.category.name }}
+                                </a>
+                            {% endif %}
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> {{ post.reading_time }} min read
                             </small>
                         </div>
                     </div>
-                    
+
                     <div class="post-content mb-4">
                         {{ post.content|linebreaks }}
                     </div>
-                    
-                    <!-- Like Section -->
+
+                    <!-- Like & Bookmark -->
                     <div class="border-top pt-3 mb-3">
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-center gap-3">
                             {% if user.is_authenticated %}
-                                <button class="btn {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %} me-3 like-btn" 
+                                <button class="btn {% if user_liked %}btn-danger{% else %}btn-outline-danger{% endif %} like-btn"
                                         data-post-id="{{ post.pk }}">
-                                    <i class="fas fa-heart"></i> 
+                                    <i class="fas fa-heart"></i>
                                     <span class="like-count">{{ post.total_likes }}</span>
                                 </button>
+                                <button class="btn {% if user_bookmarked %}btn-warning{% else %}btn-outline-warning{% endif %} bookmark-btn"
+                                        data-post-id="{{ post.pk }}">
+                                    <i class="fas fa-bookmark"></i>
+                                    {% if user_bookmarked %}Saved{% else %}Save{% endif %}
+                                </button>
                             {% else %}
-                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-danger me-3">
+                                <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-outline-danger">
                                     <i class="fas fa-heart"></i> {{ post.total_likes }}
                                 </a>
                             {% endif %}
@@ -56,8 +76,8 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- Comments Section -->
+
+            <!-- Comments -->
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">Comments</h5>
@@ -67,15 +87,14 @@
                         <form method="POST" class="mb-4">
                             {% csrf_token %}
                             {{ comment_form|crispy }}
-                            <button type="submit" class="btn btn-primary">Post Comment</button>
+                            <button type="submit" class="btn btn-primary mt-2">Post Comment</button>
                         </form>
                     {% else %}
                         <div class="alert alert-info">
                             Please <a href="{% url 'login' %}?next={{ request.path }}">login</a> to comment.
                         </div>
                     {% endif %}
-                    
-                    <!-- Comments List -->
+
                     {% for comment in comments %}
                         <div class="border-bottom mb-3 pb-3">
                             <div class="d-flex justify-content-between align-items-start">
@@ -83,11 +102,11 @@
                                     <a href="{% url 'profile-detail' comment.author.username %}" class="text-decoration-none fw-bold">
                                         {{ comment.author.username }}
                                     </a>
-                                    <small class="text-muted">{{ comment.created_date|timesince }} ago</small>
+                                    <small class="text-muted ms-2">{{ comment.created_date|timesince }} ago</small>
                                 </div>
                                 {% if user == comment.author or user.is_staff %}
-                                    <a href="{% url 'delete-comment' comment.pk %}" class="text-danger" 
-                                       onclick="return confirm('Are you sure you want to delete this comment?')">
+                                    <a href="{% url 'delete-comment' comment.pk %}" class="text-danger"
+                                       onclick="return confirm('Delete this comment?')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 {% endif %}
@@ -99,6 +118,7 @@
                     {% endfor %}
                 </div>
             </div>
+
         </div>
     </div>
 </div>
@@ -106,22 +126,36 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
+    // Like button
     $('.like-btn').click(function(e) {
         e.preventDefault();
         var btn = $(this);
         var postId = btn.data('post-id');
-        
         $.ajax({
-            url: '{% url "like-post" 0 %}'.replace('0', postId),
+            url: '/post/' + postId + '/like/',
             type: 'POST',
-            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            headers: {'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest'},
             success: function(response) {
-                if (response.liked) {
-                    btn.removeClass('btn-outline-danger').addClass('btn-danger');
-                } else {
-                    btn.removeClass('btn-danger').addClass('btn-outline-danger');
-                }
+                btn.toggleClass('btn-outline-danger', !response.liked);
+                btn.toggleClass('btn-danger', response.liked);
                 btn.find('.like-count').text(response.total_likes);
+            }
+        });
+    });
+
+    // Bookmark button
+    $('.bookmark-btn').click(function(e) {
+        e.preventDefault();
+        var btn = $(this);
+        var postId = btn.data('post-id');
+        $.ajax({
+            url: '/post/' + postId + '/bookmark/',
+            type: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}', 'X-Requested-With': 'XMLHttpRequest'},
+            success: function(response) {
+                btn.toggleClass('btn-outline-warning', !response.bookmarked);
+                btn.toggleClass('btn-warning', response.bookmarked);
+                btn.html('<i class="fas fa-bookmark"></i> ' + (response.bookmarked ? 'Saved' : 'Save'));
             }
         });
     });

@@ -3,134 +3,1078 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EchoNotes - {% block title %}Your Voice Echoes Here{% endblock %}</title>
-    
-    <!-- Bootstrap 5 CSS -->
+    <title>EchoNotes — {% block title %}Your Voice Echoes Here{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Custom CSS -->
+    
+    <!-- ↓ THIS IS WHAT YOU NEED ↓ -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-</head>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0.1">
+
+    <style>
+    /* ── Notification Bell ─────────────────────────────── */
+    .notif-icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.09);
+      color: rgba(255,255,255,0.6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.18s;
+      text-decoration: none;
+    }
+    .notif-icon-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+
+    .notif-badge {
+      position: absolute; top: -5px; right: -5px;
+      min-width: 17px; height: 17px; border-radius: 50%;
+      background: #ef4444; color: white;
+      font-size: 0.6rem; font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      display: flex !important; align-items: center; justify-content: center;
+      border: 2px solid #0f0a1a;
+      padding: 0 3px;
+    }
+
+    .notif-dropdown {
+      position: absolute; top: calc(100% + 10px); right: 0;
+      width: 320px;
+      background: rgba(18,12,30,0.97);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      display: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .notif-dropdown.open { display: block; animation: dropIn 0.18s ease; }
+    @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+    .notif-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .notif-header span {
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
+      font-weight: 600; color: rgba(255,255,255,0.6);
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .notif-mark-read {
+      background: none; border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+      color: #a78bfa; transition: color 0.15s;
+    }
+    .notif-mark-read:hover { color: white; }
+
+    .notif-list { max-height: 360px; overflow-y: auto; }
+    .notif-list::-webkit-scrollbar { width: 3px; }
+    .notif-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+    .notif-item {
+      display: flex; align-items: flex-start; gap: 0.7rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: rgba(255,255,255,0.04); }
+    .notif-item.unread { background: rgba(124,58,237,0.07); }
+    .notif-item.unread:hover { background: rgba(124,58,237,0.12); }
+
+    .notif-av {
+      width: 34px; height: 34px; border-radius: 50%;
+      object-fit: cover; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .notif-av-ph {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; color: white;
+      font-family: 'DM Sans', sans-serif; text-transform: uppercase;
+      flex-shrink: 0;
+      background: linear-gradient(135deg,#7c3aed,#a855f7);
+    }
+
+    .notif-body { flex: 1; min-width: 0; }
+    .notif-text {
+      font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
+      color: rgba(255,255,255,0.75); line-height: 1.4;
+      margin-bottom: 2px;
+    }
+    .notif-time {
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      color: rgba(255,255,255,0.28);
+    }
+
+    .notif-icon-badge {
+      font-size: 1rem; flex-shrink: 0; opacity: 0.8;
+    }
+
+    .notif-empty {
+      padding: 2rem; text-align: center;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+      color: rgba(255,255,255,0.25);
+    }
+    .notif-footer {
+      padding: 0.6rem 1rem;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .notif-footer a {
+      font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
+      color: #a78bfa; text-decoration: none;
+    }
+    </style>
+
+
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'landing' %}">
-                <i class="fas fa-volume-up"></i> EchoNotes
-                <small class="d-none d-md-inline">"Your Voice Echoes Here"</small>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'landing' %}">Home</a>
-                    </li>
-                    
+
+<!-- Navigation -->
+<nav class="echonav navbar navbar-expand-lg">
+    <div class="container">
+        <a class="echo-brand" href="{% url 'landing' %}">
+            <i class="fas fa-volume-up" style="color:var(--accent);font-size:1.1rem"></i>
+            <div>
+                Echo<span>Notes</span>
+                <small>Your voice echoes here</small>
+            </div>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                style="color:rgba(255,255,255,0.7)">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center" style="gap: 0.5rem; margin-left: 1.5rem;">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'landing' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'story-list' %}">Stories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link highlight" href="{% url 'contest-list' %}">
+                        <i class="fas fa-trophy me-1" style="color:var(--gold)"></i>Contests
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Explore
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg" aria-labelledby="exploreDropdown" style="background: rgba(30, 22, 45, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 12px; font-size: 0.9rem;">
+                        <li><a class="dropdown-item py-2" href="{% url 'daily-prompt' %}"><i class="fas fa-lightbulb me-2 text-warning"></i>Daily Prompt <span class="badge rounded-pill ms-1" style="background:var(--accent); font-size:0.65rem">✨ AI</span></a></li>
+                        <li><a class="dropdown-item py-2" href="{% url 'word-of-the-day' %}"><i class="fas fa-book-open me-2 text-info"></i>Word of the Day <span class="badge rounded-pill ms-1" style="background:var(--accent); font-size:0.65rem">✨ AI</span></a></li>
+                        <li><hr class="dropdown-divider border-secondary"></li>
+                        <li><a class="dropdown-item py-2" href="{% url 'leaderboard' %}"><i class="fas fa-medal me-2" style="color:var(--gold)"></i>Leaderboard</a></li>
+                        <li><a class="dropdown-item py-2" href="{% url 'badges' %}"><i class="fas fa-award me-2" style="color:var(--accent)"></i>Badges</a></li>
+                        <li><a class="dropdown-item py-2" href="{% url 'writing-timer' %}"><i class="fas fa-stopwatch me-2 text-danger"></i>Writing Timer</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+
+            <div class="d-flex align-items-lg-center gap-3">
+                <form class="echo-search d-flex align-items-center m-0" action="{% url 'search' %}" method="GET" style="background: rgba(255,255,255,0.05); border-radius: 20px; padding: 3px; border: 1px solid rgba(255,255,255,0.08);">
+                    <input type="search" name="q" placeholder="Search..." required class="border-0 bg-transparent text-white px-3" style="outline: none; font-size: 0.85rem; width: 160px;">
+                    <button type="submit" class="border-0 rounded-circle d-flex justify-content-center align-items-center" style="background: var(--accent); width: 32px; height: 32px; color: white;"><i class="fas fa-search" style="font-size: 0.75rem;"></i></button>
+                </form>
+
+                <ul class="navbar-nav align-items-lg-center m-0">
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'create-post' %}">Write Post</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'profile' %}">
-                                <i class="fas fa-user-circle"></i> {{ user.username }}
+                        <li class="nav-item me-2 d-none d-lg-block">
+                            <a class="nav-link py-1 px-3 text-white" href="{% url 'create-post' %}" style="background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; box-shadow: 0 4px 12px rgba(124,58,237,0.3);">
+                                <i class="fas fa-pen me-2" style="font-size: 0.75rem;"></i> Write
                             </a>
                         </li>
-                        {% if user.is_staff %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'admin-dashboard' %}">
-                                    <i class="fas fa-cog"></i> Admin
-                                </a>
-                            </li>
-                        {% endif %}
+                        {% if user.is_authenticated %}
+                        <!-- Inbox icon -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                          <a href="{% url 'inbox' %}" class="notif-icon-btn" title="Messages" style="text-decoration:none">
+                            <i class="fas fa-envelope"></i>
+                          </a>
+                        </li>
+                        <!-- Notification bell -->
+                        <li class="nav-item" style="position:relative">
+                          <button id="notif-bell-btn" class="notif-icon-btn" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            <span id="notif-badge" class="notif-badge" style="display:none">0</span>
+                          </button>
+                          <div id="notif-dropdown" class="notif-dropdown">
+                            <div class="notif-header">
+                              <span>Notifications</span>
+                              <button id="notif-mark-read" class="notif-mark-read">Mark all read</button>
+                            </div>
+                            <div id="notif-list" class="notif-list">
+                              <div class="notif-empty">Loading…</div>
+                            </div>
+                            <div class="notif-footer">
+                              <a href="{% url 'dashboard' %}#tab-pending">View all in Dashboard</a>
+                            </div>
+                          </div>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 0.2rem 1rem;">
+                                <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 34px; height: 34px; background: linear-gradient(135deg,rgb(0, 89, 255),rgb(0, 183, 255)); color: white; font-weight: bold; font-size: 0.9rem;">
+                                    {{ user.username|make_list|first|upper }}
+                                </div>
+                                <span class="d-none d-lg-block">{{ user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-0 shadow-lg mt-2" aria-labelledby="profileDropdown" style="background: rgba(18, 12, 30, 0.95); backdrop-filter: blur(10px); border-radius: 12px; font-size: 0.9rem;">
+                                <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2 text-secondary"></i>Dashboard</a></li>
+                                <li class="d-lg-none"><a class="dropdown-item py-2" href="{% url 'create-post' %}"><i class="fas fa-pen me-2 text-secondary"></i>Write</a></li>
+                                <li><a class="dropdown-item py-2" href="{% url 'profile' %}"><i class="fas fa-user-circle me-2 text-secondary"></i>Profile</a></li>
+                                <li><a class="dropdown-item py-2" href="{% url 'my-bookmarks' %}"><i class="fas fa-bookmark me-2 text-secondary"></i>Bookmarks</a></li>
+                                {% if user.is_staff %}
+                                    <li><hr class="dropdown-divider border-secondary"></li>
+                                    <li><a class="dropdown-item py-2" href="{% url 'admin-dashboard' %}" style="color:var(--gold) !important"><i class="fas fa-cog me-2"></i>Admin Area</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider border-secondary"></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">Login</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'register' %}">Register</a>
+                        <li class="nav-item ms-lg-2">
+                            <a class="nav-link text-white" href="{% url 'register' %}"
+                               style="background: linear-gradient(135deg, #7c3aed, #a855f7); padding: 0.4rem 1.2rem !important; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-flex; box-shadow: 0 4px 12px rgba(124,58,237,0.3);">
+                                Join Free
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
-                <form class="d-flex ms-3" action="{% url 'search' %}" method="GET">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Search posts..." required>
-                    <button class="btn btn-outline-light" type="submit">Search</button>
-                </form>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Messages -->
-    {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <!-- Main Content -->
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- Footer -->
-   <!-- Footer -->
-<footer class="bg-light text-center text-lg-start mt-5">
-    <div class="container p-4">
-        <div class="row">
-            <div class="col-lg-6 col-md-12 mb-4 mb-md-0">
-                <h5 class="text-uppercase">EchoNotes</h5>
-                <p>
-                    Empowering voices to share their stories, ideas, and creativity. 
-                    Your voice echoes here.
-                </p>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                <h5 class="text-uppercase">Quick Links</h5>
-                <ul class="list-unstyled mb-0">
-                    <li><a href="{% url 'landing' %}" class="text-dark">Home</a></li>
-                    <li><a href="{% url 'about' %}" class="text-dark">About Us</a></li>
-                    <li><a href="{% url 'contact' %}" class="text-dark">Contact</a></li>
-                    <li><a href="{% url 'privacy-policy' %}" class="text-dark">Privacy Policy</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                <h5 class="text-uppercase">Follow Us</h5>
-                <ul class="list-unstyled">
-                    <li><a href="#" class="text-dark"><i class="fab fa-facebook"></i> Facebook</a></li>
-                    <li><a href="#" class="text-dark"><i class="fab fa-twitter"></i> Twitter</a></li>
-                    <li><a href="#" class="text-dark"><i class="fab fa-instagram"></i> Instagram</a></li>
-                    <li><a href="#" class="text-dark"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
-                </ul>
             </div>
         </div>
     </div>
-    <div class="text-center p-3 bg-primary text-white">
-        © {% now "Y" %} EchoNotes. All rights reserved. | 
-        <a href="{% url 'privacy-policy' %}" class="text-white">Privacy Policy</a> | 
-        <a href="{% url 'contact' %}" class="text-white">Contact Us</a>
+</nav>
+
+<!-- Messages -->
+{% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Main Content -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="echo-footer mt-5">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="echo-footer-brand mb-3">Echo<span>Notes</span></div>
+                <p style="color:rgba(255,255,255,0.5);font-size:0.875rem;line-height:1.7">
+                    A space for writers, poets, and storytellers.
+                    Share your voice — someone out there needs to hear it.
+                </p>
+                <p style="color:rgba(255,255,255,0.3);font-size:0.78rem">
+                    <i class="fas fa-map-marker-alt me-1"></i> Founded in Cebu, Philippines
+                </p>
+            </div>
+
+            <div class="col-lg-2 col-md-4 mb-4">
+    <h6>Explore</h6>
+    <ul class="list-unstyled mb-0">
+        {% for category in categories %}
+            <li style="margin-bottom:0.5rem;">
+                <a href="{% url 'category-posts' category.slug %}">
+                    <i class="fas fa-tag me-1" style="font-size:0.7rem;color:var(--accent)"></i>{{ category.name }}
+                </a>
+            </li>
+        {% empty %}
+            <li><a href="{% url 'landing' %}">All Posts</a></li>
+        {% endfor %}
+    </ul>
+    </div>
+
+            <div class="col-lg-3 col-md-4 mb-4">
+                <h6>Community</h6>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'create-post' %}"><i class="fas fa-pen me-2" style="color:var(--accent)"></i>Write a Post</a>
+                    <a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2" style="color:var(--accent)"></i>Dashboard</a>
+                    <a href="{% url 'my-bookmarks' %}"><i class="fas fa-bookmark me-2" style="color:var(--accent)"></i>Bookmarks</a>
+                    <a href="{% url 'contest-list' %}"><i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests</a>
+                {% else %}
+                    <a href="{% url 'register' %}"><i class="fas fa-user-plus me-2" style="color:var(--accent)"></i>Join EchoNotes</a>
+                    <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-2" style="color:var(--accent)"></i>Login</a>
+                    <a href="{% url 'contest-list' %}"><i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests</a>
+                {% endif %}
+                <a href="{% url 'search' %}?q="><i class="fas fa-search me-2" style="color:var(--accent)"></i>Search Posts</a>
+            </div>
+
+            <div class="col-lg-3 col-md-4 mb-4">
+                <h6>Legal</h6>
+                <a href="{% url 'about' %}"><i class="fas fa-info-circle me-2" style="color:var(--accent)"></i>About Us</a>
+                <a href="{% url 'privacy-policy' %}"><i class="fas fa-shield-alt me-2" style="color:var(--accent)"></i>Privacy Policy</a>
+                <a href="{% url 'contact' %}"><i class="fas fa-envelope me-2" style="color:var(--accent)"></i>Contact Us</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="echo-footer-bottom">
+        <div class="container d-flex justify-content-between flex-wrap gap-2">
+            <span>© {% now "Y" %} EchoNotes. All rights reserved.</span>
+            <span>Made with <i class="fas fa-heart" style="color:var(--accent)"></i> in Cebu, Philippines</span>
+        </div>
     </div>
 </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Custom JS -->
-    <script src="{% static 'js/main.js' %}"></script>
-    {% block extra_js %}{% endblock %}
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
+<script>
+// Auto-hide alerts
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => {
+        try { new bootstrap.Alert(a).close(); } catch(e) {}
+    });
+}, 5000);
+</script>
+
+{% block extra_js %}{% endblock %}
+
+{% if user.is_authenticated %}
+<!-- ═══════════════════════════════════════════════════════════════
+     FLOATING CHAT WIDGET  (Facebook-style, every page)
+═══════════════════════════════════════════════════════════════ -->
+<style>
+/* ── Floating button ─────────────────────────────────────── */
+#echo-chat-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #fff;
+  box-shadow: 0 4px 24px rgba(124,58,237,0.55);
+  z-index: 9999;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+#echo-chat-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 32px rgba(124,58,237,0.7);
+}
+#echo-chat-fab .fab-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  border: 2px solid #0f0f14;
+}
+
+/* ── Chat panel ──────────────────────────────────────────── */
+#echo-chat-panel {
+  position: fixed;
+  bottom: 96px;
+  right: 28px;
+  width: 340px;
+  height: 480px;
+  background: rgba(18, 12, 30, 0.97);
+  border: 1px solid rgba(124,58,237,0.3);
+  border-radius: 20px;
+  box-shadow: 0 16px 64px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  z-index: 9998;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  transform: scale(0.9) translateY(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(.34,1.56,.64,1),
+              opacity 0.2s ease;
+}
+#echo-chat-panel.open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Panel header */
+.ecp-header {
+  padding: 0.85rem 1rem;
+  background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(168,85,247,0.15));
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+.ecp-header-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#7c3aed,#a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.95rem; color: #fff;
+}
+.ecp-header-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 0;
+}
+.ecp-header-sub {
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.4);
+  font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; gap: 5px;
+}
+.ecp-live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34,197,94,0.7);
+  animation: ecp-pulse 2s ease infinite;
+}
+@keyframes ecp-pulse {
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.6;transform:scale(.8)}
+}
+.ecp-close {
+  margin-left: auto;
+  background: none; border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 1rem; cursor: pointer;
+  padding: 4px; border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+.ecp-close:hover { color: #fff; background: rgba(255,255,255,0.08); }
+
+/* Room tabs */
+.ecp-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  flex-shrink: 0;
+}
+.ecp-tab {
+  flex: 1;
+  padding: 0.5rem 0.25rem;
+  background: none; border: none;
+  color: rgba(255,255,255,0.35);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.ecp-tab:hover { color: rgba(255,255,255,0.7); }
+.ecp-tab.active {
+  color: #a78bfa;
+  border-bottom-color: #7c3aed;
+}
+
+/* Messages list */
+.ecp-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.9rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  scroll-behavior: smooth;
+}
+.ecp-messages::-webkit-scrollbar { width: 3px; }
+.ecp-messages::-webkit-scrollbar-track { background: transparent; }
+.ecp-messages::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1); border-radius: 3px;
+}
+
+/* Message rows */
+.ecp-msg { display: flex; gap: 0.5rem; align-items: flex-end; }
+.ecp-msg.me { flex-direction: row-reverse; }
+
+.ecp-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700; color: #fff;
+  flex-shrink: 0; font-family: 'DM Sans', sans-serif;
+  text-transform: uppercase;
+}
+.ecp-bubble-wrap { max-width: 72%; display:flex;flex-direction:column;gap:2px; }
+.ecp-msg.me .ecp-bubble-wrap { align-items: flex-end; }
+
+.ecp-name {
+  font-size: 0.66rem; color: rgba(255,255,255,0.35);
+  font-family: 'DM Sans',sans-serif; padding: 0 3px;
+}
+.ecp-bubble {
+  padding: 0.45rem 0.75rem;
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  word-break: break-word;
+  color: rgba(255,255,255,0.9);
+}
+.ecp-bubble.other {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-bottom-left-radius: 3px;
+}
+.ecp-bubble.me {
+  background: linear-gradient(135deg,#7c3aed,#a855f7);
+  color: #fff;
+  border-bottom-right-radius: 3px;
+}
+.ecp-time {
+  font-size: 0.6rem; color: rgba(255,255,255,0.25);
+  font-family: 'DM Mono', monospace; padding: 0 3px;
+}
+
+/* Empty state */
+.ecp-empty {
+  flex: 1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap: 0.5rem; text-align:center; padding: 1rem;
+}
+.ecp-empty i { font-size: 2rem; opacity: 0.15; color: #fff; }
+.ecp-empty p {
+  font-family:'DM Sans',sans-serif; font-size:0.8rem;
+  color:rgba(255,255,255,0.3); margin:0;
+}
+
+/* Input row */
+.ecp-input-row {
+  padding: 0.7rem 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex; gap: 0.5rem; align-items: center;
+  flex-shrink: 0;
+}
+.ecp-input {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  padding: 0.45rem 0.9rem;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.83rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ecp-input:focus { border-color: rgba(124,58,237,0.5); }
+.ecp-input::placeholder { color: rgba(255,255,255,0.25); }
+.ecp-send {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg,#7c3aed,#a855f7);
+  border: none; color: #fff; font-size: 0.85rem;
+  display: flex; align-items:center; justify-content:center;
+  cursor: pointer; flex-shrink: 0;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.ecp-send:hover { transform: scale(1.1); box-shadow: 0 3px 12px rgba(124,58,237,0.5); }
+.ecp-send:disabled { opacity: 0.5; transform: none; }
+
+/* Slide-in animation for new messages */
+@keyframes ecpIn {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.ecp-msg { animation: ecpIn 0.2s ease forwards; }
+
+/* Mobile adjustment */
+@media(max-width:480px){
+  #echo-chat-panel { width: calc(100vw - 20px); right:10px; bottom:86px; }
+  #echo-chat-fab   { bottom:16px; right:16px; }
+}
+</style>
+
+<!-- FAB button -->
+<button id="echo-chat-fab" title="Open Community Chat" onclick="ecpToggle()">
+  <i class="fas fa-comments" id="ecp-fab-icon"></i>
+  <span class="fab-badge" id="ecp-badge"></span>
+</button>
+
+<!-- Chat panel -->
+<div id="echo-chat-panel">
+
+  <!-- Header -->
+  <div class="ecp-header">
+    <div class="ecp-header-icon"><i class="fas fa-comments"></i></div>
+    <div>
+      <div class="ecp-header-title">Community Chat</div>
+      <div class="ecp-header-sub">
+        <span class="ecp-live-dot"></span> Live
+      </div>
+    </div>
+    <button class="ecp-close" onclick="ecpToggle()" title="Close">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Room tabs -->
+  <!-- Room tabs -->
+  <div class="ecp-tabs" id="ecp-main-tabs">
+    <button class="ecp-tab active" onclick="ecpLoadContactsMode('fans',this)">👥 Fans</button>
+    <button class="ecp-tab" onclick="ecpLoadContactsMode('groups',this)">💬 Groups</button>
+  </div>
+
+  <div class="ecp-tabs" id="ecp-chat-tabs" style="display:none; justify-content: flex-start;">
+    <button class="ecp-tab" onclick="ecpBackToContacts()" style="flex:none; padding:0.5rem 1rem;"><i class="fas fa-chevron-left"></i> Back</button>
+    <div style="flex:1; display:flex; align-items:center; padding-left:10px; font-size:0.8rem; color:#fff;" id="ecp-chat-title">Chat</div>
+  </div>
+
+  <!-- Contacts View -->
+  <div class="ecp-messages" id="ecp-contacts-view" style="padding: 0;"></div>
+
+  <!-- Messages -->
+  <div class="ecp-messages" id="ecp-messages" style="display:none;">
+    <div class="ecp-empty" id="ecp-empty">
+      <i class="fas fa-comment-dots"></i>
+      <p>Loading messages…</p>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="ecp-input-row" id="ecp-input-row" style="display:none;">
+    <input
+      type="text"
+      id="ecp-input"
+      class="ecp-input"
+      placeholder="Type a message…"
+      maxlength="500"
+      autocomplete="off"
+    >
+    <button class="ecp-send" id="ecp-send-btn" title="Send">
+      <i class="fas fa-paper-plane"></i>
+    </button>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  /* ── config ──────────────────────────────────────────────── */
+  const ME           = '{{ user.username }}';
+  const CONTACTS_URL = '{% url "get_chat_contacts" %}';
+  const SEND_URL     = '{% url "post_chat_message" %}';
+  const FETCH_URL    = '{% url "get_chat_messages" %}';
+  const CSRF         = '{{ csrf_token }}';
+
+  let isOpen      = false;
+  let currentMode = 'fans'; // 'fans' or 'groups'
+  let activeChatType = null; // 'fan' or 'group'
+  let activeTargetId = null;
+  
+  let lastId      = 0;
+  let unread      = 0;
+  let pollTimer   = null;
+  let loadedContacts = { fans: [], groups: [] };
+
+  /* ── helpers ─────────────────────────────────────────────── */
+  function esc(s){
+    if(!s) return '';
+    return s.replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function avatarStyle(username, isMe){
+    if(isMe) return 'background:linear-gradient(135deg,#7c3aed,#a855f7)';
+    return username.length%2===0
+      ? 'background:linear-gradient(135deg,#0ea5e9,#38bdf8)'
+      : 'background:linear-gradient(135deg,#f59e0b,#fbbf24)';
+  }
+
+  function renderContactItem(type, item) {
+    if(type === 'fan') {
+      const init = item.username.charAt(0).toUpperCase();
+      const av = item.avatar 
+        ? `<img src="${esc(item.avatar)}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`
+        : `<div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;${avatarStyle(item.username, false)}">${init}</div>`;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 15px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background=''" onclick="ecpOpenChat('fan', ${item.id}, '${esc(item.username)}')">
+        ${av}
+        <div style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:#fff;">${esc(item.username)}</div>
+      </div>`;
+    } else {
+      return `<div style="display:flex;align-items:center;gap:10px;padding:12px 15px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background=''" onclick="ecpOpenChat('group', ${item.id}, '${esc(item.name)}')">
+        <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;background:linear-gradient(135deg,#4f46e5,#7c3aed)"><i class="fas fa-users"></i></div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:#fff;">${esc(item.name)}</div>
+      </div>`;
+    }
+  }
+
+  function renderContacts() {
+    const list = loadedContacts[currentMode];
+    const box = document.getElementById('ecp-contacts-view');
+    if(!list || list.length === 0) {
+      box.innerHTML = `<div class="ecp-empty" style="padding:20px;"><i class="fas fa-user-friends"></i><p>No ${currentMode} found.</p></div>`;
+      return;
+    }
+    let html = '';
+    list.forEach(item => {
+      html += renderContactItem(currentMode === 'fans' ? 'fan' : 'group', item);
+    });
+    box.innerHTML = html;
+  }
+
+  function fetchContacts() {
+    fetch(CONTACTS_URL)
+      .then(r => r.json())
+      .then(data => {
+        if(data.fans) loadedContacts.fans = data.fans;
+        if(data.groups) loadedContacts.groups = data.groups;
+        if(!activeTargetId) renderContacts();
+      }).catch(()=>{});
+  }
+
+  window.ecpLoadContactsMode = function(mode, tabEl) {
+    currentMode = mode;
+    document.querySelectorAll('#ecp-main-tabs .ecp-tab').forEach(t=>t.classList.remove('active'));
+    tabEl.classList.add('active');
+    renderContacts();
+  };
+
+  /* ── Chat Messages UI ────────────────────────────────────── */
+  function buildMsg(msg){
+    const isMe = (msg.user === ME || msg.is_me);
+    const init = (msg.user||'?').charAt(0).toUpperCase();
+    const av   = msg.avatar
+      ? `<img src="${esc(msg.avatar)}" style="width:26px;height:26px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="${esc(msg.user)}">`
+      : `<div class="ecp-avatar" style="${avatarStyle(msg.user,isMe)}">${init}</div>`;
+    const name = isMe ? '' : `<span class="ecp-name">${esc(msg.user)}</span>`;
+    const bubbleCls = isMe ? 'me' : 'other';
+    const rowCls    = isMe ? 'ecp-msg me' : 'ecp-msg';
+
+    if(isMe){
+      return `<div class="${rowCls}" data-id="${msg.id}">
+        <div class="ecp-bubble-wrap">
+          <div class="ecp-bubble ${bubbleCls}">${esc(msg.message)}</div>
+          <div class="ecp-time">${esc(msg.timestamp)}</div>
+        </div>${av}</div>`;
+    } else {
+      return `<div class="${rowCls}" data-id="${msg.id}">
+        ${av}
+        <div class="ecp-bubble-wrap">
+          ${name}
+          <div class="ecp-bubble ${bubbleCls}">${esc(msg.message)}</div>
+          <div class="ecp-time">${esc(msg.timestamp)}</div>
+        </div></div>`;
+    }
+  }
+
+  function appendMessages(msgs, scrollToBottom){
+    const box   = document.getElementById('ecp-messages');
+    const empty = document.getElementById('ecp-empty');
+    if(!msgs || !msgs.length) return;
+    if(empty) empty.remove();
+
+    msgs.forEach(m => {
+      if(document.querySelector(`#ecp-messages [data-id="${m.id}"]`)) return;
+      const d = document.createElement('div');
+      d.innerHTML = buildMsg(m).trim();
+      box.appendChild(d.firstChild);
+      lastId = Math.max(lastId, m.id);
+
+      /* unread badge when panel is closed */
+      if(!isOpen && m.user !== ME && !m.is_me){
+        unread++;
+        showBadge(unread);
+      }
+    });
+
+    if(scrollToBottom !== false) box.scrollTop = box.scrollHeight;
+  }
+
+  function showBadge(n){
+    const b = document.getElementById('ecp-badge');
+    if(n > 0){ b.style.display='flex'; b.textContent = n > 9 ? '9+' : n; }
+    else      { b.style.display='none'; }
+  }
+
+  /* ── Open chat ───────────────────────────────────────────── */
+  window.ecpOpenChat = function(type, id, title) {
+    activeChatType = type;
+    activeTargetId = id;
+    
+    document.getElementById('ecp-main-tabs').style.display = 'none';
+    document.getElementById('ecp-contacts-view').style.display = 'none';
+    
+    document.getElementById('ecp-chat-tabs').style.display = 'flex';
+    document.getElementById('ecp-chat-title').innerText = type === 'fan' ? '@' + title : title;
+    
+    document.getElementById('ecp-messages').style.display = 'flex';
+    document.getElementById('ecp-input-row').style.display = 'flex';
+    
+    const box = document.getElementById('ecp-messages');
+    box.innerHTML = '<div class="ecp-empty"><i class="fas fa-spinner fa-spin"></i><p>Loading…</p></div>';
+    lastId = 0;
+
+    fetch(`${FETCH_URL}?chat_type=${type}&target_id=${id}&since=0`)
+      .then(r=>r.json())
+      .then(data=>{
+        box.innerHTML = '';
+        if(!data.messages || !data.messages.length){
+          box.innerHTML = `<div class="ecp-empty" id="ecp-empty">
+            <i class="fas fa-comment-dots"></i>
+            <p>No messages yet.</p></div>`;
+        } else {
+          appendMessages(data.messages, true);
+        }
+      })
+      .catch(()=>{ box.innerHTML='<div class="ecp-empty"><p>Could not load messages.</p></div>'; });
+      
+    startPolling();
+  };
+
+  window.ecpBackToContacts = function() {
+    activeChatType = null;
+    activeTargetId = null;
+    clearInterval(pollTimer);
+    
+    document.getElementById('ecp-main-tabs').style.display = 'flex';
+    document.getElementById('ecp-contacts-view').style.display = 'block';
+    
+    document.getElementById('ecp-chat-tabs').style.display = 'none';
+    document.getElementById('ecp-messages').style.display = 'none';
+    document.getElementById('ecp-input-row').style.display = 'none';
+    
+    renderContacts();
+  };
+
+  /* ── poll for new messages ───────────────────────────────── */
+  function poll(){
+    if(!activeTargetId) return;
+    fetch(`${FETCH_URL}?chat_type=${activeChatType}&target_id=${activeTargetId}&since=${lastId}`)
+      .then(r=>r.json())
+      .then(data=>{ if(data.messages && data.messages.length) appendMessages(data.messages); })
+      .catch(()=>{});
+  }
+
+  function startPolling(){
+    clearInterval(pollTimer);
+    pollTimer = setInterval(poll, 3000);
+  }
+
+  /* ── toggle open/close ───────────────────────────────────── */
+  window.ecpToggle = function(){
+    isOpen = !isOpen;
+    const panel = document.getElementById('echo-chat-panel');
+    const icon  = document.getElementById('ecp-fab-icon');
+
+    if(isOpen){
+      panel.classList.add('open');
+      icon.className = 'fas fa-times';
+      showBadge(0);
+      unread = 0;
+      fetchContacts();
+      if(activeTargetId) {
+        startPolling();
+        setTimeout(()=>document.getElementById('ecp-input').focus(), 250);
+      }
+    } else {
+      panel.classList.remove('open');
+      icon.className = 'fas fa-comments';
+      clearInterval(pollTimer);
+    }
+  };
+
+
+  /* ── send ────────────────────────────────────────────────── */
+  function sendMsg(){
+    const inp = document.getElementById('ecp-input');
+    const btn = document.getElementById('ecp-send-btn');
+    const txt = inp.value.trim();
+    if(!txt || !activeTargetId) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch(SEND_URL, {
+      method:'POST',
+      headers:{
+        'X-CSRFToken': CSRF,
+        'Content-Type':'application/x-www-form-urlencoded'
+      },
+      body: new URLSearchParams({message:txt, chat_type:activeChatType, target_id:activeTargetId})
+    })
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.status==='ok'){
+        inp.value='';
+        appendMessages([{...data, is_me:true}]);
+      }
+    })
+    .catch(()=>{})
+    .finally(()=>{
+      btn.disabled=false;
+      btn.innerHTML='<i class="fas fa-paper-plane"></i>';
+      inp.focus();
+    });
+  }
+
+  document.getElementById('ecp-send-btn').addEventListener('click', sendMsg);
+  document.getElementById('ecp-input').addEventListener('keydown',function(e){
+    if(e.key==='Enter'){ e.preventDefault(); sendMsg(); }
+  });
+
+  /* ── background poll (badge notifications) ───────────────── */
+  setInterval(()=>{
+    if(isOpen && activeTargetId) return; // panel handles it when chatting
+    if(!activeTargetId && isOpen) {
+       // Just refresh contacts periodically? Optional.
+    }
+  }, 8000);
+
+})();
+</script>
+{% endif %}
+<!-- END FLOATING CHAT WIDGET -->
+
+{% if user.is_authenticated %}
+<script>
+(function(){
+  const BELL     = document.getElementById('notif-bell-btn');
+  const DROPDOWN = document.getElementById('notif-dropdown');
+  const BADGE    = document.getElementById('notif-badge');
+  const LIST     = document.getElementById('notif-list');
+  const MARK_BTN = document.getElementById('notif-mark-read');
+  const CSRF     = '{{ csrf_token }}';
+  const NOTIF_URL = '{% url "get-notifications" %}';
+  const READ_URL  = '{% url "mark-notifications-read" %}';
+
+  if (!BELL) return; // guard for non-auth pages
+
+  let isOpen = false;
+
+  // ── Toggle dropdown ────────────────────────────────────────
+  BELL.addEventListener('click', function(e) {
+    e.stopPropagation();
+    isOpen = !isOpen;
+    DROPDOWN.classList.toggle('open', isOpen);
+    if (isOpen) { fetchNotifs(); }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!DROPDOWN.contains(e.target) && e.target !== BELL) {
+      isOpen = false;
+      DROPDOWN.classList.remove('open');
+    }
+  });
+
+  // ── Fetch & render ─────────────────────────────────────────
+  function esc(s) {
+    if (!s) return '';
+    return s.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+  }
+
+  function fetchNotifs() {
+    fetch(NOTIF_URL)
+      .then(r => r.json())
+      .then(data => {
+        // Badge
+        if (data.unread_count > 0) {
+          BADGE.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+          BADGE.style.display = 'flex';
+        } else {
+          BADGE.style.display = 'none';
+        }
+
+        // List
+        if (!data.notifications || !data.notifications.length) {
+          LIST.innerHTML = '<div class="notif-empty">You are all caught up! 🎉</div>';
+          return;
+        }
+        LIST.innerHTML = data.notifications.map(n => {
+          const av = n.avatar
+            ? `<img src="${esc(n.avatar)}" class="notif-av" alt="${esc(n.sender)}">`
+            : `<div class="notif-av-ph">${esc(n.sender).charAt(0).toUpperCase()}</div>`;
+          const link = n.post_id
+            ? `/post/${n.post_id}/`
+            : `/profile/${esc(n.sender)}/`;
+          return `<div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="location.href='${link}'">
+            ${av}
+            <div class="notif-body">
+              <div class="notif-text">${esc(n.text)}</div>
+              <div class="notif-time">${esc(n.created)}</div>
+            </div>
+            <span class="notif-icon-badge">${esc(n.icon)}</span>
+          </div>`;
+        }).join('');
+      })
+      .catch(() => {
+        LIST.innerHTML = '<div class="notif-empty">Could not load notifications.</div>';
+      });
+  }
+
+  // ── Mark all read ──────────────────────────────────────────
+  if (MARK_BTN) {
+    MARK_BTN.addEventListener('click', function() {
+      fetch(READ_URL, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF }
+      }).then(() => {
+        BADGE.style.display = 'none';
+        LIST.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+      });
+    });
+  }
+
+  // ── Background poll every 15s ──────────────────────────────
+  function pollBadge() {
+    fetch(NOTIF_URL)
+      .then(r => r.json())
+      .then(data => {
+        if (data.unread_count > 0) {
+          BADGE.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+          BADGE.style.display = 'flex';
+        } else {
+          BADGE.style.display = 'none';
+        }
+      }).catch(() => {});
+  }
+
+  // Initial load + interval
+  pollBadge();
+  setInterval(pollBadge, 15000);
+
+  // Stop polling when tab hidden
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) pollBadge();
+  });
+})();
+</script>
+{% endif %}
+
 </body>
 </html>
