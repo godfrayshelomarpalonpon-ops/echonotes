@@ -211,10 +211,15 @@ def follow_user(request, username):
     follow, created = Follow.objects.get_or_create(follower=request.user, following=user_to_follow)
     if not created:
         follow.delete()
+        following = False
     else:
+        following = True
         _create_notification(user_to_follow, request.user, 'follow',
                              text=f'{request.user.username} started following you')
-    return JsonResponse({'following': created, 'follower_count': user_to_follow.followers.count()})
+    
+    # Force a fresh count from the DB for the target user ID
+    follower_count = Follow.objects.filter(following_id=user_to_follow.id).count()
+    return JsonResponse({'following': following, 'follower_count': follower_count})
 
 
 # ─── Posts ────────────────────────────────────────────────────────────────────
@@ -1198,12 +1203,22 @@ def _create_notification(recipient, sender, notif_type, post=None, text=''):
     """Create a notification, silently skip self-notifications and dupes."""
     if recipient == sender:
         return
-    Notification.objects.update_or_create(
+    from django.utils import timezone
+    Notification.objects.filter(
+        recipient=recipient,
+        sender=sender,
+        notification_type=notif_type,
+        post_reference=post
+    ).delete() # Simple way to ensure only one exists, or we could just use first()
+    
+    Notification.objects.create(
         recipient=recipient,
         sender=sender,
         notification_type=notif_type,
         post_reference=post,
-        defaults={'text_preview': text, 'is_read': False},
+        text_preview=text,
+        is_read=False,
+        created_date=timezone.now()
     )
 
 

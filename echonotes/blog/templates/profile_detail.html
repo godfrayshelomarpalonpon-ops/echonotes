@@ -47,8 +47,9 @@
   }
   .pd-bio {
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.9rem; color: rgba(255,255,255,0.55);
-    margin-bottom: 1rem; line-height: 1.6;
+    font-size: 0.95rem; color: var(--ink-light);
+    margin-bottom: 1.5rem; line-height: 1.6;
+    max-width: 600px;
   }
   .pd-joined {
     font-family: 'DM Sans', sans-serif;
@@ -335,16 +336,23 @@
 
 </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
 (function(){
   const CSRF = '{{ csrf_token }}';
-  function post(url, cb) {
+  function post(url, cb, err_cb) {
     fetch(url, {
       method: 'POST',
       headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/x-www-form-urlencoded' }
-    }).then(r => r.json()).then(cb).catch(() => {});
+    }).then(r => {
+      if (!r.ok) throw new Error('Server returned ' + r.status);
+      return r.json();
+    }).then(cb).catch(err => {
+      console.error('Action failed:', err);
+      if (err_cb) err_cb(err);
+    });
   }
 
   // Follow / Unfollow
@@ -352,15 +360,35 @@
   if (followBtn) {
     followBtn.addEventListener('click', function() {
       const uname = this.dataset.username;
+      
+      // Add a loading state to prevent double clicks
+      if (this.classList.contains('loading')) return;
+      this.classList.add('loading');
+      this.style.opacity = '0.7';
+
       post('/follow/' + uname + '/', data => {
+        this.classList.remove('loading');
+        this.style.opacity = '1';
+
         if (data.following) {
           this.innerHTML = '<i class="fas fa-user-minus"></i> Unfollow';
-          this.classList.replace('pd-btn-primary', 'pd-btn-outline');
+          this.classList.remove('pd-btn-primary');
+          this.classList.add('pd-btn-outline');
         } else {
           this.innerHTML = '<i class="fas fa-user-plus"></i> Follow';
-          this.classList.replace('pd-btn-outline', 'pd-btn-primary');
+          this.classList.remove('pd-btn-outline');
+          this.classList.add('pd-btn-primary');
         }
-        document.getElementById('pd-follower-count').textContent = data.follower_count;
+        
+        const countEl = document.getElementById('pd-follower-count');
+        if (countEl) {
+          countEl.textContent = data.follower_count;
+          console.log('Updated follower count to:', data.follower_count);
+        }
+      }, err => {
+        this.classList.remove('loading');
+        this.style.opacity = '1';
+        alert('Could not update follow status. Please try again.');
       });
     });
   }
@@ -415,5 +443,4 @@
   }
 })();
 </script>
-{% endblock %}
 {% endblock %}
