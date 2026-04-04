@@ -1,8 +1,21 @@
 #!/bin/bash
 
 # Build the project
-echo "Building project..."
-python3.12 -m pip install -r requirements.txt
+echo "------------------------------"
+echo "  🚀 STARTING BUILD PROCESS   "
+echo "------------------------------"
 
-echo "Collecting static files..."
-python3.12 echonotes/manage.py collectstatic --noinput --clear
+# Install Dependencies
+echo "🐍 Installing dependencies..."
+python3 -m pip install -r requirements.txt
+
+# Create staticfiles directory (optional but safe)
+mkdir -p echonotes/staticfiles
+
+# Collect Static Files
+echo "🎨 Collecting static files..."
+python3 echonotes/manage.py collectstatic --noinput --clear
+
+echo "------------------------------"
+echo "  ✅ BUILD COMPLETE          "
+echo "------------------------------"

@@ -13,7 +13,15 @@
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "echonotes/static/$1"
+      "dest": "echonotes/staticfiles/$1"
+    },
+    {
+      "src": "/media/(.*)",
+      "dest": "echonotes/media/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "echonotes/static/images/favicon.ico"
     },
     {
       "src": "/(.*)",
