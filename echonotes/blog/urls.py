@@ -12,10 +12,6 @@ urlpatterns = [
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
 
-    # We removed the standalone chat page since it's floating widget now
-    path('chat/contacts/', views.get_chat_contacts, name='get_chat_contacts'),
-    path('chat/post/', views.post_chat_message, name='post_chat_message'),
-    path('chat/messages/', views.get_chat_messages, name='get_chat_messages'),
 
     # Direct Messages (Private)
     path('messages/', views.inbox, name='inbox'),

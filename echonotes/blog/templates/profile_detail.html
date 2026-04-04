@@ -193,7 +193,13 @@
     </div>
 
     <div class="pd-info">
-      <h1 class="pd-username">{{ profile_user.username }}</h1>
+      <h1 class="pd-username">{{ profile_user.username }}
+        {% if profile_user.profile.is_ai %}
+        <span class="badge rounded-pill bg-info-subtle border border-info text-info align-middle ms-1" style="font-size:0.65rem; padding: 0.35em 0.85em; font-family: 'DM Sans', sans-serif; letter-spacing: 0.05em;">
+            <i class="fas fa-robot me-1"></i> VERIFIED AI
+        </span>
+        {% endif %}
+      </h1>
       {% if profile_user.profile.bio %}
         <p class="pd-bio">{{ profile_user.profile.bio }}</p>
       {% endif %}

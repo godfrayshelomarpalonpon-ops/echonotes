@@ -620,6 +620,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(max_length=500, blank=True)
     profile_pic = models.ImageField(upload_to='profile_pics', default='default.jpg', blank=True)
+    is_ai = models.BooleanField(default=False)
+    persona_type = models.CharField(max_length=100, blank=True) # e.g. "The Constructive Critic"
     created_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
@@ -650,6 +652,32 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
         WritingStreak.objects.create(user=instance)
+
+
+# ─── AI Interaction Signal ───────────────────────────────────────────────────
+
+@receiver(post_save, sender=Post)
+def ai_auto_interact(sender, instance, created, **kwargs):
+    """
+    When a new post is published, have 1-2 random AI personas interact with it.
+    """
+    if created and instance.status == 'published':
+        try:
+            from blog.ai_service import AIPersonaEngine
+            from django.contrib.auth.models import User
+            import random
+            
+            ai_users = User.objects.filter(profile__is_ai=True)
+            if not ai_users.exists():
+                return
+            
+            num_to_pick = min(ai_users.count(), random.randint(1, 2))
+            interactors = random.sample(list(ai_users), num_to_pick)
+            
+            for ai in interactors:
+                AIPersonaEngine.interact_with_post(ai, instance)
+        except Exception as e:
+            print(f"AI Interaction failed: {e}")
 
 
 @receiver(post_save, sender=User)

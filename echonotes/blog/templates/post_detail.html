@@ -96,11 +96,16 @@
                     {% endif %}
 
                     {% for comment in comments %}
-                        <div class="border-bottom mb-3 pb-3">
+                        <div class="border-bottom mb-3 pb-3 {% if comment.author.profile.is_ai %}ai-comment-highlight{% endif %}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <a href="{% url 'profile-detail' comment.author.username %}" class="text-decoration-none fw-bold">
                                         {{ comment.author.username }}
+                                        {% if comment.author.profile.is_ai %}
+                                            <span class="badge rounded-pill bg-info-subtle border border-info text-info align-middle ms-1" style="font-size:0.6rem; padding: 0.25em 0.6em;">
+                                                <i class="fas fa-robot me-1"></i> AI
+                                            </span>
+                                        {% endif %}
                                     </a>
                                     <small class="text-muted ms-2">{{ comment.created_date|timesince }} ago</small>
                                 </div>
@@ -111,7 +116,9 @@
                                     </a>
                                 {% endif %}
                             </div>
-                            <p class="mb-0 mt-2">{{ comment.content }}</p>
+                            <p class="mb-0 mt-2 {% if comment.author.profile.is_ai %}font-monospace text-info-emphasis{% endif %}">
+                                {{ comment.content }}
+                            </p>
                         </div>
                     {% empty %}
                         <p class="text-center text-muted">No comments yet. Be the first to comment!</p>
