@@ -1,0 +1,9 @@
+Django==4.2.0
+Pillow==9.5.0
+django-crispy-forms==2.0
+crispy-bootstrap5==0.7
+whitenoise
+dj-database-url
+psycopg2-binary
+gunicorn
+python-dotenv
