@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ story.title }} - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">{{ story.title }}</h4>
+                        <span class="{% if story.status == 'open' %}contest-status-open{% else %}contest-status-closed{% endif %}"
+                              style="background:rgba(255,255,255,0.15);color:white">
+                            {{ story.get_status_display }}
+                        </span>
+                    </div>
+                    <small style="opacity:0.7">{{ story.description }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+                        <small class="text-muted">Started by
+                            <a href="{% url 'profile-detail' story.started_by.username %}" class="text-decoration-none fw-bold">
+                                {{ story.started_by.username }}
+                            </a>
+                        </small>
+                        <span class="text-muted">·</span>
+                        <small class="text-muted">{{ story.total_paragraphs }} paragraphs</small>
+                        <span class="text-muted">·</span>
+                        <small class="text-muted">
+                            Contributors:
+                            {% for contributor in contributors %}
+                                <a href="{% url 'profile-detail' contributor.username %}" class="text-decoration-none">{{ contributor.username }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Story Content -->
+            <div class="card shadow mb-4">
+                <div class="card-body p-4">
+                    {% for paragraph in paragraphs %}
+                    <div class="mb-4 pb-4 {% if not forloop.last %}border-bottom{% endif %}" style="border-color:var(--cream-border)!important">
+                        <p style="font-family:var(--font-body);font-size:1.05rem;line-height:1.9;color:var(--ink-light);margin-bottom:0.5rem">
+                            {{ paragraph.content }}
+                        </p>
+                        <small class="text-muted" style="font-size:0.75rem">
+                            — <a href="{% url 'profile-detail' paragraph.author.username %}" class="text-decoration-none">{{ paragraph.author.username }}</a>
+                            · Paragraph {{ paragraph.order }}
+                        </small>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">No paragraphs yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Add Paragraph -->
+            {% if user.is_authenticated %}
+                {% if story.status == 'open' %}
+                    {% if not user_has_contributed %}
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Continue the Story</h5>
+                            <small style="opacity:0.7">Each writer can contribute one paragraph</small>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                {% csrf_token %}
+                                {{ form|crispy }}
+                                <button type="submit" class="btn btn-primary mt-2">
+                                    <i class="fas fa-plus me-2"></i>Add My Paragraph
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        You've already contributed to this story. Thank you!
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="alert alert-secondary">
+                    This story is closed for new contributions.
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="alert alert-info">
+                <a href="{% url 'login' %}" class="alert-link">Login</a> to contribute to this story.
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

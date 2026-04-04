@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Users - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Manage Users</h2>
+        <a href="{% url 'admin-dashboard' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">All Users ({{ users.count }})</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Joined</th>
+                            <th>Posts</th>
+                            <th>Staff</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'profile-detail' u.username %}" class="text-decoration-none fw-bold">
+                                    {{ u.username }}
+                                </a>
+                            </td>
+                            <td>{{ u.email }}</td>
+                            <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                            <td>{{ u.posts.count }}</td>
+                            <td>
+                                {% if u.is_staff %}
+                                    <span class="badge bg-warning text-dark">Staff</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">User</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u != request.user %}
+                                    <form method="POST" class="d-inline"
+                                          onsubmit="return confirm('Delete user {{ u.username }}? This cannot be undone.')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_user" value="1">
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted small">You</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No users found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

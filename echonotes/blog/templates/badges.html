@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}Badges - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <span class="section-eyebrow">Achievements</span>
+        <h1 class="section-title">Writer Badges</h1>
+        <hr class="section-divider">
+        <p class="text-muted">Earn badges by being active in the EchoNotes community.</p>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="row g-3 mb-5">
+        {% for badge in all_badges %}
+        <div class="col-md-4 col-lg-3">
+            <div class="card text-center p-3 h-100"
+                 style="{% if badge.name in user_badge_names %}border:2px solid var(--gold){% else %}opacity:0.5;filter:grayscale(0.8){% endif %}">
+                <div style="font-size:2.5rem;margin-bottom:0.5rem">{{ badge.icon }}</div>
+                <h6 style="font-family:var(--font-display);font-size:0.95rem;margin-bottom:0.25rem">
+                    {{ badge.get_name_display }}
+                </h6>
+                <p class="text-muted mb-2" style="font-size:0.8rem;line-height:1.5">{{ badge.description }}</p>
+                {% if badge.name in user_badge_names %}
+                    <span class="badge" style="background:rgba(212,168,67,0.15);color:var(--gold);font-size:0.7rem">✓ Earned</span>
+                {% else %}
+                    <span class="badge bg-secondary" style="font-size:0.7rem">Locked</span>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <p class="text-muted">No badges set up yet. Run: <code>python manage.py shell</code> then <code>from blog.badges import ensure_badges_exist; ensure_badges_exist()</code></p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <a href="{% url 'login' %}" class="alert-link">Login</a> to see your earned badges.
+    </div>
+    {% endif %}
+
+    <div class="card p-4" style="border-left:3px solid var(--accent)">
+        <h5 style="font-family:var(--font-display)">How to earn badges</h5>
+        <div class="row g-3 mt-1">
+            <div class="col-md-6">
+                <ul class="list-unstyled mb-0" style="font-size:0.875rem;color:var(--ink-muted)">
+                    <li class="mb-1">✍️ Publish your first post</li>
+                    <li class="mb-1">📚 Publish 10 posts</li>
+                    <li class="mb-1">🏆 Publish 50 posts</li>
+                    <li class="mb-1">❤️ Receive your first like</li>
+                    <li class="mb-1">💫 Receive 100 likes</li>
+                    <li class="mb-1">💬 Leave your first comment</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-unstyled mb-0" style="font-size:0.875rem;color:var(--ink-muted)">
+                    <li class="mb-1">🔥 Post 7 days in a row</li>
+                    <li class="mb-1">⚡ Post 30 days in a row</li>
+                    <li class="mb-1">🎯 Enter a writing contest</li>
+                    <li class="mb-1">👑 Win a writing contest</li>
+                    <li class="mb-1">🤝 Contribute to a collaborative story</li>
+                    <li class="mb-1">📖 Join the Word of the Day challenge</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

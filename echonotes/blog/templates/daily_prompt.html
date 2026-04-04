@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Daily Writing Prompt - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+
+            <div class="mb-4">
+                <span class="section-eyebrow">Daily Challenge</span>
+                <h1 class="section-title">Today's Writing Prompt</h1>
+                <hr class="section-divider">
+            </div>
+
+            {% if today_prompt %}
+            <div class="card mb-4" style="border-top:3px solid var(--accent);background:var(--ink);color:white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span style="font-family:var(--font-mono);font-size:0.72rem;letter-spacing:2px;color:rgba(255,255,255,0.4)">
+                            PROMPT FOR {{ today_prompt.date|date:"F d, Y"|upper }}
+                        </span>
+                        <span style="font-size:0.78rem;color:rgba(255,255,255,0.4)">
+                            {{ today_prompt.total_responses }} responses
+                        </span>
+                    </div>
+                    <p style="font-family:var(--font-display);font-size:1.4rem;line-height:1.5;color:white;font-style:italic;margin:0">
+                        "{{ today_prompt.prompt }}"
+                    </p>
+                </div>
+            </div>
+
+            {% if user.is_authenticated %}
+                {% if not user_response %}
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Write Your Response</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small id="word-count" class="word-counter">0 words</small>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Post Response
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-success mb-4">
+                    <i class="fas fa-check-circle me-2"></i>
+                    You've already responded to today's prompt! Come back tomorrow for a new one.
+                </div>
+                {% endif %}
+            {% else %}
+            <div class="alert alert-info mb-4">
+                <a href="{% url 'login' %}" class="alert-link">Login</a> to respond to today's prompt.
+            </div>
+            {% endif %}
+
+            <!-- Responses -->
+            <h5 class="mb-3" style="font-family:var(--font-display)">
+                Community Responses ({{ responses|length }})
+            </h5>
+
+            {% for response in responses %}
+            <div class="card mb-3 post-card">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <a href="{% url 'profile-detail' response.author.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">
+                            {{ response.author.username }}
+                        </a>
+                        <small class="text-muted">{{ response.created_date|timesince }} ago</small>
+                    </div>
+                    <p style="line-height:1.8;color:var(--ink-light)">{{ response.content }}</p>
+                    <div class="d-flex align-items-center gap-3 mt-2">
+                        {% if user.is_authenticated %}
+                        <button class="btn btn-sm {% if response.pk in liked_responses %}btn-danger{% else %}btn-outline-danger{% endif %} like-prompt-btn"
+                                data-response-id="{{ response.pk }}" style="font-size:0.78rem;padding:0.2rem 0.6rem">
+                            <i class="fas fa-heart"></i>
+                            <span class="pr-like-count-{{ response.pk }}">{{ response.likes.count }}</span>
+                        </button>
+                        {% else %}
+                        <small class="text-muted"><i class="fas fa-heart text-danger"></i> {{ response.likes.count }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-4 text-muted">
+                <i class="fas fa-feather fa-3x mb-3" style="color:var(--cream-border)"></i>
+                <p>No responses yet. Be the first to respond!</p>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <div class="card text-center p-5">
+                <i class="fas fa-hourglass-half fa-3x mb-3" style="color:var(--cream-border)"></i>
+                <h4 style="font-family:var(--font-display)">No prompt for today yet</h4>
+                <p class="text-muted">Check back later — the admin posts a new prompt daily.</p>
+            </div>
+            {% endif %}
+
+            <!-- Past Prompts -->
+            {% if past_prompts %}
+            <div class="mt-5">
+                <h5 style="font-family:var(--font-display);margin-bottom:1rem">Past Prompts</h5>
+                {% for prompt in past_prompts %}
+                <div class="card mb-2 p-3" style="border-left:3px solid var(--cream-border)">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <p class="mb-0" style="font-style:italic;color:var(--ink-light)">"{{ prompt.prompt|truncatewords:20 }}"</p>
+                        <small class="text-muted ms-3 text-nowrap">{{ prompt.date|date:"M d" }} · {{ prompt.total_responses }} responses</small>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+const contentField = document.getElementById('prompt-content');
+const wordCountEl = document.getElementById('word-count');
+if (contentField && wordCountEl) {
+    contentField.addEventListener('input', () => {
+        const words = contentField.value.trim().split(/\s+/).filter(w => w).length;
+        wordCountEl.textContent = words + ' words';
+    });
+}
+
+document.querySelectorAll('.like-prompt-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const id = this.dataset.responseId;
+        fetch(`/prompt/like/${id}/`, {
+            method: 'POST',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+        })
+        .then(r => r.json())
+        .then(data => {
+            this.classList.toggle('btn-danger', data.liked);
+            this.classList.toggle('btn-outline-danger', !data.liked);
+            document.querySelector(`.pr-like-count-${id}`).textContent = data.total_likes;
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

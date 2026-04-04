@@ -1,0 +1,30 @@
+<!-- 
+ADD this block to landing.html and dashboard.html
+Place it right after the hero section on landing,
+or at the top of the main content on dashboard.
+-->
+
+<!-- AI Broadcast Bar -->
+<div id="ai-broadcast-bar" style="background:linear-gradient(135deg,#1a1a2e,#2d1a0e);border-bottom:1px solid rgba(200,71,43,0.3);padding:0.6rem 0;display:none">
+    <div class="container d-flex align-items-center gap-3">
+        <span style="background:var(--accent);color:white;font-size:0.65rem;font-weight:700;letter-spacing:2px;padding:0.2rem 0.5rem;border-radius:2px;white-space:nowrap;font-family:var(--font-mono)">
+            🤖 AI LIVE
+        </span>
+        <p id="ai-broadcast-text" style="margin:0;color:rgba(255,255,255,0.75);font-size:0.85rem;line-height:1.5"></p>
+        <small id="ai-broadcast-time" style="color:rgba(255,255,255,0.3);font-size:0.72rem;white-space:nowrap;margin-left:auto"></small>
+    </div>
+</div>
+
+<script>
+// Fetch latest AI broadcast
+fetch('/ai-broadcast/')
+    .then(r => r.json())
+    .then(data => {
+        if (data.message) {
+            document.getElementById('ai-broadcast-text').textContent = data.message;
+            document.getElementById('ai-broadcast-time').textContent = data.created_date;
+            document.getElementById('ai-broadcast-bar').style.display = 'block';
+        }
+    })
+    .catch(() => {});
+</script>

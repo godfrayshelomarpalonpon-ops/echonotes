@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+
+{% block title %}Writing Timer - EchoNotes{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <span class="section-eyebrow">Focus Tool</span>
+        <h1 class="section-title">Writing Timer</h1>
+        <hr class="section-divider" style="margin:1rem auto 0.5rem">
+        <p class="text-muted">Set your timer, write in the box below, and track your session.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Timer Controls -->
+        <div class="col-lg-4">
+            <div class="card p-4 text-center" style="border-top:3px solid var(--accent);position:sticky;top:80px">
+
+                <div id="timer-display" style="font-family:var(--font-display);font-size:4.5rem;letter-spacing:-2px;color:var(--ink);line-height:1;margin-bottom:1rem">
+                    25:00
+                </div>
+
+                <!-- Duration -->
+                <div class="d-flex justify-content-center gap-2 mb-3" id="duration-selector">
+                    <button class="btn btn-outline-primary btn-sm duration-btn" data-minutes="10">10</button>
+                    <button class="btn btn-primary btn-sm duration-btn" data-minutes="25">25</button>
+                    <button class="btn btn-outline-primary btn-sm duration-btn" data-minutes="45">45</button>
+                    <button class="btn btn-outline-primary btn-sm duration-btn" data-minutes="60">60</button>
+                </div>
+
+                <!-- Progress -->
+                <div class="mb-3" style="background:var(--cream-dark);border-radius:3px;height:5px">
+                    <div id="timer-progress" style="background:var(--accent);height:5px;border-radius:3px;width:0%;transition:width 1s linear"></div>
+                </div>
+
+                <!-- Controls -->
+                <div class="d-flex justify-content-center gap-2 mb-3">
+                    <button id="start-btn" class="btn btn-primary px-4">
+                        <i class="fas fa-play me-1"></i>Start
+                    </button>
+                    <button id="pause-btn" class="btn btn-outline-primary px-4" style="display:none">
+                        <i class="fas fa-pause me-1"></i>Pause
+                    </button>
+                    <button id="reset-btn" class="btn btn-outline-secondary px-3">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="row g-2 text-center border-top pt-3" style="border-color:var(--cream-border)!important">
+                    <div class="col-4">
+                        <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--accent)" id="live-words">0</div>
+                        <small class="text-muted" style="font-size:0.7rem">WORDS</small>
+                    </div>
+                    <div class="col-4">
+                        <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--accent)" id="live-wpm">0</div>
+                        <small class="text-muted" style="font-size:0.7rem">W/MIN</small>
+                    </div>
+                    <div class="col-4">
+                        <div style="font-family:var(--font-display);font-size:1.4rem;color:var(--accent)" id="live-chars">0</div>
+                        <small class="text-muted" style="font-size:0.7rem">CHARS</small>
+                    </div>
+                </div>
+
+                {% if total_sessions > 0 %}
+                <div class="border-top mt-3 pt-3" style="border-color:var(--cream-border)!important">
+                    <small class="text-muted">All time: <strong>{{ total_words }}</strong> words in <strong>{{ total_sessions }}</strong> sessions</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Writing Area -->
+        <div class="col-lg-8">
+            <div class="card" style="border-top:3px solid var(--ink)">
+                <div class="card-body p-0">
+                    <div style="background:var(--ink);padding:0.6rem 1rem;display:flex;justify-content:space-between;align-items:center">
+                        <span style="color:rgba(255,255,255,0.5);font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;font-family:var(--font-mono)">
+                            Writing Area
+                        </span>
+                        <div class="d-flex gap-2">
+                            <button id="save-post-btn" class="btn btn-sm" style="background:var(--accent);color:white;font-size:0.75rem;display:none" onclick="saveAsPost()">
+                                <i class="fas fa-paper-plane me-1"></i>Publish as Post
+                            </button>
+                            <button id="clear-btn" class="btn btn-sm" style="color:rgba(255,255,255,0.4);font-size:0.75rem;background:transparent;border:1px solid rgba(255,255,255,0.15)" onclick="clearWriting()">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="writing-area"
+                        style="width:100%;min-height:500px;border:none;outline:none;padding:2rem;font-family:var(--font-body);font-size:1.05rem;line-height:1.9;color:var(--ink-light);background:white;resize:none"
+                        placeholder="Your timer is set. When you're ready, start the timer and begin writing...
+
+This is your distraction-free writing space. Everything stays here until you publish."></textarea>
+                </div>
+            </div>
+
+            <!-- Publish form (hidden) -->
+            <div id="publish-form" style="display:none" class="card mt-3 p-3">
+                <h6 style="font-family:var(--font-display)">Publish this as a post?</h6>
+                <form method="GET" action="{% url 'create-post' %}" id="timer-publish-form">
+                    <input type="text" id="post-title-input" class="form-control mb-2" placeholder="Give your writing a title...">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="goToCreatePost()">
+                            <i class="fas fa-pen me-1"></i>Continue to Publish
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('publish-form').style.display='none'">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Sessions -->
+    {% if recent_sessions %}
+    <div class="mt-5">
+        <h5 style="font-family:var(--font-display);margin-bottom:1rem">Recent Sessions</h5>
+        <div class="card">
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead><tr><th>Duration</th><th>Words</th><th>Status</th><th>Date</th></tr></thead>
+                    <tbody>
+                        {% for session in recent_sessions %}
+                        <tr>
+                            <td>{{ session.duration_minutes }} min</td>
+                            <td><strong>{{ session.words_written }}</strong></td>
+                            <td>{% if session.completed %}<span class="badge bg-success">Completed</span>{% else %}<span class="badge bg-secondary">Stopped</span>{% endif %}</td>
+                            <td><small class="text-muted">{{ session.created_date|timesince }} ago</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+let duration = 25 * 60;
+let remaining = duration;
+let interval = null;
+let running = false;
+let startTime = null;
+
+const display = document.getElementById('timer-display');
+const progress = document.getElementById('timer-progress');
+const startBtn = document.getElementById('start-btn');
+const pauseBtn = document.getElementById('pause-btn');
+const resetBtn = document.getElementById('reset-btn');
+const writingArea = document.getElementById('writing-area');
+const liveWords = document.getElementById('live-words');
+const liveWpm = document.getElementById('live-wpm');
+const liveChars = document.getElementById('live-chars');
+const saveBtn = document.getElementById('save-post-btn');
+
+function formatTime(s) {
+    return `${Math.floor(s/60).toString().padStart(2,'0')}:${(s%60).toString().padStart(2,'0')}`;
+}
+
+function getWordCount() {
+    return writingArea.value.trim().split(/\s+/).filter(w => w).length;
+}
+
+function updateStats() {
+    const words = getWordCount();
+    const chars = writingArea.value.length;
+    liveWords.textContent = words;
+    liveChars.textContent = chars;
+    if (startTime) {
+        const elapsed = (Date.now() - startTime) / 60000;
+        liveWpm.textContent = elapsed > 0 ? Math.round(words / elapsed) : 0;
+    }
+    saveBtn.style.display = words > 10 ? '' : 'none';
+}
+
+writingArea.addEventListener('input', updateStats);
+
+function updateDisplay() {
+    display.textContent = formatTime(remaining);
+    progress.style.width = ((duration - remaining) / duration * 100) + '%';
+    updateStats();
+}
+
+document.querySelectorAll('.duration-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        if (running) return;
+        document.querySelectorAll('.duration-btn').forEach(b => {
+            b.classList.remove('btn-primary');
+            b.classList.add('btn-outline-primary');
+        });
+        this.classList.remove('btn-outline-primary');
+        this.classList.add('btn-primary');
+        duration = parseInt(this.dataset.minutes) * 60;
+        remaining = duration;
+        updateDisplay();
+    });
+});
+
+startBtn.addEventListener('click', function() {
+    running = true;
+    if (!startTime) startTime = Date.now();
+    startBtn.style.display = 'none';
+    pauseBtn.style.display = '';
+    writingArea.focus();
+    interval = setInterval(() => {
+        remaining--;
+        updateDisplay();
+        if (remaining <= 0) {
+            clearInterval(interval);
+            running = false;
+            display.style.color = 'var(--accent)';
+            saveSession(true);
+            if (typeof showToast !== 'undefined') showToast('⏰ Time is up! Great session!', 'success');
+        }
+    }, 1000);
+});
+
+pauseBtn.addEventListener('click', function() {
+    clearInterval(interval);
+    running = false;
+    startBtn.style.display = '';
+    startBtn.innerHTML = '<i class="fas fa-play me-1"></i>Resume';
+    pauseBtn.style.display = 'none';
+});
+
+resetBtn.addEventListener('click', function() {
+    if (running) saveSession(false);
+    clearInterval(interval);
+    running = false;
+    startTime = null;
+    remaining = duration;
+    display.style.color = 'var(--ink)';
+    startBtn.style.display = '';
+    startBtn.innerHTML = '<i class="fas fa-play me-1"></i>Start';
+    pauseBtn.style.display = 'none';
+    updateDisplay();
+});
+
+function saveSession(completed) {
+    const words = getWordCount();
+    const mins = Math.round(duration / 60);
+    fetch('/timer/save/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf()},
+        body: `duration=${mins}&words=${words}&completed=${completed}`
+    });
+}
+
+function clearWriting() {
+    if (writingArea.value && !confirm('Clear all your writing?')) return;
+    writingArea.value = '';
+    updateStats();
+}
+
+function saveAsPost() {
+    document.getElementById('publish-form').style.display = '';
+    document.getElementById('post-title-input').focus();
+}
+
+function goToCreatePost() {
+    const title = document.getElementById('post-title-input').value;
+    const content = writingArea.value;
+    localStorage.setItem('timer_draft_title', title);
+    localStorage.setItem('timer_draft_content', content);
+    window.location.href = "{% url 'create-post' %}?from_timer=1";
+}
+
+function getCsrf() {
+    const match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : '';
+}
+
+updateDisplay();
+</script>
+{% endblock %}
+{% endblock %}
