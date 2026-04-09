@@ -37,7 +37,6 @@ ALLOWED_HOSTS = ['testserver', '127.0.0.1', 'localhost', '.vercel.app', '.now.sh
 INSTALLED_APPS = [
     'jazzmin',              # ← must be FIRST
     'django.contrib.admin',
-    'grappelli',    # ← before django.contrib.admin
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -237,7 +236,11 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # WhiteNoise settings for production
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Media files
 MEDIA_URL = '/media/'
