@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
+from django.utils.html import format_html
 from .models import (
     Post, Comment, Like, Category, Contest, ContestEntry, Report,
-    DailyPrompt, WordOfTheDay, CollaborativeStory, Badge, WritingStreak,
+    DailyPrompt, WordOfTheDay, CollaborativeStory, StoryParagraph, 
+    Badge, WritingStreak, UserProfile, Follow, Bookmark,
 )
 from .badges import ensure_badges_exist
 
@@ -21,10 +23,22 @@ unblock_users.short_description = "Unblock selected users"
 
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'category', 'mood', 'status', 'created_date', 'get_total_likes')
+    list_display = ('title', 'author', 'category', 'status_badge', 'created_date', 'get_total_likes')
     list_filter = ('status', 'category', 'mood', 'created_date')
     search_fields = ('title', 'content', 'author__username')
-    readonly_fields = ('title', 'content', 'author', 'category', 'status', 'created_date')
+    readonly_fields = ('author', 'category', 'created_date')
+
+    def status_badge(self, obj):
+        colors = {
+            'published': '#28a745',
+            'draft': '#6c757d',
+        }
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">{}</span>',
+            colors.get(obj.status, '#000'),
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
 
     def get_total_likes(self, obj):
         return obj.total_likes()
@@ -33,19 +47,17 @@ class PostAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def has_change_permission(self, request, obj=None):
-        return False
-
 
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('post', 'author', 'created_date')
+    list_display = ('post', 'author', 'created_date', 'content_preview')
     search_fields = ('content', 'author__username')
     readonly_fields = ('post', 'author', 'content', 'created_date')
 
-    def has_add_permission(self, request):
-        return False
+    def content_preview(self, obj):
+        return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
+    content_preview.short_description = 'Content'
 
-    def has_change_permission(self, request, obj=None):
+    def has_add_permission(self, request):
         return False
 
 
@@ -57,18 +69,32 @@ class LikeAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def has_change_permission(self, request, obj=None):
-        return False
-
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug')
+    list_display = ('name', 'slug', 'post_count')
     prepopulated_fields = {'slug': ('name',)}
+
+    def post_count(self, obj):
+        return obj.posts.count()
+    post_count.short_description = 'Posts'
 
 
 class ContestAdmin(admin.ModelAdmin):
-    list_display = ('title', 'theme', 'status', 'total_entries', 'submission_deadline')
+    list_display = ('title', 'theme', 'status_badge', 'total_entries', 'submission_deadline')
     list_filter = ('status',)
+
+    def status_badge(self, obj):
+        colors = {
+            'open': '#007bff',
+            'voting': '#ffc107',
+            'closed': '#dc3545',
+        }
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">{}</span>',
+            colors.get(obj.status, '#000'),
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -77,9 +103,23 @@ class ContestAdmin(admin.ModelAdmin):
 
 
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('post', 'reported_by', 'reason', 'status', 'created_date')
+    list_display = ('post', 'reported_by', 'reason', 'status_badge', 'created_date')
     list_filter = ('status', 'reason')
     readonly_fields = ('post', 'reported_by', 'reason', 'description', 'created_date')
+
+    def status_badge(self, obj):
+        colors = {
+            'pending': '#ffc107',
+            'reviewed': '#17a2b8',
+            'resolved': '#28a745',
+            'dismissed': '#6c757d',
+        }
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 10px; border-radius: 10px; font-size: 12px; font-weight: bold;">{}</span>',
+            colors.get(obj.status, '#000'),
+            obj.get_status_display()
+        )
+    status_badge.short_description = 'Status'
 
 
 class DailyPromptAdmin(admin.ModelAdmin):
@@ -120,8 +160,21 @@ class WritingStreakAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def has_change_permission(self, request, obj=None):
-        return False
+
+class CollaborativeStoryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'started_by', 'status', 'total_paragraphs', 'created_date')
+    list_filter = ('status',)
+
+
+class StoryParagraphAdmin(admin.ModelAdmin):
+    list_display = ('story', 'author', 'order', 'created_date')
+    readonly_fields = ('story', 'author', 'order', 'created_date')
+
+
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'is_ai', 'persona_type', 'created_date')
+    list_filter = ('is_ai',)
+    search_fields = ('user__username', 'persona_type')
 
 
 class CustomUserAdmin(UserAdmin):
@@ -132,13 +185,15 @@ class CustomUserAdmin(UserAdmin):
     actions = [block_users, unblock_users]
 
     def account_status(self, obj):
-        return '✅ Active' if obj.is_active else '🚫 Blocked'
+        color = '#28a745' if obj.is_active else '#dc3545'
+        text = 'Active' if obj.is_active else 'Blocked'
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color, text
+        )
     account_status.short_description = 'Status'
 
     def has_add_permission(self, request):
-        return False
-
-    def has_change_permission(self, request, obj=None):
         return False
 
 
@@ -152,6 +207,12 @@ admin.site.register(DailyPrompt, DailyPromptAdmin)
 admin.site.register(WordOfTheDay, WordOfTheDayAdmin)
 admin.site.register(Badge, BadgeAdmin)
 admin.site.register(WritingStreak, WritingStreakAdmin)
+admin.site.register(CollaborativeStory, CollaborativeStoryAdmin)
+admin.site.register(StoryParagraph, StoryParagraphAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)
+admin.site.register(Follow)
+admin.site.register(Bookmark)
 
 admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
+

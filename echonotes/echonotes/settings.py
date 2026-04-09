@@ -116,13 +116,84 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 JAZZMIN_SETTINGS = {
-    'site_title': 'EchoNotes Admin',
-    'site_header': 'EchoNotes',
-    'site_brand': 'EchoNotes',
-    'welcome_sign': 'Welcome to EchoNotes Admin',
-    'copyright': 'EchoNotes',
-    'search_model': ['auth.User', 'blog.Post'],
+    "site_title": "EchoNotes Admin",
+    "site_header": "EchoNotes",
+    "site_brand": "EchoNotes",
+    "site_logo": "images/admin_logo.png",
+    "login_logo": "images/admin_logo.png",
+    "site_icon": "images/admin_favicon.png",
+    "welcome_sign": "Welcome to EchoNotes Administration",
+    "copyright": "EchoNotes © 2026",
+    "search_model": ["auth.User", "blog.Post"],
+    "user_avatar": "profile.profile_pic",
+
+    # Links to show in the top menu
+    "topmenu_links": [
+        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
+        {"name": "Main Site", "url": "/", "new_window": True},
+        {"model": "auth.User"},
+    ],
+
+    # Custom icons for models
+    "icons": {
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+        "blog.Post": "fas fa-feather-alt",
+        "blog.Comment": "fas fa-comments",
+        "blog.Like": "fas fa-heart",
+        "blog.Category": "fas fa-folder",
+        "blog.Contest": "fas fa-trophy",
+        "blog.Report": "fas fa-exclamation-triangle",
+        "blog.DailyPrompt": "fas fa-lightbulb",
+        "blog.WordOfTheDay": "fas fa-book",
+        "blog.Badge": "fas fa-medal",
+        "blog.WritingStreak": "fas fa-fire",
+        "blog.UserProfile": "fas fa-id-card",
+        "blog.Follow": "fas fa-user-friends",
+        "blog.Bookmark": "fas fa-bookmark",
+    },
+    
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "hide_apps": [],
+    "hide_models": [],
+    "order_with_respect_to": ["auth", "blog"],
+    "show_ui_builder": False,
 }
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_small_text": False,
+    "footer_small_text": False,
+    "body_small_text": False,
+    "brand_small_text": False,
+    "brand_colour": "navbar-dark",
+    "accent": "accent-primary",
+    "navbar": "navbar-dark navbar-primary",
+    "no_navbar_border": False,
+    "navbar_fixed": True,
+    "layout_boxed": False,
+    "footer_fixed": False,
+    "sidebar_fixed": True,
+    "sidebar": "sidebar-dark-primary",
+    "sidebar_nav_small_text": False,
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+    "sidebar_nav_compact_style": False,
+    "sidebar_nav_legacy_style": False,
+    "sidebar_nav_flat_style": False,
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+    "button_classes": {
+        "primary": "btn-primary",
+        "secondary": "btn-secondary",
+        "info": "btn-info",
+        "warning": "btn-warning",
+        "danger": "btn-danger",
+        "success": "btn-success"
+    }
+}
+
 
 
 REST_FRAMEWORK = {
