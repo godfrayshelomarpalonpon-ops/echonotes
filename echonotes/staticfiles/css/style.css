@@ -164,6 +164,18 @@ a:hover { color: var(--accent-hover); }
 .echonav .nav-link.highlight { color: var(--gold) !important; }
 .echonav .nav-link.highlight:hover { color: var(--gold-light) !important; }
 
+/* Dropdown Menu Styles */
+.echonav .dropdown-menu-dark .dropdown-item {
+    color: rgba(255, 255, 255, 0.75) !important;
+    transition: all var(--transition);
+}
+
+.echonav .dropdown-menu-dark .dropdown-item:hover,
+.echonav .dropdown-menu-dark .dropdown-item:focus {
+    color: white !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 .echo-search {
     display: flex;
     align-items: center;

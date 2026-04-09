@@ -118,9 +118,7 @@ JAZZMIN_SETTINGS = {
     "site_title": "EchoNotes Admin",
     "site_header": "EchoNotes",
     "site_brand": "EchoNotes",
-    "site_logo": "images/admin_logo.png",
-    "login_logo": "images/admin_logo.png",
-    "site_icon": "images/admin_favicon.png",
+
     "welcome_sign": "Welcome to EchoNotes Administration",
     "copyright": "EchoNotes © 2026",
     "search_model": ["auth.User", "blog.Post"],
@@ -238,9 +236,12 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # WhiteNoise settings for production
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+WHITENOISE_MANIFEST_STRICT = False
+
+
 
 # Media files
 MEDIA_URL = '/media/'
