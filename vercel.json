@@ -13,7 +13,7 @@
   "routes": [
     {
       "src": "/favicon.ico",
-      "dest": "echonotes/static/images/favicon.ico"
+      "dest": "echonotes/static/images/admin_favicon.png"
     },
     {
       "src": "/(.*)",
