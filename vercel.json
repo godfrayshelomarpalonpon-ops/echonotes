@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "echonotes/echonotes/wsgi.py",
+      "src": "index.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
@@ -17,7 +17,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "echonotes/echonotes/wsgi.py"
+      "dest": "index.py"
     }
   ]
 }
