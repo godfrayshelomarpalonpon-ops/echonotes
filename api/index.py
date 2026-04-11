@@ -11,13 +11,18 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'echonotes.settings')
 
 # Import the application handler
 try:
+    print(f"DEBUG: Current directory: {os.getcwd()}")
+    print(f"DEBUG: sys.path: {sys.path}")
     from echonotes.wsgi import application
     app = application
+    print("DEBUG: Successfully imported echonotes.wsgi")
 except ImportError as e:
-    print(f"Error importing WSGI application: {e}")
-    # Fallback to inner import path if needed
+    print(f"DEBUG: Error importing echonotes.wsgi: {e}")
+    # Fallback to direct wsgi import if needed
     try:
         from wsgi import application
         app = application
-    except ImportError:
+        print("DEBUG: Successfully imported wsgi from fallback")
+    except ImportError as inner_e:
+         print(f"DEBUG: Final import error: {inner_e}")
          raise e

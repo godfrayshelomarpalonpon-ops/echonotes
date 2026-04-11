@@ -11,10 +11,9 @@ echo "------------------------------"
 echo "🐍 Installing dependencies..."
 python3 -m pip install -r requirements.txt --break-system-packages
 
-# Collect Static Files
-# The manage.py is in the inner 'echonotes' directory relative to root.
-echo "🎨 Collecting static files..."
-python3 echonotes/manage.py collectstatic --noinput --clear
+# Collect Static Files - Skipping this as we use the public/ folder for Vercel Zero Config
+# echo "🎨 Collecting static files..."
+# python3 echonotes/manage.py collectstatic --noinput --clear
 
 echo "------------------------------"
 echo "  ✅ BUILD COMPLETE          "
