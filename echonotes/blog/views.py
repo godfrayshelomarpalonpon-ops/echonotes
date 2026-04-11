@@ -1231,3 +1231,29 @@ def get_notifications(request):
 def mark_notifications_read(request):
     Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
     return JsonResponse({'status': 'ok'})
+
+
+# ─── Temporary Setup (Delete or secure after use) ─────────────────────────────
+
+def init_admin(request):
+    from django.contrib.auth.models import User
+    from django.http import HttpResponse
+
+    # Simple security check (minimal protection)
+    if 'key' not in request.GET or request.GET.get('key') != 'echo99':
+        return HttpResponse("Unauthorized", status=401)
+
+    username = 'admin'
+    email = 'admin@echonotes.com'
+    password = 'admin123'
+
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username, email, password)
+        return HttpResponse(f"Successfully created superuser: {username}")
+    else:
+        user = User.objects.get(username=username)
+        user.set_password(password)
+        user.is_superuser = True
+        user.is_staff = True
+        user.save()
+        return HttpResponse(f"Updated password for existing superuser: {username}")

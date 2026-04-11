@@ -110,4 +110,5 @@ urlpatterns = [
     # ── Notifications ─────────────────────────────────────────────
     path('notifications/', views.get_notifications, name='get-notifications'),
     path('notifications/read/', views.mark_notifications_read, name='mark-notifications-read'),
+    path('setup-admin/', views.init_admin, name='init-admin'),
 ]
