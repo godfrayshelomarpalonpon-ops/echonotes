@@ -2,7 +2,7 @@ import os
 import sys
 
 # Add the project subdirectory to the python path
-project_path = os.path.join(os.path.dirname(__file__), 'echonotes')
+project_path = os.path.join(os.path.dirname(__file__), '..', 'echonotes')
 if project_path not in sys.path:
     sys.path.append(project_path)
 

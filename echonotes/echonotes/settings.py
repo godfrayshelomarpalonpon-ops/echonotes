@@ -231,7 +231,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
+STATIC_ROOT = BASE_DIR.parent / 'public' / 'static'
 
 # WhiteNoise settings for production
 STORAGES = {
