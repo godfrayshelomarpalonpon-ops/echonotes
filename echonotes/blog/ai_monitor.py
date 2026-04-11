@@ -11,11 +11,11 @@ Or schedule it with Windows Task Scheduler / cron for production.
 """
 import json
 import time
-import urllib.request
 from datetime import date, datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.contrib.auth.models import User
+from blog.ai_utils import call_gemini
 
 
 PROMPT_THEMES = [
@@ -37,30 +37,11 @@ PROMPT_THEMES = [
 ]
 
 
-def call_claude(prompt_text, max_tokens=300):
-    payload = json.dumps({
-        "model": "claude-sonnet-4-20250514",
-        "max_tokens": max_tokens,
-        "messages": [{"role": "user", "content": prompt_text}]
-    }).encode('utf-8')
-
-    req = urllib.request.Request(
-        'https://api.anthropic.com/v1/messages',
-        data=payload,
-        headers={
-            'Content-Type': 'application/json',
-            'anthropic-version': '2023-06-01',
-        },
-        method='POST'
-    )
-
-    with urllib.request.urlopen(req, timeout=15) as response:
-        result = json.loads(response.read().decode('utf-8'))
-        return result['content'][0]['text'].strip()
+# call_claude replaced by call_gemini from ai_utils
 
 
 def generate_writing_prompt(theme):
-    return call_claude(f"""You are the writing prompt curator for EchoNotes, a Filipino literary community based in Cebu.
+    return call_gemini(f"""You are the writing prompt curator for EchoNotes, a Filipino literary community based in Cebu.
 
 Generate ONE writing prompt with theme: {theme}
 
@@ -74,7 +55,7 @@ Just the prompt text, nothing else.""", max_tokens=100)
 
 
 def generate_hot_broadcast(stats):
-    return call_claude(f"""You are the AI broadcaster for EchoNotes, a Filipino literary community.
+    return call_gemini(f"""You are the AI broadcaster for EchoNotes, a Filipino literary community.
 
 Here is what happened in the last hour on the platform:
 - New posts published: {stats['new_posts']}

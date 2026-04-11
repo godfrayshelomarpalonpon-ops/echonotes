@@ -1,5 +1,17 @@
 import os
 import google.generativeai as genai
+from dotenv import load_dotenv
+
+# Ensure environment variables are loaded from .env.local if it exists
+# utils.py is in c:\Users\Admin\Desktop\echonotes\echonotes\blog\
+# We need to go 2 levels up to reach c:\Users\Admin\Desktop\echonotes\
+env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../.env.local')
+load_dotenv(env_path)
+# Also try standard .env at root
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../.env'))
+# Try looking in the current working directory too as a fallback
+load_dotenv('.env.local')
+load_dotenv()
 
 def call_gemini(prompt_text, max_tokens=300):
     """
@@ -12,7 +24,7 @@ def call_gemini(prompt_text, max_tokens=300):
 
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-flash-latest')
         
         # Generation configuration
         config = genai.types.GenerationConfig(

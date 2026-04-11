@@ -7,39 +7,30 @@ It handles the manual AI prompt generation endpoint
 @require_POST  
 def generate_prompt_ai(request):
     import json
-    import urllib.request
     import random
+    from .ai_utils import call_gemini
 
     try:
         data = json.loads(request.body) if request.body else {}
         theme = data.get('theme', 'general creative writing')
 
-        payload = json.dumps({
-            "model": "claude-sonnet-4-20250514",
-            "max_tokens": 100,
-            "messages": [{
-                "role": "user",
-                "content": f"""Generate ONE writing prompt for a Filipino literary community called EchoNotes.
+        prompt = f"""Generate ONE writing prompt for a Filipino literary community called EchoNotes.
 Theme: {theme}
 - One sentence only, no numbering, no prefix
 - Evocative, specific, emotionally resonant
 Just the prompt text:"""
-            }]
-        }).encode('utf-8')
 
-        req = urllib.request.Request(
-            'https://api.anthropic.com/v1/messages',
-            data=payload,
-            headers={'Content-Type': 'application/json', 'anthropic-version': '2023-06-01'},
-            method='POST'
-        )
+        response_text = call_gemini(prompt, max_tokens=100)
+        
+        if "ERROR" in response_text:
+            raise Exception(response_text)
 
-        with urllib.request.urlopen(req, timeout=10) as response:
-            result = json.loads(response.read().decode('utf-8'))
-            prompt_text = result['content'][0]['text'].strip()
-            return JsonResponse({'prompt': prompt_text, 'success': True})
+        # Clean up any potential AI formatting
+        clean_prompt = response_text.replace('Just the prompt text:', '').strip().strip('"')
+        return JsonResponse({'prompt': clean_prompt, 'success': True})
 
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG: generate_prompt_ai failed: {e}")
         fallbacks = [
             "Write about a moment when silence said more than words ever could.",
             "Describe the smell of rain on a street you used to walk every day.",

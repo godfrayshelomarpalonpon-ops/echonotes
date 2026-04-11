@@ -706,23 +706,21 @@ def ai_broadcast(request):
 @require_POST
 def generate_prompt_ai(request):
     try:
+        from .ai_utils import call_gemini
         data = json.loads(request.body) if request.body else {}
         theme = data.get('theme', 'general creative writing')
-        payload = json.dumps({
-            "model": "claude-sonnet-4-20250514",
-            "max_tokens": 100,
-            "messages": [{"role": "user", "content": f"Generate ONE writing prompt for a Filipino literary community.\nTheme: {theme}\nOne sentence only, evocative, no prefix.\nJust the prompt:"}]
-        }).encode('utf-8')
-        req = urllib.request.Request(
-            'https://api.anthropic.com/v1/messages',
-            data=payload,
-            headers={'Content-Type': 'application/json', 'anthropic-version': '2023-06-01'},
-            method='POST'
-        )
-        with urllib.request.urlopen(req, timeout=10) as response:
-            result = json.loads(response.read().decode('utf-8'))
-            return JsonResponse({'prompt': result['content'][0]['text'].strip(), 'success': True})
-    except Exception:
+        
+        prompt = f"Generate ONE writing prompt for a Filipino literary community.\nTheme: {theme}\nOne sentence only, evocative, no prefix.\nJust the prompt:"
+        response_text = call_gemini(prompt, max_tokens=100)
+        
+        if "ERROR" in response_text:
+             raise Exception(response_text)
+             
+        # Clean up any potential AI formatting
+        clean_prompt = response_text.replace('Just the prompt:', '').strip().strip('"')
+        return JsonResponse({'prompt': clean_prompt, 'success': True})
+    except Exception as e:
+        print(f"DEBUG: generate_prompt_ai failed: {e}")
         fallbacks = [
             "Write about a moment when silence said more than words ever could.",
             "Describe the smell of rain on a street you used to walk every day.",
