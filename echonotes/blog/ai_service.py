@@ -96,18 +96,18 @@ class AIService:
         """
         Generates a 1-sentence evocative summary of the writing.
         """
-        from blog.ai_utils import call_claude
+        from blog.ai_utils import call_gemini
         prompt = f"Summarize the following story/poem in exactly one evocative, beautiful sentence from a literary perspective:\n\n{content}"
-        return call_claude(prompt, max_tokens=150)
+        return call_gemini(prompt, max_tokens=150)
 
     @staticmethod
     def moderate_content(text):
         """
         Analyzes content for toxicity. Returns a tuple (is_toxic, score).
         """
-        from blog.ai_utils import call_claude
+        from blog.ai_utils import call_gemini
         prompt = f"Analyze the following text for toxicity (hate speech, violence, severe harassment). Return ONLY a JSON object with 'toxic' (boolean) and 'score' (float 0.0 to 1.0):\n\n{text}"
-        response = call_claude(prompt, max_tokens=50)
+        response = call_gemini(prompt, max_tokens=50)
         try:
             # Clean response if AI adds markdown backticks
             clean_response = response.strip('`').replace('json', '').strip()
