@@ -50,6 +50,11 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
     mood = models.CharField(max_length=20, choices=MOOD_CHOICES, blank=True)
+    # AI Fields
+    ai_summary = models.TextField(blank=True, help_text="AI-generated 1-sentence summary")
+    is_flagged = models.BooleanField(default=False)
+    toxicity_score = models.FloatField(default=0.0)
+    
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PUBLISHED)
     created_date = models.DateTimeField(default=timezone.now)
     updated_date = models.DateTimeField(auto_now=True)
@@ -82,6 +87,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField()
+    is_flagged = models.BooleanField(default=False)
     created_date = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -678,6 +684,31 @@ def ai_auto_interact(sender, instance, created, **kwargs):
                 AIPersonaEngine.interact_with_post(ai, instance)
         except Exception as e:
             print(f"AI Interaction failed: {e}")
+
+    # Generate Summary and Moderate
+    if not instance.ai_summary and instance.status == 'published':
+        try:
+            from blog.ai_service import AIService
+            instance.ai_summary = AIService.generate_summary(instance.content)
+            instance.is_flagged, instance.toxicity_score = AIService.moderate_content(instance.content)
+            instance.save(update_fields=['ai_summary', 'is_flagged', 'toxicity_score'])
+        except Exception as e:
+            print(f"AI Summary generation failed: {e}")
+
+@receiver(post_save, sender=Comment)
+def ai_comment_moderation(sender, instance, created, **kwargs):
+    """
+    Automated moderation for new comments.
+    """
+    if created:
+        try:
+            from blog.ai_service import AIService
+            is_toxic, score = AIService.moderate_content(instance.content)
+            if is_toxic:
+                instance.is_flagged = True
+                instance.save(update_fields=['is_flagged'])
+        except Exception as e:
+            print(f"Comment moderation failed: {e}")
 
 
 @receiver(post_save, sender=User)

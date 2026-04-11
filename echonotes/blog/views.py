@@ -13,6 +13,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 
 from .badges import award_badges, award_badge
 from .decorators import admin_required
@@ -36,6 +38,7 @@ from .models import (
 
 # ─── Landing ──────────────────────────────────────────────────────────────────
 
+@cache_page(60 * 15)
 def landing(request):
     context = {
         'recent_posts': Post.objects.filter(status='published').order_by('-created_date')[:6],

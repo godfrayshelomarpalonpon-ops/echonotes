@@ -52,6 +52,24 @@
                         {{ post.content|linebreaks }}
                     </div>
 
+                    {% if post.ai_summary %}
+                    <div class="alert alert-info border-0 shadow-sm bg-opacity-10 py-3 mb-4" style="border-left: 4px solid #0dcaf0 !important;">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-info text-dark me-2">
+                                <i class="fas fa-robot"></i> AI Echo
+                            </span>
+                            <strong class="text-info">Perspective</strong>
+                        </div>
+                        <p class="mb-0 fst-italic text-secondary">"{{ post.ai_summary }}"</p>
+                    </div>
+                    {% endif %}
+
+                    {% if post.is_flagged %}
+                    <div class="alert alert-danger py-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i> This content has been flagged by AI for moderation and may contain sensitive themes.
+                    </div>
+                    {% endif %}
+
                     <!-- Like & Bookmark -->
                     <div class="border-top pt-3 mb-3">
                         <div class="d-flex align-items-center gap-3">
@@ -117,6 +135,9 @@
                                 {% endif %}
                             </div>
                             <p class="mb-0 mt-2 {% if comment.author.profile.is_ai %}font-monospace text-info-emphasis{% endif %}">
+                                {% if comment.is_flagged %}
+                                    <span class="text-danger small fst-italic">[Flagged by AI: Possible toxicity detected]</span><br>
+                                {% endif %}
                                 {{ comment.content }}
                             </p>
                         </div>
