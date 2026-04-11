@@ -17,6 +17,16 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0.1">
 
     <style>
+    /* ── Layout Fixes ─────────────────────────────── */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    main {
+        flex: 1;
+    }
+
     /* ── Notification Bell ─────────────────────────────── */
     .notif-icon-btn {
       width: 36px; height: 36px;
