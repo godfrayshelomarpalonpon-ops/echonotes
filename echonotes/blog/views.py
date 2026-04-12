@@ -1,4 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import connection
+from django.http import HttpResponse
+
+def sync_db(request):
+    # This is a temporary view to fix the production DB schema
+    with connection.cursor() as cursor:
+        cursor.execute("ALTER TABLE blog_category ADD COLUMN IF NOT EXISTS color varchar(20) DEFAULT '#7c3aed' NOT NULL;")
+        cursor.execute("ALTER TABLE blog_category ADD COLUMN IF NOT EXISTS icon varchar(50) DEFAULT 'fas fa-circle' NOT NULL;")
+        cursor.execute("ALTER TABLE blog_category ADD COLUMN IF NOT EXISTS created_date timestamp with time zone DEFAULT now() NOT NULL;")
+    return HttpResponse("Schema sync complete.")
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
