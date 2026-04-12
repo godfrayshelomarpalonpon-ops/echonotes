@@ -1,435 +1,593 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EchoNotes — {% block title %}Your Voice Echoes Here{% endblock %}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoNotes — {% block title %}Your Voice Echoes Here{% endblock %}</title>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- ↓ THIS IS WHAT YOU NEED ↓ -->
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0.1">
+  <!-- SEO & Social Media -->
+  <meta name="description"
+    content="{% block meta_description %}EchoNotes is a vibrant literary community for writers, poets, and storytellers to share their voices and connect with others.{% endblock %}">
+  <meta name="author" content="EchoNotes Community">
 
-    <style>
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+  <meta property="og:title" content="EchoNotes — {% block og_title %}Your Voice Echoes Here{% endblock %}">
+  <meta property="og:description"
+    content="{% block og_description %}Share your stories, poems, and essays in a supportive community of writers.{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{% static 'img/og-default.jpg' %}{% endblock %}">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="{{ request.build_absolute_uri }}">
+  <meta property="twitter:title" content="EchoNotes — {% block twitter_title %}Your Voice Echoes Here{% endblock %}">
+  <meta property="twitter:description"
+    content="{% block twitter_description %}Share your stories, poems, and essays in a supportive community of writers.{% endblock %}">
+  <meta property="twitter:image" content="{% block twitter_image %}{% static 'img/og-default.jpg' %}{% endblock %}">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- ↓ THIS IS WHAT YOU NEED ↓ -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0.1">
+
+  <style>
     /* ── Layout Fixes ─────────────────────────────── */
     body {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
+
     main {
-        flex: 1;
+      flex: 1;
     }
 
     /* ── Notification Bell ─────────────────────────────── */
     .notif-icon-btn {
-      width: 36px; height: 36px;
+      width: 36px;
+      height: 36px;
       border-radius: 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.09);
-      color: rgba(255,255,255,0.6);
-      display: flex; align-items: center; justify-content: center;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      color: rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 0.9rem;
       cursor: pointer;
       position: relative;
       transition: all 0.18s;
       text-decoration: none;
     }
-    .notif-icon-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+
+    .notif-icon-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+    }
 
     .notif-badge {
-      position: absolute; top: -5px; right: -5px;
-      min-width: 17px; height: 17px; border-radius: 50%;
-      background: #ef4444; color: white;
-      font-size: 0.6rem; font-weight: 700;
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      font-weight: 700;
       font-family: 'DM Sans', sans-serif;
-      display: flex !important; align-items: center; justify-content: center;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
       border: 2px solid #0f0a1a;
       padding: 0 3px;
     }
 
     .notif-dropdown {
-      position: absolute; top: calc(100% + 10px); right: 0;
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
       width: 320px;
-      background: rgba(18,12,30,0.97);
-      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(18, 12, 30, 0.97);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
       backdrop-filter: blur(20px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
       display: none;
       z-index: 9999;
       overflow: hidden;
     }
-    .notif-dropdown.open { display: block; animation: dropIn 0.18s ease; }
-    @keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+    .notif-dropdown.open {
+      display: block;
+      animation: dropIn 0.18s ease;
+    }
+
+    @keyframes dropIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
 
     .notif-header {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 0.8rem 1rem;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     }
-    .notif-header span {
-      font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
-      font-weight: 600; color: rgba(255,255,255,0.6);
-      text-transform: uppercase; letter-spacing: 0.08em;
-    }
-    .notif-mark-read {
-      background: none; border: none; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
-      color: #a78bfa; transition: color 0.15s;
-    }
-    .notif-mark-read:hover { color: white; }
 
-    .notif-list { max-height: 360px; overflow-y: auto; }
-    .notif-list::-webkit-scrollbar { width: 3px; }
-    .notif-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    .notif-header span {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .notif-mark-read {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.72rem;
+      color: #a78bfa;
+      transition: color 0.15s;
+    }
+
+    .notif-mark-read:hover {
+      color: white;
+    }
+
+    .notif-list {
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .notif-list::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .notif-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
 
     .notif-item {
-      display: flex; align-items: flex-start; gap: 0.7rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
       padding: 0.75rem 1rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       cursor: pointer;
       transition: background 0.15s;
     }
-    .notif-item:last-child { border-bottom: none; }
-    .notif-item:hover { background: rgba(255,255,255,0.04); }
-    .notif-item.unread { background: rgba(124,58,237,0.07); }
-    .notif-item.unread:hover { background: rgba(124,58,237,0.12); }
+
+    .notif-item:last-child {
+      border-bottom: none;
+    }
+
+    .notif-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .notif-item.unread {
+      background: rgba(124, 58, 237, 0.07);
+    }
+
+    .notif-item.unread:hover {
+      background: rgba(124, 58, 237, 0.12);
+    }
 
     .notif-av {
-      width: 34px; height: 34px; border-radius: 50%;
-      object-fit: cover; flex-shrink: 0;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .notif-av-ph {
-      width: 34px; height: 34px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.8rem; font-weight: 700; color: white;
-      font-family: 'DM Sans', sans-serif; text-transform: uppercase;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
       flex-shrink: 0;
-      background: linear-gradient(135deg,#7c3aed,#a855f7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .notif-body { flex: 1; min-width: 0; }
+    .notif-av-ph {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+    }
+
+    .notif-body {
+      flex: 1;
+      min-width: 0;
+    }
+
     .notif-text {
-      font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
-      color: rgba(255,255,255,0.75); line-height: 1.4;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.4;
       margin-bottom: 2px;
     }
+
     .notif-time {
-      font-family: 'DM Mono', monospace; font-size: 0.65rem;
-      color: rgba(255,255,255,0.28);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      color: rgba(255, 255, 255, 0.28);
     }
 
     .notif-icon-badge {
-      font-size: 1rem; flex-shrink: 0; opacity: 0.8;
+      font-size: 1rem;
+      flex-shrink: 0;
+      opacity: 0.8;
     }
 
     .notif-empty {
-      padding: 2rem; text-align: center;
-      font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
-      color: rgba(255,255,255,0.25);
+      padding: 2rem;
+      text-align: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.25);
     }
+
     .notif-footer {
       padding: 0.6rem 1rem;
       text-align: center;
-      border-top: 1px solid rgba(255,255,255,0.06);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .notif-footer a {
-      font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
-      color: #a78bfa; text-decoration: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.75rem;
+      color: #a78bfa;
+      text-decoration: none;
     }
-    </style>
+  </style>
 
 
 <body>
 
-<!-- Navigation -->
-<nav class="echonav navbar navbar-expand-lg">
+  <!-- Navigation -->
+  <nav class="echonav navbar navbar-expand-lg">
     <div class="container">
-        <a class="echo-brand" href="{% url 'landing' %}">
-            <i class="fas fa-volume-up" style="color:var(--accent);font-size:1.1rem"></i>
-            <div>
-                Echo<span>Notes</span>
-                <small>Your voice echoes here</small>
-            </div>
-        </a>
+      <a class="echo-brand" href="{% url 'landing' %}">
+        <i class="fas fa-volume-up" style="color:var(--accent);font-size:1.1rem"></i>
+        <div>
+          Echo<span>Notes</span>
+          <small>Your voice echoes here</small>
+        </div>
+      </a>
 
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                style="color:rgba(255,255,255,0.7)">
-            <i class="fas fa-bars"></i>
-        </button>
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        style="color:rgba(255,255,255,0.7)">
+        <i class="fas fa-bars"></i>
+      </button>
 
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center" style="gap: 0.5rem; margin-left: 1.5rem;">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'landing' %}">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'story-list' %}">Stories</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link highlight" href="{% url 'contest-list' %}">
-                        <i class="fas fa-trophy me-1" style="color:var(--gold)"></i>Contests
-                    </a>
-                </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Explore
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg" aria-labelledby="exploreDropdown" style="background: rgba(30, 22, 45, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 12px; font-size: 0.9rem;">
-                        <li><a class="dropdown-item py-2" href="{% url 'daily-prompt' %}"><i class="fas fa-lightbulb me-2 text-warning"></i>Daily Prompt <span class="badge rounded-pill ms-1" style="background:var(--accent); font-size:0.65rem">✨ AI</span></a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'word-of-the-day' %}"><i class="fas fa-book-open me-2 text-info"></i>Word of the Day <span class="badge rounded-pill ms-1" style="background:var(--accent); font-size:0.65rem">✨ AI</span></a></li>
-                        <li><hr class="dropdown-divider border-secondary"></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'leaderboard' %}"><i class="fas fa-medal me-2" style="color:var(--gold)"></i>Leaderboard</a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'badges' %}"><i class="fas fa-award me-2" style="color:var(--accent)"></i>Badges</a></li>
-                        <li><a class="dropdown-item py-2" href="{% url 'writing-timer' %}"><i class="fas fa-stopwatch me-2 text-danger"></i>Writing Timer</a></li>
-                    </ul>
-                </li>
-
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center" style="gap: 0.5rem; margin-left: 1.5rem;">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'landing' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'story-list' %}">Stories</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link highlight" href="{% url 'contest-list' %}">
+              <i class="fas fa-trophy me-1" style="color:var(--gold)"></i>Contests
+            </a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="exploreDropdown" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Explore
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark border-0 shadow-lg" aria-labelledby="exploreDropdown"
+              style="background: rgba(30, 22, 45, 0.98); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 12px; font-size: 0.9rem;">
+              <li><a class="dropdown-item py-2" href="{% url 'circle-discovery' %}"><i
+                    class="fas fa-users-cog me-2 text-primary"></i>Community Circles</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'daily-prompt' %}"><i
+                    class="fas fa-lightbulb me-2 text-warning"></i>Daily Prompt <span class="badge rounded-pill ms-1"
+                    style="background:var(--accent); font-size:0.65rem">✨ AI</span></a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'word-of-the-day' %}"><i
+                    class="fas fa-book-open me-2 text-info"></i>Word of the Day <span class="badge rounded-pill ms-1"
+                    style="background:var(--accent); font-size:0.65rem">✨ AI</span></a></li>
+              <li>
+                <hr class="dropdown-divider border-secondary">
+              </li>
+              <li><a class="dropdown-item py-2" href="{% url 'leaderboard' %}"><i class="fas fa-medal me-2"
+                    style="color:var(--gold)"></i>Leaderboard</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'badges' %}"><i class="fas fa-award me-2"
+                    style="color:var(--accent)"></i>Badges</a></li>
+              <li><a class="dropdown-item py-2" href="{% url 'writing-timer' %}"><i
+                    class="fas fa-stopwatch me-2 text-danger"></i>Writing Timer</a></li>
             </ul>
+          </li>
 
-            <div class="d-flex align-items-lg-center gap-3">
-                <form class="echo-search d-flex align-items-center m-0" action="{% url 'search' %}" method="GET" style="background: rgba(255,255,255,0.05); border-radius: 20px; padding: 3px; border: 1px solid rgba(255,255,255,0.08);">
-                    <input type="search" name="q" placeholder="Search..." required class="border-0 bg-transparent text-white px-3" style="outline: none; font-size: 0.85rem; width: 160px;">
-                    <button type="submit" class="border-0 rounded-circle d-flex justify-content-center align-items-center" style="background: var(--accent); width: 32px; height: 32px; color: white;"><i class="fas fa-search" style="font-size: 0.75rem;"></i></button>
-                </form>
+        </ul>
 
-                <ul class="navbar-nav align-items-lg-center m-0">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item me-2 d-none d-lg-block">
-                            <a class="nav-link py-1 px-3 text-white" href="{% url 'create-post' %}" style="background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; box-shadow: 0 4px 12px rgba(124,58,237,0.3);">
-                                <i class="fas fa-pen me-2" style="font-size: 0.75rem;"></i> Write
-                            </a>
-                        </li>
-                        {% if user.is_authenticated %}
-                        <!-- Inbox icon -->
-                        <li class="nav-item">
-                          <a href="{% url 'inbox' %}" class="notif-icon-btn" title="Messages" style="text-decoration:none">
-                            <i class="fas fa-envelope"></i>
-                          </a>
-                        </li>
-                        <!-- Notification bell -->
-                        <li class="nav-item" style="position:relative">
-                          <button id="notif-bell-btn" class="notif-icon-btn" title="Notifications">
-                            <i class="fas fa-bell"></i>
-                            <span id="notif-badge" class="notif-badge" style="display:none">0</span>
-                          </button>
-                          <div id="notif-dropdown" class="notif-dropdown">
-                            <div class="notif-header">
-                              <span>Notifications</span>
-                              <button id="notif-mark-read" class="notif-mark-read">Mark all read</button>
-                            </div>
-                            <div id="notif-list" class="notif-list">
-                              <div class="notif-empty">Loading…</div>
-                            </div>
-                            <div class="notif-footer">
-                              <a href="{% url 'dashboard' %}#tab-pending">View all in Dashboard</a>
-                            </div>
-                          </div>
-                        </li>
-                        {% endif %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 0.2rem 1rem;">
-                                <div class="rounded-circle d-flex justify-content-center align-items-center" style="width: 34px; height: 34px; background: linear-gradient(135deg,rgb(0, 89, 255),rgb(0, 183, 255)); color: white; font-weight: bold; font-size: 0.9rem;">
-                                    {{ user.username|make_list|first|upper }}
-                                </div>
-                                <span class="d-none d-lg-block">{{ user.username }}</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-0 shadow-lg mt-2" aria-labelledby="profileDropdown" style="background: rgba(18, 12, 30, 0.95); backdrop-filter: blur(10px); border-radius: 12px; font-size: 0.9rem;">
-                                <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2 text-secondary"></i>Dashboard</a></li>
-                                <li class="d-lg-none"><a class="dropdown-item py-2" href="{% url 'create-post' %}"><i class="fas fa-pen me-2 text-secondary"></i>Write</a></li>
-                                <li><a class="dropdown-item py-2" href="{% url 'profile' %}"><i class="fas fa-user-circle me-2 text-secondary"></i>Profile</a></li>
-                                <li><a class="dropdown-item py-2" href="{% url 'my-bookmarks' %}"><i class="fas fa-bookmark me-2 text-secondary"></i>Bookmarks</a></li>
-                                {% if user.is_staff %}
-                                    <li><hr class="dropdown-divider border-secondary"></li>
-                                    <li><a class="dropdown-item py-2" href="{% url 'admin-dashboard' %}" style="color:var(--gold) !important"><i class="fas fa-cog me-2"></i>Admin Area</a></li>
-                                {% endif %}
-                                <li><hr class="dropdown-divider border-secondary"></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
-                        </li>
-                        <li class="nav-item ms-lg-2">
-                            <a class="nav-link text-white" href="{% url 'register' %}"
-                               style="background: linear-gradient(135deg, #7c3aed, #a855f7); padding: 0.4rem 1.2rem !important; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-flex; box-shadow: 0 4px 12px rgba(124,58,237,0.3);">
-                                Join Free
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </div>
-</nav>
+        <div class="d-flex align-items-lg-center gap-3">
+          <form class="echo-search d-flex align-items-center m-0" action="{% url 'search' %}" method="GET"
+            style="background: rgba(255,255,255,0.05); border-radius: 20px; padding: 3px; border: 1px solid rgba(255,255,255,0.08);">
+            <input type="search" name="q" placeholder="Search..." required
+              class="border-0 bg-transparent text-white px-3" style="outline: none; font-size: 0.85rem; width: 160px;">
+            <button type="submit" class="border-0 rounded-circle d-flex justify-content-center align-items-center"
+              style="background: var(--accent); width: 32px; height: 32px; color: white;"><i class="fas fa-search"
+                style="font-size: 0.75rem;"></i></button>
+          </form>
 
-<!-- Messages -->
-{% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    </div>
-{% endif %}
-
-<!-- Main Content -->
-<main>
-    {% block content %}{% endblock %}
-</main>
-
-<!-- Footer -->
-<footer class="echo-footer mt-5">
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <div class="echo-footer-brand mb-3">Echo<span>Notes</span></div>
-                <p style="color:rgba(255,255,255,0.5);font-size:0.875rem;line-height:1.7">
-                    A space for writers, poets, and storytellers.
-                    Share your voice — someone out there needs to hear it.
-                </p>
-                <p style="color:rgba(255,255,255,0.3);font-size:0.78rem">
-                    <i class="fas fa-map-marker-alt me-1"></i> Founded in Cebu, Philippines
-                </p>
-            </div>
-
-            <div class="col-lg-2 col-md-4 mb-4">
-    <h6>Explore</h6>
-    <ul class="list-unstyled mb-0">
-        {% for category in categories %}
-            <li style="margin-bottom:0.5rem;">
-                <a href="{% url 'category-posts' category.slug %}">
-                    <i class="fas fa-tag me-1" style="font-size:0.7rem;color:var(--accent)"></i>{{ category.name }}
-                </a>
+          <ul class="navbar-nav align-items-lg-center m-0">
+            {% if user.is_authenticated %}
+            <li class="nav-item me-2 d-none d-lg-block">
+              <a class="nav-link py-1 px-3 text-white" href="{% url 'create-post' %}"
+                style="background: linear-gradient(135deg, #7c3aed, #a855f7); border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-flex; align-items: center; box-shadow: 0 4px 12px rgba(124,58,237,0.3);">
+                <i class="fas fa-pen me-2" style="font-size: 0.75rem;"></i> Write
+              </a>
             </li>
-        {% empty %}
-            <li><a href="{% url 'landing' %}">All Posts</a></li>
-        {% endfor %}
-    </ul>
-    </div>
-
-            <div class="col-lg-3 col-md-4 mb-4">
-                <h6>Community</h6>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'create-post' %}"><i class="fas fa-pen me-2" style="color:var(--accent)"></i>Write a Post</a>
-                    <a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2" style="color:var(--accent)"></i>Dashboard</a>
-                    <a href="{% url 'my-bookmarks' %}"><i class="fas fa-bookmark me-2" style="color:var(--accent)"></i>Bookmarks</a>
-                    <a href="{% url 'contest-list' %}"><i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests</a>
-                {% else %}
-                    <a href="{% url 'register' %}"><i class="fas fa-user-plus me-2" style="color:var(--accent)"></i>Join EchoNotes</a>
-                    <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-2" style="color:var(--accent)"></i>Login</a>
-                    <a href="{% url 'contest-list' %}"><i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests</a>
+            {% if user.is_authenticated %}
+            <!-- Inbox icon -->
+            <li class="nav-item">
+              <a href="{% url 'inbox' %}" class="notif-icon-btn" title="Messages" style="text-decoration:none">
+                <i class="fas fa-envelope"></i>
+              </a>
+            </li>
+            <!-- Notification bell -->
+            <li class="nav-item" style="position:relative">
+              <button id="notif-bell-btn" class="notif-icon-btn" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span id="notif-badge" class="notif-badge" style="display:none">0</span>
+              </button>
+              <div id="notif-dropdown" class="notif-dropdown">
+                <div class="notif-header">
+                  <span>Notifications</span>
+                  <button id="notif-mark-read" class="notif-mark-read">Mark all read</button>
+                </div>
+                <div id="notif-list" class="notif-list">
+                  <div class="notif-empty">Loading…</div>
+                </div>
+                <div class="notif-footer">
+                  <a href="{% url 'dashboard' %}#tab-pending">View all in Dashboard</a>
+                </div>
+              </div>
+            </li>
+            {% endif %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="profileDropdown"
+                role="button" data-bs-toggle="dropdown" aria-expanded="false" style="padding: 0.2rem 1rem;">
+                <div class="rounded-circle d-flex justify-content-center align-items-center"
+                  style="width: 34px; height: 34px; background: linear-gradient(135deg,rgb(0, 89, 255),rgb(0, 183, 255)); color: white; font-weight: bold; font-size: 0.9rem;">
+                  {{ user.username|make_list|first|upper }}
+                </div>
+                <span class="d-none d-lg-block">{{ user.username }}</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-0 shadow-lg mt-2"
+                aria-labelledby="profileDropdown"
+                style="background: rgba(18, 12, 30, 0.95); backdrop-filter: blur(10px); border-radius: 12px; font-size: 0.9rem;">
+                <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i
+                      class="fas fa-tachometer-alt me-2 text-secondary"></i>Dashboard</a></li>
+                <li class="d-lg-none"><a class="dropdown-item py-2" href="{% url 'create-post' %}"><i
+                      class="fas fa-pen me-2 text-secondary"></i>Write</a></li>
+                <li><a class="dropdown-item py-2" href="{% url 'profile-detail' username=user.username %}"><i
+                      class="fas fa-user-circle me-2 text-secondary"></i>Profile</a></li>
+                <li><a class="dropdown-item py-2" href="{% url 'my-bookmarks' %}"><i
+                      class="fas fa-bookmark me-2 text-secondary"></i>Bookmarks</a></li>
+                {% if user.is_staff %}
+                <li>
+                  <hr class="dropdown-divider border-secondary">
+                </li>
+                <li><a class="dropdown-item py-2" href="{% url 'admin-dashboard' %}"
+                    style="color:var(--gold) !important"><i class="fas fa-cog me-2"></i>Admin Area</a></li>
                 {% endif %}
-                <a href="{% url 'search' %}?q="><i class="fas fa-search me-2" style="color:var(--accent)"></i>Search Posts</a>
-            </div>
-
-            <div class="col-lg-3 col-md-4 mb-4">
-                <h6>Legal</h6>
-                <a href="{% url 'about' %}"><i class="fas fa-info-circle me-2" style="color:var(--accent)"></i>About Us</a>
-                <a href="{% url 'privacy-policy' %}"><i class="fas fa-shield-alt me-2" style="color:var(--accent)"></i>Privacy Policy</a>
-                <a href="{% url 'contact' %}"><i class="fas fa-envelope me-2" style="color:var(--accent)"></i>Contact Us</a>
-            </div>
+                <li>
+                  <hr class="dropdown-divider border-secondary">
+                </li>
+                <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i
+                      class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+              </ul>
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">Login</a>
+            </li>
+            <li class="nav-item ms-lg-2">
+              <a class="nav-link text-white" href="{% url 'register' %}"
+                style="background: linear-gradient(135deg, #7c3aed, #a855f7); padding: 0.4rem 1.2rem !important; border-radius: 20px; font-size: 0.85rem; font-weight: 500; display: inline-flex; box-shadow: 0 4px 12px rgba(124,58,237,0.3);">
+                Join Free
+              </a>
+            </li>
+            {% endif %}
+          </ul>
         </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Messages -->
+  {% if messages %}
+  <div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Main Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="echo-footer mt-5">
+    <div class="container py-5">
+      <div class="row">
+        <div class="col-lg-4 mb-4">
+          <div class="echo-footer-brand mb-3">Echo<span>Notes</span></div>
+          <p style="color:rgba(255,255,255,0.5);font-size:0.875rem;line-height:1.7">
+            A space for writers, poets, and storytellers.
+            Share your voice — someone out there needs to hear it.
+          </p>
+          <p style="color:rgba(255,255,255,0.3);font-size:0.78rem">
+            <i class="fas fa-map-marker-alt me-1"></i> Founded in Cebu, Philippines
+          </p>
+        </div>
+
+        <div class="col-lg-2 col-md-4 mb-4">
+          <h6>Explore</h6>
+          <ul class="list-unstyled mb-0">
+            {% for category in categories %}
+            <li style="margin-bottom:0.5rem;">
+              <a href="{% url 'category-posts' category.slug %}">
+                <i class="fas fa-tag me-1" style="font-size:0.7rem;color:var(--accent)"></i>{{ category.name }}
+              </a>
+            </li>
+            {% empty %}
+            <li><a href="{% url 'landing' %}">All Posts</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="col-lg-3 col-md-4 mb-4">
+          <h6>Community</h6>
+          {% if user.is_authenticated %}
+          <a href="{% url 'create-post' %}"><i class="fas fa-pen me-2" style="color:var(--accent)"></i>Write a Post</a>
+          <a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2"
+              style="color:var(--accent)"></i>Dashboard</a>
+          <a href="{% url 'my-bookmarks' %}"><i class="fas fa-bookmark me-2"
+              style="color:var(--accent)"></i>Bookmarks</a>
+          <a href="{% url 'contest-list' %}"><i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests</a>
+          {% else %}
+          <a href="{% url 'register' %}"><i class="fas fa-user-plus me-2" style="color:var(--accent)"></i>Join
+            EchoNotes</a>
+          <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt me-2" style="color:var(--accent)"></i>Login</a>
+          <a href="{% url 'contest-list' %}"><i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests</a>
+          {% endif %}
+          <a href="{% url 'search' %}?q="><i class="fas fa-search me-2" style="color:var(--accent)"></i>Search Posts</a>
+        </div>
+
+        <div class="col-lg-3 col-md-4 mb-4">
+          <h6>Legal</h6>
+          <a href="{% url 'about' %}"><i class="fas fa-info-circle me-2" style="color:var(--accent)"></i>About Us</a>
+          <a href="{% url 'privacy-policy' %}"><i class="fas fa-shield-alt me-2" style="color:var(--accent)"></i>Privacy
+            Policy</a>
+          <a href="{% url 'contact' %}"><i class="fas fa-envelope me-2" style="color:var(--accent)"></i>Contact Us</a>
+        </div>
+      </div>
     </div>
 
     <div class="echo-footer-bottom">
-        <div class="container d-flex justify-content-between flex-wrap gap-2">
-            <span>© {% now "Y" %} EchoNotes. All rights reserved.</span>
-            <span>Made with <i class="fas fa-heart" style="color:var(--accent)"></i> in Cebu, Philippines</span>
-        </div>
+      <div class="container d-flex justify-content-between flex-wrap gap-2">
+        <span>© {% now "Y" %} EchoNotes. All rights reserved.</span>
+        <span>Made with <i class="fas fa-heart" style="color:var(--accent)"></i> in Cebu, Philippines</span>
+      </div>
     </div>
-</footer>
+  </footer>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="{% static 'js/main.js' %}"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="{% static 'js/main.js' %}"></script>
 
-<script>
-// Auto-hide alerts
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(a => {
-        try { new bootstrap.Alert(a).close(); } catch(e) {}
-    });
-}, 5000);
-</script>
+  <script>
+    // Auto-hide alerts
+    setTimeout(() => {
+      document.querySelectorAll('.alert').forEach(a => {
+        try { new bootstrap.Alert(a).close(); } catch (e) { }
+      });
+    }, 5000);
+  </script>
 
-{% block extra_js %}{% endblock %}
+  {% block extra_js %}{% endblock %}
 
 
-{% if user.is_authenticated %}
-<script>
-(function(){
-  const BELL     = document.getElementById('notif-bell-btn');
-  const DROPDOWN = document.getElementById('notif-dropdown');
-  const BADGE    = document.getElementById('notif-badge');
-  const LIST     = document.getElementById('notif-list');
-  const MARK_BTN = document.getElementById('notif-mark-read');
-  const CSRF     = '{{ csrf_token }}';
-  const NOTIF_URL = '{% url "get-notifications" %}';
-  const READ_URL  = '{% url "mark-notifications-read" %}';
+  {% if user.is_authenticated %}
+  <script>
+    (function () {
+      const BELL = document.getElementById('notif-bell-btn');
+      const DROPDOWN = document.getElementById('notif-dropdown');
+      const BADGE = document.getElementById('notif-badge');
+      const LIST = document.getElementById('notif-list');
+      const MARK_BTN = document.getElementById('notif-mark-read');
+      const CSRF = '{{ csrf_token }}';
+      const NOTIF_URL = '{% url "get-notifications" %}';
+      const READ_URL = '{% url "mark-notifications-read" %}';
 
-  if (!BELL) return; // guard for non-auth pages
+      if (!BELL) return; // guard for non-auth pages
 
-  let isOpen = false;
+      let isOpen = false;
 
-  // ── Toggle dropdown ────────────────────────────────────────
-  BELL.addEventListener('click', function(e) {
-    e.stopPropagation();
-    isOpen = !isOpen;
-    DROPDOWN.classList.toggle('open', isOpen);
-    if (isOpen) { fetchNotifs(); }
-  });
+      // ── Toggle dropdown ────────────────────────────────────────
+      BELL.addEventListener('click', function (e) {
+        e.stopPropagation();
+        isOpen = !isOpen;
+        DROPDOWN.classList.toggle('open', isOpen);
+        if (isOpen) { fetchNotifs(); }
+      });
 
-  document.addEventListener('click', function(e) {
-    if (!DROPDOWN.contains(e.target) && e.target !== BELL) {
-      isOpen = false;
-      DROPDOWN.classList.remove('open');
-    }
-  });
-
-  // ── Fetch & render ─────────────────────────────────────────
-  function esc(s) {
-    if (!s) return '';
-    return s.replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-  }
-
-  function fetchNotifs() {
-    fetch(NOTIF_URL)
-      .then(r => r.json())
-      .then(data => {
-        // Badge
-        if (data.unread_count > 0) {
-          BADGE.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
-          BADGE.style.display = 'flex';
-        } else {
-          BADGE.style.display = 'none';
+      document.addEventListener('click', function (e) {
+        if (!DROPDOWN.contains(e.target) && e.target !== BELL) {
+          isOpen = false;
+          DROPDOWN.classList.remove('open');
         }
+      });
 
-        // List
-        if (!data.notifications || !data.notifications.length) {
-          LIST.innerHTML = '<div class="notif-empty">You are all caught up! 🎉</div>';
-          return;
-        }
-        LIST.innerHTML = data.notifications.map(n => {
-          const av = n.avatar
-            ? `<img src="${esc(n.avatar)}" class="notif-av" alt="${esc(n.sender)}">`
-            : `<div class="notif-av-ph">${esc(n.sender).charAt(0).toUpperCase()}</div>`;
-          const link = n.post_id
-            ? `/post/${n.post_id}/`
-            : `/profile/${esc(n.sender)}/`;
-          return `<div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="location.href='${link}'">
+      // ── Fetch & render ─────────────────────────────────────────
+      function esc(s) {
+        if (!s) return '';
+        return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+      }
+
+      function fetchNotifs() {
+        fetch(NOTIF_URL)
+          .then(r => r.json())
+          .then(data => {
+            // Badge
+            if (data.unread_count > 0) {
+              BADGE.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+              BADGE.style.display = 'flex';
+            } else {
+              BADGE.style.display = 'none';
+            }
+
+            // List
+            if (!data.notifications || !data.notifications.length) {
+              LIST.innerHTML = '<div class="notif-empty">You are all caught up! 🎉</div>';
+              return;
+            }
+            LIST.innerHTML = data.notifications.map(n => {
+              const av = n.avatar
+                ? `<img src="${esc(n.avatar)}" class="notif-av" alt="${esc(n.sender)}">`
+                : `<div class="notif-av-ph">${esc(n.sender).charAt(0).toUpperCase()}</div>`;
+              const link = n.post_id
+                ? `/post/${n.post_id}/`
+                : `/profile/${esc(n.sender)}/`;
+              return `<div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="location.href='${link}'">
             ${av}
             <div class="notif-body">
               <div class="notif-text">${esc(n.text)}</div>
@@ -437,51 +595,116 @@ setTimeout(() => {
             </div>
             <span class="notif-icon-badge">${esc(n.icon)}</span>
           </div>`;
-        }).join('');
-      })
-      .catch(() => {
-        LIST.innerHTML = '<div class="notif-empty">Could not load notifications.</div>';
-      });
-  }
+            }).join('');
+          })
+          .catch(() => {
+            LIST.innerHTML = '<div class="notif-empty">Could not load notifications.</div>';
+          });
+      }
 
-  // ── Mark all read ──────────────────────────────────────────
-  if (MARK_BTN) {
-    MARK_BTN.addEventListener('click', function() {
-      fetch(READ_URL, {
+      // ── Mark all read ──────────────────────────────────────────
+      if (MARK_BTN) {
+        MARK_BTN.addEventListener('click', function () {
+          fetch(READ_URL, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': CSRF }
+          }).then(() => {
+            BADGE.style.display = 'none';
+            LIST.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+          });
+        });
+      }
+
+      // ── Background poll every 15s ──────────────────────────────
+      function pollBadge() {
+        fetch(NOTIF_URL)
+          .then(r => r.json())
+          .then(data => {
+            if (data.unread_count > 0) {
+              BADGE.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+              BADGE.style.display = 'flex';
+            } else {
+              BADGE.style.display = 'none';
+            }
+          }).catch(() => { });
+      }
+
+      // Initial load + interval
+      pollBadge();
+      setInterval(pollBadge, 15000);
+
+      // Stop polling when tab hidden
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) pollBadge();
+      });
+    })();
+  </script>
+  {% endif %}
+
+  <!-- ── AI Critique Modal ────────────────────────────── -->
+  <div class="modal fade" id="critiqueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg"
+        style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px;">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title font-serif fw-bold" style="color: #7c3aed;">
+            <i class="fas fa-magic me-2"></i>AI Creative Critique
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body py-4">
+          <div id="critique-loading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3 text-muted">Gemini is analyzing your prose...</p>
+          </div>
+          <div id="critique-content" class="critique-text" style="display: none; line-height: 1.7; color: #1f2937;">
+            <!-- AI Response here -->
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <small class="text-muted w-100 text-center mb-2">This is a private AI suggestion for your eyes only.</small>
+          <button type="button" class="btn btn-primary w-100 py-2 rounded-3" data-bs-dismiss="modal">Thank you,
+            Gemini</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function followUser(username, btn) {
+      if (!username) return;
+
+      fetch('/follow/' + username + '/', {
         method: 'POST',
-        headers: { 'X-CSRFToken': CSRF }
-      }).then(() => {
-        BADGE.style.display = 'none';
-        LIST.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
-      });
-    });
-  }
-
-  // ── Background poll every 15s ──────────────────────────────
-  function pollBadge() {
-    fetch(NOTIF_URL)
-      .then(r => r.json())
-      .then(data => {
-        if (data.unread_count > 0) {
-          BADGE.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
-          BADGE.style.display = 'flex';
-        } else {
-          BADGE.style.display = 'none';
+        headers: {
+          'X-CSRFToken': '{{ csrf_token }}',
+          'Content-Type': 'application/json'
         }
-      }).catch(() => {});
-  }
-
-  // Initial load + interval
-  pollBadge();
-  setInterval(pollBadge, 15000);
-
-  // Stop polling when tab hidden
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) pollBadge();
-  });
-})();
-</script>
-{% endif %}
-
+      }).then(r => {
+        if (r.status === 403) {
+          window.location.href = "{% url 'login' %}?next=" + window.location.pathname;
+          return;
+        }
+        return r.json();
+      }).then(data => {
+        if (data && data.following !== undefined) {
+          if (data.following) {
+            btn.innerHTML = '<i class="fas fa-check"></i> Following';
+            btn.classList.remove('btn-outline-primary', 'text-primary');
+            btn.classList.add('btn-success', 'text-white');
+          } else {
+            btn.innerHTML = '<i class="fas fa-plus"></i> Follow';
+            btn.classList.remove('btn-success', 'text-white');
+            btn.classList.add('btn-outline-primary', 'text-primary');
+          }
+          // Optional: trigger a custom event if other components need to know
+          document.dispatchEvent(new CustomEvent('followStateChanged', {
+            detail: { username: username, following: data.following }
+          }));
+        }
+      }).catch(err => console.error('Error following user:', err));
+    }
+  </script>
 </body>
+
 </html>

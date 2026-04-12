@@ -235,6 +235,9 @@ STATIC_ROOT = BASE_DIR.parent / 'public' / 'static'
 
 # WhiteNoise settings for production
 STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },

@@ -38,9 +38,10 @@ urlpatterns = [
     # Bookmarks
     path('bookmarks/', views.my_bookmarks, name='my-bookmarks'),
 
-    # Categories & Moods
+    # Categories & Circles
     path('category/<slug:slug>/', views.category_posts, name='category-posts'),
     path('mood/<str:mood>/', views.mood_posts, name='mood-posts'),
+    path('circles/', views.circle_discovery, name='circle-discovery'),
 
     # Comments
     path('comment/<int:pk>/delete/', views.delete_comment, name='delete-comment'),

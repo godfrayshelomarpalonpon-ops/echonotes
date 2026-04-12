@@ -22,6 +22,8 @@ def call_gemini(prompt_text, max_tokens=300):
         print("DEBUG: GOOGLE_API_KEY not found in environment.")
         return "I'm having trouble thinking right now. (API Key Missing)"
 
+    from google.generativeai.types import HarmCategory, HarmBlockThreshold
+
     try:
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-flash-latest')
@@ -31,9 +33,28 @@ def call_gemini(prompt_text, max_tokens=300):
             max_output_tokens=max_tokens,
             temperature=0.7,
         )
+
+        # Relaxed safety settings for literary/creative writing
+        safety_settings = {
+            HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
+        }
         
-        response = model.generate_content(prompt_text, generation_config=config)
-        return response.text.strip()
+        response = model.generate_content(
+            prompt_text, 
+            generation_config=config,
+            safety_settings=safety_settings
+        )
+        
+        # Check if response was blocked
+        try:
+            return response.text.strip()
+        except ValueError:
+            # If the response was blocked, return an indicator
+            print(f"DEBUG: Gemini response blocked by safety filters. Finish reason: {response.candidates[0].finish_reason}")
+            return "ERROR: Safety Filter Block"
         
     except Exception as e:
         print(f"DEBUG: Gemini API Call failed: {e}")

@@ -46,6 +46,16 @@ class ProfileUpdateForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(PostForm, self).__init__(*args, **kwargs)
+        if user:
+            # Only show categories (circles) the user is subscribed to
+            self.fields['category'].queryset = Category.objects.filter(subscribers=user)
+            self.fields['category'].empty_label = "Global Feed (Not in a Circle)"
+        else:
+            self.fields['category'].queryset = Category.objects.none()
+
     class Meta:
         model = Post
         fields = ['title', 'content', 'category', 'mood', 'status']

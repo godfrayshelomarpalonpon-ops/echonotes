@@ -13,7 +13,7 @@
                     <small id="word-count" class="text-white-50">0 words · 1 min read</small>
                 </div>
                 <div class="card-body">
-                    <form method="POST">
+                    <form method="POST" id="post-form">
                         {% csrf_token %}
                         {{ form|crispy }}
                         <div class="d-grid gap-2 mt-3">
@@ -29,22 +29,4 @@
     </div>
 </div>
 
-{% block extra_js %}
-<script>
-    const contentField = document.getElementById('post-content');
-    const wordCountEl = document.getElementById('word-count');
-
-    function updateWordCount() {
-        const text = contentField.value.trim();
-        const words = text ? text.split(/\s+/).length : 0;
-        const minutes = Math.max(1, Math.ceil(words / 200));
-        wordCountEl.textContent = `${words} words · ${minutes} min read`;
-    }
-
-    if (contentField) {
-        contentField.addEventListener('input', updateWordCount);
-        updateWordCount();
-    }
-</script>
-{% endblock %}
 {% endblock %}

@@ -40,7 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     // ── 3. Live Word Count & Reading Time ────────────────────
-    const contentField = document.getElementById('post-content') || document.getElementById('entry-content');
+    const contentField = document.getElementById('post-content') || 
+                         document.getElementById('entry-content') || 
+                         document.getElementById('prompt-content') || 
+                         document.getElementById('word-content');
     const wordCountEl = document.getElementById('word-count');
 
     function updateWordCount() {
@@ -302,6 +305,129 @@ document.addEventListener('DOMContentLoaded', function () {
     function getCookie(name) {
         const match = document.cookie.match(new RegExp('(^|;)\\s*' + name + '=([^;]+)'));
         return match ? decodeURIComponent(match[2]) : null;
+    }
+
+
+    // ── 17. Draft Auto-save Manager ─────────────────────────
+    const DRAFT_KEY = 'echonotes_draft_';
+    const postForm = document.getElementById('post-form');
+    
+    if (contentField && postForm) {
+        const formAction = postForm.getAttribute('action') || 'new';
+        const draftId = formAction === 'new' ? 'new' : (formAction.match(/\d+/) || ['new'])[0];
+        const storageKey = DRAFT_KEY + draftId;
+
+        // Auto-save interval (every 30 seconds)
+        let saveTimer;
+        contentField.addEventListener('input', () => {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => {
+                const titleField = document.getElementById('id_title');
+                const data = {
+                    title: titleField ? titleField.value : '',
+                    content: contentField.value,
+                    timestamp: new Date().getTime()
+                };
+                localStorage.setItem(storageKey, JSON.stringify(data));
+                console.log('Draft saved to localStorage');
+            }, 1000); // Save after 1s of inactivity
+        });
+
+        // Check for existing draft on load
+        const savedData = localStorage.getItem(storageKey);
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            // Only suggest restore if content has changed significantly or form is empty
+            if (data.content && data.content.trim() !== contentField.value.trim()) {
+                const toastHtml = `
+                    <div class="d-flex align-items-center">
+                        <span>You have an unsaved draft from ${new Date(data.timestamp).toLocaleTimeString()}.</span>
+                        <button class="btn btn-sm btn-primary ms-3 restore-draft-btn">Restore</button>
+                    </div>
+                `;
+                showToast(toastHtml, 'info');
+                
+                // Add event listener for the dynamic toast button
+                setTimeout(() => {
+                    const restoreBtn = document.querySelector('.restore-draft-btn');
+                    if (restoreBtn) {
+                        restoreBtn.addEventListener('click', () => {
+                            if (confirm('Restore unsaved draft? This will overwrite your current text.')) {
+                                const titleField = document.getElementById('id_title');
+                                if (titleField) titleField.value = data.title;
+                                contentField.value = data.content;
+                                updateWordCount();
+                                showToast('Draft restored!', 'success');
+                            }
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        // Clear draft on successful submission
+        postForm.addEventListener('submit', () => {
+            localStorage.removeItem(storageKey);
+        });
+    }
+
+    // ── 18. AI Critique Handler ──────────────────────────────
+    const critiqueBtn = document.getElementById('ai-critique-btn');
+    const critiqueModal = document.getElementById('critiqueModal');
+    
+    if (critiqueBtn && critiqueModal) {
+        critiqueBtn.addEventListener('click', () => {
+            const content = contentField ? contentField.value.trim() : '';
+            
+            if (content.length < 50) {
+                showToast('Please write at least 50 characters before requesting a critique.', 'warning');
+                return;
+            }
+
+            const modal = new bootstrap.Modal(critiqueModal);
+            const loading = document.getElementById('critique-loading');
+            const result = document.getElementById('critique-content');
+            
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            modal.show();
+
+            fetch('/post/critique/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ content: content })
+            })
+            .then(r => r.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success) {
+                    result.style.display = 'block';
+                    // Format bold lines and bullet points
+                    result.innerHTML = data.critique
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/^\* (.*?)$/gm, '<li>$1</li>')
+                        .replace(/\n\n/g, '</p><p>')
+                        .replace(/\n/g, '<br>');
+                    
+                    if (result.innerHTML.includes('<li>')) {
+                        result.innerHTML = '<ul>' + result.innerHTML + '</ul>';
+                    }
+                } else {
+                    modal.hide();
+                    showToast(data.error || 'Critique failed. Please try again.', 'danger');
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                modal.hide();
+                showToast('AI service currently unavailable.', 'danger');
+                console.error(err);
+            });
+        });
     }
 
 });

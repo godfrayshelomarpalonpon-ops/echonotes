@@ -2,7 +2,7 @@ import os
 import django
 import random
 import json
-import urllib.request
+# import urllib.request (removed unused)
 
 import sys
 

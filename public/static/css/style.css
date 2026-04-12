@@ -7,28 +7,31 @@
 
 /* ── CSS Variables ── */
 :root {
-    --ink:          #1a1a2e;
-    --ink-light:    #2d2d44;
-    --ink-muted:    #6b6b7a;
-    --cream:        #faf8f3;
-    --cream-dark:   #f0ece0;
-    --cream-border: #e2ddd4;
-    --accent:       #c8472b;
-    --accent-hover: #e8673e;
-    --gold:         #d4a843;
-    --gold-light:   #f0c84a;
+    --ink:          #12121e;
+    --ink-light:    #212133;
+    --ink-muted:    #6b7280;
+    --cream:        #fcfbf7;
+    --cream-dark:   #f5f1e8;
+    --cream-border: #e8e2d4;
+    --accent:       #be123c; /* Rose-700 */
+    --accent-hover: #9f1239;
+    --gold:         #b45309; /* Amber-700 */
+    --gold-light:   #d97706;
     --white:        #ffffff;
 
     --font-display: 'Playfair Display', Georgia, serif;
-    --font-body:    'DM Sans', system-ui, sans-serif;
-    --font-mono:    'DM Mono', monospace;
+    --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono:    'JetBrains Mono', 'DM Mono', monospace;
 
-    --shadow-sm:  0 1px 4px rgba(26,26,46,0.08);
-    --shadow-md:  0 4px 16px rgba(26,26,46,0.12);
-    --shadow-lg:  0 8px 32px rgba(26,26,46,0.16);
+    --shadow-sm:  0 2px 4px rgba(18,18,30,0.04);
+    --shadow-md:  0 10px 15px -3px rgba(18,18,30,0.08), 0 4px 6px -2px rgba(18,18,30,0.03);
+    --shadow-lg:  0 25px 50px -12px rgba(18,18,30,0.15);
+    
+    --glass: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.5);
 
-    --radius:     3px;
-    --transition: 0.25s ease;
+    --radius:     8px; /* Slightly softer radius */
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Reset & Base ── */

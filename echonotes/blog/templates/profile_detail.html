@@ -3,6 +3,12 @@
 
 {% block title %}{{ profile_user.username }} — EchoNotes{% endblock %}
 
+{% block meta_description %}{{ profile_user.profile.bio|default:"Read the latest echoes and stories from " |add:profile_user.username|add:" on EchoNotes." }}{% endblock %}
+
+{% block og_title %}{{ profile_user.username }}'s Echoes{% endblock %}
+{% block og_description %}{{ profile_user.profile.bio|default:"Check out my writing and stories on the EchoNotes literary community." }}{% endblock %}
+{% block og_image %}{% if profile_user.profile.profile_pic %}{{ profile_user.profile.profile_pic.url }}{% endif %}{% endblock %}
+
 {% block content %}
 <style>
   .pd-wrapper { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
@@ -225,6 +231,17 @@
           <span class="pd-stat-label">🔥 Streak</span>
         </div>
       </div>
+
+      {% if user.is_authenticated and user == profile_user %}
+      <div class="pd-actions">
+        <a href="{% url 'profile' %}" class="pd-btn pd-btn-primary">
+          <i class="fas fa-edit"></i> Edit Profile
+        </a>
+        <a href="{% url 'logout' %}" class="pd-btn pd-btn-danger">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+      {% endif %}
 
       {% if user.is_authenticated and user != profile_user %}
       <div class="pd-actions">

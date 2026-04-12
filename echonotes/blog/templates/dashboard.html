@@ -5,7 +5,11 @@
 
 {% block content %}
 <style>
-  .db-wrapper { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+  .db-wrapper {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
 
   /* ── Header ── */
   .db-hero {
@@ -20,82 +24,159 @@
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
   }
+
   .db-avatar {
-    width: 56px; height: 56px;
-    border-radius: 50%; object-fit: cover;
-    border: 2px solid rgba(124,58,237,0.5);
-    flex-shrink: 0;
-  }
-  .db-avatar-ph {
-    width: 56px; height: 56px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; font-weight: 700; color: white;
-    font-family: 'DM Sans', sans-serif; text-transform: uppercase;
-    background: linear-gradient(135deg,#7c3aed,#a855f7);
-    border: 2px solid rgba(124,58,237,0.5);
+    object-fit: cover;
+    border: 2px solid rgba(124, 58, 237, 0.5);
     flex-shrink: 0;
   }
-  .db-hero-info { flex: 1; }
+
+  .db-avatar-ph {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    border: 2px solid rgba(124, 58, 237, 0.5);
+    flex-shrink: 0;
+  }
+
+  .db-hero-info {
+    flex: 1;
+  }
+
   .db-hero-name {
     font-family: 'Playfair Display', serif;
-    font-size: 1.4rem; color: var(--ink); margin: 0;
+    font-size: 1.4rem;
+    color: var(--ink);
+    margin: 0;
   }
+
   .db-hero-sub {
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.8rem; color: var(--ink-muted); margin-top: 2px;
+    font-size: 0.8rem;
+    color: var(--ink-muted);
+    margin-top: 2px;
   }
-  .db-hero-actions { display: flex; gap: 0.5rem; margin-left: auto; }
+
+  .db-hero-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+  }
+
   .db-action-btn {
-    display: inline-flex; align-items: center; gap: 0.4rem;
-    padding: 0.45rem 1rem; border-radius: 10px;
-    font-family: 'DM Sans',sans-serif; font-size: 0.82rem; font-weight: 500;
-    text-decoration: none; transition: all 0.18s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.18s;
   }
-  .db-btn-primary { background: linear-gradient(135deg,#7c3aed,#a855f7); color: var(--ink); }
-  .db-btn-primary:hover { box-shadow: 0 4px 18px rgba(124,58,237,0.4); color: var(--ink); transform: translateY(-1px); }
+
+  .db-btn-primary {
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: var(--ink);
+  }
+
+  .db-btn-primary:hover {
+    box-shadow: 0 4px 18px rgba(124, 58, 237, 0.4);
+    color: var(--ink);
+    transform: translateY(-1px);
+  }
+
   .db-btn-outline {
     background: var(--cream-dark);
     border: 1px solid var(--cream-border);
     color: var(--ink);
   }
-  .db-btn-outline:hover { background: var(--cream-border); color: var(--ink); }
+
+  .db-btn-outline:hover {
+    background: var(--cream-border);
+    color: var(--ink);
+  }
 
   /* ── Stats row ── */
   .db-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-    gap: 0.9rem;
+    grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+    gap: 0.8rem;
     margin-bottom: 1.5rem;
   }
+
   .db-stat-card {
     background: white;
     border: 1px solid var(--cream-border);
     border-radius: 16px;
     padding: 1.1rem 1.3rem;
     backdrop-filter: blur(10px);
-    display: flex; align-items: center; gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
+
   .db-stat-icon {
-    width: 38px; height: 38px;
+    width: 34px;
+    height: 34px;
     border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
   }
-  .db-stat-body { flex: 1; }
+
+  .db-stat-body {
+    flex: 1;
+  }
+
   .db-stat-num {
     font-family: 'Playfair Display', serif;
-    font-size: 1.35rem; color: var(--ink); margin: 0; line-height: 1;
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
   .db-stat-label {
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.7rem; color: var(--ink-muted);
-    text-transform: uppercase; letter-spacing: 0.07em;
+    font-size: 0.65rem;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   /* ── Layout ── */
-  .db-layout { display: grid; grid-template-columns: 1fr 320px; gap: 1.2rem; }
-  @media(max-width:900px) { .db-layout { grid-template-columns: 1fr; } }
+  .db-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.2rem;
+  }
+
+  @media(max-width:900px) {
+    .db-layout {
+      grid-template-columns: 1fr;
+    }
+  }
 
   /* ── Card ── */
   .db-card {
@@ -106,21 +187,26 @@
     overflow: hidden;
     margin-bottom: 1.2rem;
   }
+
   .db-card-header {
     padding: 1rem 1.4rem;
     border-bottom: 1px solid var(--cream-border);
-    display: flex; align-items: center;
+    display: flex;
+    align-items: center;
     gap: 0.55rem;
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.78rem; font-weight: 600;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--ink-muted);
   }
+
   .db-card-header .header-action {
     margin-left: auto;
     padding: 0.3rem 0.75rem;
     border-radius: 8px;
-    background: linear-gradient(135deg,#7c3aed,#a855f7);
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
     color: var(--ink);
     font-size: 0.72rem;
     text-decoration: none;
@@ -131,438 +217,876 @@
   .db-post {
     padding: 1rem 1.4rem;
     border-bottom: 1px solid var(--cream-border);
-    display: flex; align-items: flex-start; gap: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
   }
-  .db-post:last-child { border-bottom: none; }
-  .db-post-body { flex: 1; min-width: 0; }
+
+  .db-post:last-child {
+    border-bottom: none;
+  }
+
+  .db-post-body {
+    flex: 1;
+    min-width: 0;
+  }
+
   .db-post-title {
     font-family: 'Playfair Display', serif;
-    font-size: 0.95rem; color: var(--ink);
-    text-decoration: none; display: block; margin-bottom: 0.2rem;
+    font-size: 0.95rem;
+    color: var(--ink);
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.2rem;
     transition: color 0.18s;
   }
-  .db-post-title:hover { color: #a78bfa; }
+
+  .db-post-title:hover {
+    color: #a78bfa;
+  }
+
   .db-post-meta {
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.75rem; color: var(--ink-muted);
-    display: flex; gap: 0.7rem; flex-wrap: wrap;
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    display: flex;
+    gap: 0.7rem;
+    flex-wrap: wrap;
   }
+
   .db-post-badge {
-    font-size: 0.65rem; padding: 0.15rem 0.5rem;
-    border-radius: 5px; font-weight: 600;
-    background: rgba(245,158,11,0.2); color: #fbbf24;
-    border: 1px solid rgba(245,158,11,0.3);
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 5px;
+    font-weight: 600;
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
   }
-  .db-post-actions { display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0; }
+
+  .db-post-actions {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
   .db-post-action {
-    padding: 0.25rem 0.6rem; border-radius: 7px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
-    text-decoration: none; transition: all 0.15s;
+    padding: 0.25rem 0.6rem;
+    border-radius: 7px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    text-decoration: none;
+    transition: all 0.15s;
   }
-  .db-post-action.edit { background:rgba(124,58,237,.15); color:#a78bfa; border:1px solid rgba(124,58,237,.25); }
-  .db-post-action.edit:hover { background:rgba(124,58,237,.25); color:white; }
-  .db-post-action.del { background:rgba(239,68,68,.1); color:#f87171; border:1px solid rgba(239,68,68,.2); }
-  .db-post-action.del:hover { background:rgba(239,68,68,.2); color:white; }
+
+  .db-post-action.edit {
+    background: rgba(124, 58, 237, .15);
+    color: #a78bfa;
+    border: 1px solid rgba(124, 58, 237, .25);
+  }
+
+  .db-post-action.edit:hover {
+    background: rgba(124, 58, 237, .25);
+    color: white;
+  }
+
+  .db-post-action.del {
+    background: rgba(239, 68, 68, .1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, .2);
+  }
+
+  .db-post-action.del:hover {
+    background: rgba(239, 68, 68, .2);
+    color: white;
+  }
 
   .db-empty {
-    padding: 2.5rem; text-align: center;
-    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    padding: 2.5rem;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
     color: var(--ink-muted);
   }
-  .db-empty i { font-size: 2rem; opacity: 0.15; display:block; margin-bottom:.6rem; }
+
+  .db-empty i {
+    font-size: 2rem;
+    opacity: 0.15;
+    display: block;
+    margin-bottom: .6rem;
+  }
 
   /* ── Tabs ── */
   .db-tabs {
-    display: flex; border-bottom: 1px solid var(--cream-border);
-    overflow-x: auto; gap: 0;
+    display: flex;
+    border-bottom: 1px solid var(--cream-border);
+    overflow-x: auto;
+    gap: 0;
   }
+
   .db-tab {
-    padding: 0.65rem 1.1rem; cursor: pointer;
-    font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
+    padding: 0.65rem 1.1rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
     color: var(--ink-muted);
     border-bottom: 2px solid transparent;
-    transition: all 0.18s; white-space: nowrap;
-    background: none; border-top: none; border-left: none; border-right: none;
+    transition: all 0.18s;
+    white-space: nowrap;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
   }
-  .db-tab:hover { color: var(--ink); }
-  .db-tab.active { color: #a78bfa; border-bottom-color: #7c3aed; }
 
-  .db-tab-pane { display: none; padding: 0.8rem 0; }
-  .db-tab-pane.active { display: block; }
+  .db-tab:hover {
+    color: var(--ink);
+  }
+
+  .db-tab.active {
+    color: #a78bfa;
+    border-bottom-color: #7c3aed;
+  }
+
+  .db-tab-pane {
+    display: none;
+    padding: 0.8rem 0;
+  }
+
+  .db-tab-pane.active {
+    display: block;
+  }
 
   /* ── User chip ── */
   .db-user-chip {
-    display: flex; align-items: center; gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     padding: 0.65rem 1.2rem;
     border-bottom: 1px solid var(--cream-border);
     transition: background 0.18s;
   }
-  .db-user-chip:last-child { border-bottom: none; }
-  .db-user-chip:hover { background: white; }
+
+  .db-user-chip:last-child {
+    border-bottom: none;
+  }
+
+  .db-user-chip:hover {
+    background: white;
+  }
+
   .db-user-av {
-    width: 36px; height: 36px; border-radius: 50%;
-    object-fit: cover; flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
     border: 2px solid var(--cream-border);
   }
+
   .db-user-av-ph {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; font-weight: 700; color: white;
-    font-family: 'DM Sans', sans-serif; text-transform: uppercase;
-    flex-shrink: 0; border: 2px solid var(--cream-border);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    border: 2px solid var(--cream-border);
   }
-  .db-user-info { flex: 1; min-width: 0; }
+
+  .db-user-info {
+    flex: 1;
+    min-width: 0;
+  }
+
   .db-user-name {
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.88rem; font-weight: 600; color: var(--ink);
-    text-decoration: none; display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    display: block;
   }
-  .db-user-name:hover { color: #a78bfa; }
+
+  .db-user-name:hover {
+    color: #a78bfa;
+  }
+
   .db-user-sub {
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.72rem; color: var(--ink-muted);
+    font-size: 0.72rem;
+    color: var(--ink-muted);
   }
 
   /* ── Pending request ── */
-  .db-req-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
-  .db-req-btn {
-    padding: 0.28rem 0.65rem; border-radius: 8px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
-    font-weight: 500; cursor: pointer; border: none; transition: all 0.15s;
+  .db-req-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-shrink: 0;
   }
-  .db-req-accept { background: rgba(34,197,94,.2); color: #4ade80; border: 1px solid rgba(34,197,94,.3); }
-  .db-req-accept:hover { background: rgba(34,197,94,.35); color: var(--ink); }
-  .db-req-decline { background: rgba(239,68,68,.12); color: #f87171; border: 1px solid rgba(239,68,68,.2); }
-  .db-req-decline:hover { background: rgba(239,68,68,.25); color: var(--ink); }
+
+  .db-req-btn {
+    padding: 0.28rem 0.65rem;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .db-req-accept {
+    background: rgba(34, 197, 94, .2);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, .3);
+  }
+
+  .db-req-accept:hover {
+    background: rgba(34, 197, 94, .35);
+    color: var(--ink);
+  }
+
+  .db-req-decline {
+    background: rgba(239, 68, 68, .12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, .2);
+  }
+
+  .db-req-decline:hover {
+    background: rgba(239, 68, 68, .25);
+    color: var(--ink);
+  }
 
   /* ── Sidebar ── */
   .db-side-card {
     background: white;
     border: 1px solid var(--cream-border);
-    border-radius: 16px; overflow: hidden;
+    border-radius: 16px;
+    overflow: hidden;
     backdrop-filter: blur(10px);
     margin-bottom: 1rem;
   }
+
   .db-side-header {
     padding: 0.75rem 1.1rem;
     border-bottom: 1px solid var(--cream-border);
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.72rem; font-weight: 600;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--ink-muted);
   }
+
   .db-quick-link {
-    display: flex; align-items: center; gap: 0.65rem;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
     padding: 0.65rem 1.1rem;
     border-bottom: 1px solid var(--cream-border);
-    text-decoration: none; color: var(--ink);
-    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    text-decoration: none;
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
     transition: all 0.18s;
   }
-  .db-quick-link:last-child { border-bottom: none; }
-  .db-quick-link:hover { background: var(--cream-dark); color: var(--accent); }
-  .db-quick-link i { width: 16px; text-align: center; color: var(--accent,#7c3aed); }
 
-  .db-badge-list { padding: 0.8rem 1.1rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .db-quick-link:last-child {
+    border-bottom: none;
+  }
+
+  .db-quick-link:hover {
+    background: var(--cream-dark);
+    color: var(--accent);
+  }
+
+  .db-quick-link i {
+    width: 16px;
+    text-align: center;
+    color: var(--accent, #7c3aed);
+  }
+
+  .db-badge-list {
+    padding: 0.8rem 1.1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
   .db-badge-chip {
-    display: inline-flex; align-items: center; gap: 0.3rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
     padding: 0.25rem 0.6rem;
-    background: rgba(124,58,237,0.08);
-    border: 1px solid rgba(124,58,237,0.15);
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.15);
     border-radius: 20px;
-    font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: #7c3aed;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem;
+    color: #7c3aed;
   }
 </style>
 
 <div class="container">
-<div class="db-wrapper">
+  <div class="db-wrapper">
 
-  <!-- Hero -->
-  <div class="db-hero">
-    {% if user.profile.profile_pic and user.profile.profile_pic.name != 'default.jpg' %}
+    <!-- Hero -->
+    <div class="db-hero">
+      {% if user.profile.profile_pic and user.profile.profile_pic.name != 'default.jpg' %}
       <img src="{{ user.profile.profile_pic.url }}" class="db-avatar" alt="{{ user.username }}">
-    {% else %}
+      {% else %}
       <div class="db-avatar-ph">{{ user.username|slice:":1" }}</div>
-    {% endif %}
-    <div class="db-hero-info">
-      <h1 class="db-hero-name">Welcome back, {{ user.username }}!</h1>
-      <div class="db-hero-sub">{{ post_count }} post{{ post_count|pluralize }} · {{ streak.current_streak }}🔥 streak · {{ total_likes_received }} ❤️ total</div>
-    </div>
-    <div class="db-hero-actions">
-      <a href="{% url 'create-post' %}" class="db-action-btn db-btn-primary">
-        <i class="fas fa-pen"></i> Write
-      </a>
-      <a href="{% url 'profile' %}" class="db-action-btn db-btn-outline">
-        <i class="fas fa-user-circle"></i> Profile
-      </a>
-    </div>
-  </div>
-
-  <!-- Stats row -->
-  <div class="db-stats">
-    <div class="db-stat-card">
-      <div class="db-stat-icon" style="background:rgba(124,58,237,.15)"><i class="fas fa-feather-alt" style="color:#a78bfa"></i></div>
-      <div class="db-stat-body"><div class="db-stat-num">{{ post_count }}</div><div class="db-stat-label">Posts</div></div>
-    </div>
-    <div class="db-stat-card">
-      <div class="db-stat-icon" style="background:rgba(239,68,68,.12)"><i class="fas fa-heart" style="color:#f87171"></i></div>
-      <div class="db-stat-body"><div class="db-stat-num">{{ total_likes_received }}</div><div class="db-stat-label">Likes</div></div>
-    </div>
-    <div class="db-stat-card">
-      <div class="db-stat-icon" style="background:rgba(59,130,246,.12)"><i class="fas fa-comment" style="color:#60a5fa"></i></div>
-      <div class="db-stat-body"><div class="db-stat-num">{{ total_comments_received }}</div><div class="db-stat-label">Comments</div></div>
-    </div>
-    <div class="db-stat-card">
-      <div class="db-stat-icon" style="background:rgba(249,115,22,.12)"><i class="fas fa-fire" style="color:#fb923c"></i></div>
-      <div class="db-stat-body"><div class="db-stat-num">{{ streak.current_streak }}</div><div class="db-stat-label">Day Streak</div></div>
-    </div>
-    <div class="db-stat-card">
-      <div class="db-stat-icon" style="background:rgba(34,197,94,.12)"><i class="fas fa-user-friends" style="color:#4ade80"></i></div>
-      <div class="db-stat-body"><div class="db-stat-num">{{ friends|length }}</div><div class="db-stat-label">Friends</div></div>
-    </div>
-    <div class="db-stat-card">
-      <div class="db-stat-icon" style="background:rgba(99,102,241,.12)"><i class="fas fa-users" style="color:#818cf8"></i></div>
-      <div class="db-stat-body"><div class="db-stat-num">{{ followers|length }}</div><div class="db-stat-label">Followers</div></div>
-    </div>
-  </div>
-
-  <!-- Main layout -->
-  <div class="db-layout">
-
-    <!-- Left: Posts + Social -->
-    <div>
-      <!-- Your Posts -->
-      <div class="db-card">
-        <div class="db-card-header">
-          <i class="fas fa-feather-alt" style="color:var(--accent,#7c3aed)"></i> Your Posts
-          <a href="{% url 'create-post' %}" class="header-action">+ New</a>
-        </div>
-        {% if user_posts %}
-          {% for post in user_posts %}
-          <div class="db-post">
-            <div class="db-post-body">
-              <a href="{% url 'post-detail' post.pk %}" class="db-post-title">
-                {{ post.title }}
-                {% if post.status == 'draft' %}<span class="db-post-badge">Draft</span>{% endif %}
-              </a>
-              <div class="db-post-meta">
-                <span>{{ post.created_date|date:"M d, Y" }}</span>
-                <span>❤️ {{ post.total_likes }}</span>
-                <span>💬 {{ post.total_comments }}</span>
-                <span>⏱ {{ post.reading_time }} min</span>
-              </div>
-            </div>
-            <div class="db-post-actions">
-              <a href="{% url 'update-post' post.pk %}" class="db-post-action edit">Edit</a>
-              <a href="{% url 'delete-post' post.pk %}" class="db-post-action del">Del</a>
-            </div>
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="db-empty">
-            <i class="fas fa-pen-fancy"></i>
-            No posts yet. <a href="{% url 'create-post' %}" style="color:var(--accent,#7c3aed)">Write your first!</a>
-          </div>
-        {% endif %}
+      {% endif %}
+      <div class="db-hero-info">
+        <h1 class="db-hero-name">Welcome back, {{ user.username }}!</h1>
+        <div class="db-hero-sub">{{ post_count }} post{{ post_count|pluralize }} · {{ streak.current_streak }}🔥 streak
+          · {{ total_likes_received }} ❤️ total</div>
       </div>
+      <div class="db-hero-actions">
+        <a href="{% url 'create-post' %}" class="db-action-btn db-btn-primary">
+          <i class="fas fa-pen"></i> Write
+        </a>
+        <a href="{% url 'profile-detail' username=user.username %}" class="db-action-btn db-btn-outline">
+          <i class="fas fa-user-circle"></i> Profile
+        </a>
+      </div>
+    </div>
 
-      <!-- Social Tabs -->
-      <div class="db-card">
-        <div class="db-card-header" style="padding-bottom:0;border-bottom:none">
-          <i class="fas fa-users" style="color:var(--accent,#7c3aed)"></i> Social
-          {% if pending_requests|length > 0 %}
-            <span style="background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700">{{ pending_requests|length }}</span>
-          {% endif %}
+    <!-- Stats row -->
+    <div class="db-stats">
+      <div class="db-stat-card">
+        <div class="db-stat-icon" style="background:rgba(124,58,237,.15)"><i class="fas fa-feather-alt"
+            style="color:#a78bfa"></i></div>
+        <div class="db-stat-body">
+          <div class="db-stat-num">{{ post_count }}</div>
+          <div class="db-stat-label">Posts</div>
         </div>
-        <div class="db-tabs">
-          <button class="db-tab active" data-tab="tab-pending">
-            🤝 Requests {% if pending_requests|length > 0 %}({{ pending_requests|length }}){% endif %}
-          </button>
-          <button class="db-tab" data-tab="tab-friends">👥 Friends ({{ friends|length }})</button>
-          <button class="db-tab" data-tab="tab-followers">📣 Followers ({{ followers|length }})</button>
-          <button class="db-tab" data-tab="tab-following">➡️ Following ({{ following_list|length }})</button>
+      </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon" style="background:rgba(239,68,68,.12)"><i class="fas fa-heart"
+            style="color:#f87171"></i></div>
+        <div class="db-stat-body">
+          <div class="db-stat-num">{{ total_likes_received }}</div>
+          <div class="db-stat-label">Likes</div>
         </div>
+      </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon" style="background:rgba(59,130,246,.12)"><i class="fas fa-comment"
+            style="color:#60a5fa"></i></div>
+        <div class="db-stat-body">
+          <div class="db-stat-num">{{ total_comments_received }}</div>
+          <div class="db-stat-label">Comments</div>
+        </div>
+      </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon" style="background:rgba(249,115,22,.12)"><i class="fas fa-fire"
+            style="color:#fb923c"></i></div>
+        <div class="db-stat-body">
+          <div class="db-stat-num">{{ streak.current_streak }}</div>
+          <div class="db-stat-label">Day Streak</div>
+        </div>
+      </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon" style="background:rgba(34,197,94,.12)"><i class="fas fa-user-friends"
+            style="color:#4ade80"></i></div>
+        <div class="db-stat-body">
+          <div class="db-stat-num">{{ friends|length }}</div>
+          <div class="db-stat-label">Friends</div>
+        </div>
+      </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon" style="background:rgba(99,102,241,.12)"><i class="fas fa-users"
+            style="color:#818cf8"></i></div>
+        <div class="db-stat-body">
+          <div class="db-stat-num">{{ followers|length }}</div>
+          <div class="db-stat-label">Followers</div>
+        </div>
+      </div>
+      <div class="db-stat-card">
+        <div class="db-stat-icon" style="background:rgba(139,92,246,.12)"><i class="fas fa-user-plus"
+            style="color:#a78bfa"></i></div>
+        <div class="db-stat-body">
+          <div class="db-stat-num">{{ following_list|length }}</div>
+          <div class="db-stat-label">Following</div>
+        </div>
+      </div>
+    </div>
 
-        <!-- Pending Requests -->
-        <div id="tab-pending" class="db-tab-pane active">
-          {% if pending_requests %}
-            {% for req in pending_requests %}
-            <div class="db-user-chip" id="req-{{ req.pk }}">
-              {% if req.sender.profile.profile_pic and req.sender.profile.profile_pic.name != 'default.jpg' %}
-                <img src="{{ req.sender.profile.profile_pic.url }}" class="db-user-av" alt="{{ req.sender.username }}">
-              {% else %}
-                <div class="db-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{ req.sender.username|slice:":1" }}</div>
-              {% endif %}
-              <div class="db-user-info">
-                <a href="{% url 'profile-detail' req.sender.username %}" class="db-user-name">{{ req.sender.username }}</a>
-                <div class="db-user-sub">{{ req.created_date|timesince }} ago</div>
+    <!-- Main layout -->
+    <div class="db-layout">
+
+      <!-- Left: Feeds + Social -->
+      <div>
+        <!-- Feeds -->
+        <div class="db-card">
+          <div class="db-card-header" style="padding-bottom:0;border-bottom:none">
+            <i class="fas fa-rss" style="color:var(--accent,#7c3aed)"></i> Echo Feeds
+          </div>
+          <div class="db-tabs">
+            <button class="db-tab active" data-tab="tab-activity">🔥 Activity</button>
+            <button class="db-tab" data-tab="tab-circle-feed">✨ Circle Feed</button>
+            <button class="db-tab" data-tab="tab-global-feed">🌍 Global Discovery</button>
+            <button class="db-tab" data-tab="tab-your-posts">✍️ Your Posts</button>
+          </div>
+
+          <!-- Activity Feed -->
+          <div id="tab-activity" class="db-tab-pane active">
+            {% if activity_items %}
+            {% for item in activity_items %}
+            <div class="db-post">
+              <div class="rounded-circle d-flex justify-content-center align-items-center"
+                style="width: 32px; height: 32px; background: rgba(124,58,237,.1); color: #7c3aed; flex-shrink: 0; font-size: 0.8rem;">
+                {% if item.type == 'post' %}<i class="fas fa-feather-alt"></i>{% elif item.type == 'like' %}<i
+                  class="fas fa-heart" style="color:#ef4444"></i>{% else %}<i class="fas fa-comment"
+                  style="color:#3b82f6"></i>{% endif %}
               </div>
-              <div class="db-req-actions">
-                <button class="db-req-btn db-req-accept" data-pk="{{ req.pk }}" onclick="acceptReq(this)">✓ Accept</button>
-                <button class="db-req-btn db-req-decline" data-pk="{{ req.pk }}" onclick="declineReq(this)">✕ Decline</button>
+              <div class="db-post-body">
+                <div class="db-post-meta">
+                  <a href="{% url 'profile-detail' item.user.username %}" class="fw-bold text-decoration-none"
+                    style="color:var(--ink)">{{ item.user.username }}</a>
+                  <span>{{ item.text }}</span>
+                </div>
+                <div class="db-post-meta mt-1">
+                  <span style="font-size:0.65rem; color:var(--ink-muted)">{{ item.timestamp|timesince }} ago</span>
+                </div>
               </div>
             </div>
             {% endfor %}
-          {% else %}
-            <div class="db-empty"><i class="fas fa-inbox"></i>No pending requests.</div>
-          {% endif %}
+            {% else %}
+            <div class="text-center py-5">
+              <div class="mb-3" style="font-size: 2.5rem; opacity: 0.4;">🚀</div>
+              <h6 style="color:var(--ink); font-weight: 600;">Your activity feed is empty</h6>
+              <p class="text-muted small px-4 mb-4">Follow writers to see their latest echoes here. Here are some
+                suggestions:</p>
+
+              <div class="d-flex flex-column gap-2 px-4 text-start">
+                {% for sug in suggested_users %}
+                <div class="db-user-chip p-2 border rounded-3" style="background:var(--cream-dark)">
+                  {% if sug.profile.profile_pic and sug.profile.profile_pic.name != 'default.jpg' %}
+                  <img src="{{ sug.profile.profile_pic.url }}" class="db-user-av" alt="{{ sug.username }}">
+                  {% else %}
+                  <div class="db-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{ sug.username|slice:":1" }}</div>
+                  {% endif %}
+                  <div class="db-user-info">
+                    <a href="{% url 'profile-detail' sug.username %}" class="db-user-name" style="font-size:0.85rem">{{ sug.username }}</a>
+                    <div class="db-user-sub" style="font-size:0.65rem">{{ sug.post_count }} echoes</div>
+                  </div>
+                  <button class="pd-btn pd-btn-primary ms-auto py-1 px-3" style="font-size:0.75rem"
+                    onclick="followUserDashboard('{{ sug.username }}', this)">
+                    Follow
+                  </button>
+                </div>
+                {% endfor %}
+              </div>
+
+              <div class="mt-4">
+                <a href="#" class="btn btn-link text-decoration-none small"
+                  onclick="document.querySelector('[data-tab=tab-global-feed]').click()">Browse Global Feed</a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Circle Feed -->
+          <div id="tab-circle-feed" class="db-tab-pane">
+            {% if circle_feed %}
+            {% for post in circle_feed %}
+            <div class="db-post">
+              <div class="db-post-body">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="badge"
+                    style="--bg: {{ post.category.color|default:'#7c3aed' }}; background: var(--bg); font-size: 0.6rem; text-transform: uppercase;">{{ post.category.name }}</span>
+                  <span style="font-size:0.7rem; color:var(--ink-muted)">by {{ post.author.username }}</span>
+                </div>
+                <a href="{% url 'post-detail' post.pk %}" class="db-post-title">{{ post.title }}</a>
+                <div class="db-post-meta">
+                  <span>{{ post.created_date|date:"M d" }}</span>
+                  <span>❤️ {{ post.total_likes }}</span>
+                  <span>💬 {{ post.total_comments }}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            <div class="p-3 text-center">
+              <a href="{% url 'circle-discovery' %}" class="text-muted small text-decoration-none">Discover more circles
+                <i class="fas fa-arrow-right ms-1"></i></a>
+            </div>
+            {% else %}
+            <div class="db-empty">
+              <i class="fas fa-users"></i>
+              Your circle feed is quiet. <br>Join communities to see personalized echoes!
+              <div class="mt-3">
+                <a href="{% url 'circle-discovery' %}" class="db-action-btn db-btn-primary">Discover Circles</a>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Global Feed -->
+          <div id="tab-global-feed" class="db-tab-pane">
+            {% if global_feed %}
+            {% for post in global_feed %}
+            <div class="db-post">
+              <div class="db-post-body">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  {% if post.category %}
+                  <span class="badge"
+                    style="--bg: {{ post.category.color|default:'#7c3aed' }}; background: var(--bg); font-size: 0.6rem; text-transform: uppercase;">{{ post.category.name }}</span>
+                  {% endif %}
+                  <span style="font-size:0.7rem; color:var(--ink-muted)">by
+                    <a href="{% url 'profile-detail' post.author.username %}" class="text-decoration-none fw-bold"
+                      style="color:var(--ink)">{{ post.author.username }}</a>
+                    {% if post.author != user %}
+                    <button
+                      class="btn btn-sm {% if post.author.id in following_user_ids %}btn-success text-white{% else %}btn-outline-primary text-primary{% endif %}"
+                      style="font-size: 0.65rem; padding: 0.1rem 0.5rem; border-radius: 12px;"
+                      onclick="event.preventDefault(); followUserDashboard('{{ post.author.username }}', this)">
+                      {% if post.author.id in following_user_ids %}<i class="fas fa-check"></i> Following{% else %}<i
+                        class="fas fa-plus"></i> Follow{% endif %}
+                    </button>
+                    {% endif %}
+                  </span>
+                </div>
+                <a href="{% url 'post-detail' post.pk %}" class="db-post-title">{{ post.title }}</a>
+                <div class="db-post-meta">
+                  <span>{{ post.created_date|date:"M d" }}</span>
+                  <span>❤️ {{ post.total_likes }}</span>
+                  <span>💬 {{ post.total_comments }}</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="db-empty"><i class="fas fa-globe"></i>No global echoes found.</div>
+            {% endif %}
+          </div>
+
+          <!-- Your Posts -->
+          <div id="tab-your-posts" class="db-tab-pane">
+            {% if user_posts %}
+            {% for post in user_posts %}
+            <div class="db-post">
+              <div class="db-post-body">
+                <a href="{% url 'post-detail' post.pk %}" class="db-post-title">
+                  {{ post.title }}
+                  {% if post.status == 'draft' %}<span class="db-post-badge">Draft</span>{% endif %}
+                </a>
+                <div class="db-post-meta">
+                  <span>{{ post.created_date|date:"M d, Y" }}</span>
+                  <span>❤️ {{ post.total_likes }}</span>
+                  <span>💬 {{ post.total_comments }}</span>
+                  <span>⏱ {{ post.reading_time }} min</span>
+                </div>
+              </div>
+              <div class="db-post-actions">
+                <a href="{% url 'update-post' post.pk %}" class="db-post-action edit">Edit</a>
+                <a href="{% url 'delete-post' post.pk %}" class="db-post-action del">Del</a>
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="db-empty">
+              <i class="fas fa-pen-fancy"></i>
+              No posts yet. <a href="{% url 'create-post' %}" style="color:var(--accent,#7c3aed)">Write your first!</a>
+            </div>
+            {% endif %}
+          </div>
         </div>
 
-        <!-- Friends -->
-        <div id="tab-friends" class="db-tab-pane">
-          {% if friends %}
+        <!-- Social Tabs -->
+        <div class="db-card">
+          <div class="db-card-header" style="padding-bottom:0;border-bottom:none">
+            <i class="fas fa-users" style="color:var(--accent,#7c3aed)"></i> Social
+            {% if pending_requests|length > 0 %}
+            <span
+              style="background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700">{{
+              pending_requests|length }}</span>
+            {% endif %}
+          </div>
+          <div class="db-tabs">
+            <button class="db-tab active" data-tab="tab-pending">
+              🤝 Requests {% if pending_requests|length > 0 %}({{ pending_requests|length }}){% endif %}
+            </button>
+            <button class="db-tab" data-tab="tab-friends">👥 Friends ({{ friends|length }})</button>
+            <button class="db-tab" data-tab="tab-followers">📣 Followers ({{ followers|length }})</button>
+            <button class="db-tab" data-tab="tab-following">➡️ Following ({{ following_list|length }})</button>
+          </div>
+
+          <!-- Pending Requests -->
+          <div id="tab-pending" class="db-tab-pane active">
+            {% if pending_requests %}
+            {% for req in pending_requests %}
+            <div class="db-user-chip" id="req-{{ req.pk }}">
+              {% if req.sender.profile.profile_pic and req.sender.profile.profile_pic.name != 'default.jpg' %}
+              <img src="{{ req.sender.profile.profile_pic.url }}" class="db-user-av" alt="{{ req.sender.username }}">
+              {% else %}
+              <div class="db-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{
+                req.sender.username|slice:":1" }}</div>
+              {% endif %}
+              <div class="db-user-info">
+                <a href="{% url 'profile-detail' req.sender.username %}" class="db-user-name">{{ req.sender.username
+                  }}</a>
+                <div class="db-user-sub">{{ req.created_date|timesince }} ago</div>
+              </div>
+              <div class="db-req-actions">
+                <button class="db-req-btn db-req-accept" data-pk="{{ req.pk }}" onclick="acceptReq(this)">✓
+                  Accept</button>
+                <button class="db-req-btn db-req-decline" data-pk="{{ req.pk }}" onclick="declineReq(this)">✕
+                  Decline</button>
+              </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="db-empty"><i class="fas fa-inbox"></i>No pending requests.</div>
+            {% endif %}
+          </div>
+
+          <!-- Friends -->
+          <div id="tab-friends" class="db-tab-pane">
+            {% if friends %}
             {% for u in friends %}
             <div class="db-user-chip">
               {% if u.profile.profile_pic and u.profile.profile_pic.name != 'default.jpg' %}
-                <img src="{{ u.profile.profile_pic.url }}" class="db-user-av" alt="{{ u.username }}">
+              <img src="{{ u.profile.profile_pic.url }}" class="db-user-av" alt="{{ u.username }}">
               {% else %}
-                <div class="db-user-av-ph" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">{{ u.username|slice:":1" }}</div>
+              <div class="db-user-av-ph" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">{{
+                u.username|slice:":1" }}</div>
               {% endif %}
               <div class="db-user-info">
                 <a href="{% url 'profile-detail' u.username %}" class="db-user-name">{{ u.username }}</a>
               </div>
-              <a href="{% url 'conversation' u.username %}" style="font-size:.75rem;color:var(--accent);padding:0.25rem 0.6rem;border-radius:7px;background:var(--cream-dark);text-decoration:none;font-weight:500">💬 Message</a>
+              <a href="{% url 'conversation' u.username %}"
+                style="font-size:.75rem;color:var(--accent);padding:0.25rem 0.6rem;border-radius:7px;background:var(--cream-dark);text-decoration:none;font-weight:500">💬
+                Message</a>
             </div>
             {% endfor %}
-          {% else %}
-            <div class="db-empty"><i class="fas fa-user-friends"></i>No friends yet. Visit profiles to add friends!</div>
-          {% endif %}
-        </div>
+            {% else %}
+            <div class="db-empty"><i class="fas fa-user-friends"></i>No friends yet. Visit profiles to add friends!
+            </div>
+            {% endif %}
+          </div>
 
-        <!-- Followers -->
-        <div id="tab-followers" class="db-tab-pane">
-          {% if followers %}
+          <!-- Followers -->
+          <div id="tab-followers" class="db-tab-pane">
+            {% if followers %}
             {% for fol in followers %}
             <div class="db-user-chip">
               {% if fol.follower.profile.profile_pic and fol.follower.profile.profile_pic.name != 'default.jpg' %}
-                <img src="{{ fol.follower.profile.profile_pic.url }}" class="db-user-av" alt="{{ fol.follower.username }}">
+              <img src="{{ fol.follower.profile.profile_pic.url }}" class="db-user-av"
+                alt="{{ fol.follower.username }}">
               {% else %}
-                <div class="db-user-av-ph" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">{{ fol.follower.username|slice:":1" }}</div>
+              <div class="db-user-av-ph" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">{{
+                fol.follower.username|slice:":1" }}</div>
               {% endif %}
               <div class="db-user-info">
-                <a href="{% url 'profile-detail' fol.follower.username %}" class="db-user-name">{{ fol.follower.username }}</a>
+                <a href="{% url 'profile-detail' fol.follower.username %}" class="db-user-name">{{ fol.follower.username
+                  }}</a>
               </div>
             </div>
             {% endfor %}
-          {% else %}
+            {% else %}
             <div class="db-empty"><i class="fas fa-users"></i>No followers yet.</div>
-          {% endif %}
-        </div>
+            {% endif %}
+          </div>
 
-        <!-- Following -->
-        <div id="tab-following" class="db-tab-pane">
-          {% if following_list %}
+          <!-- Following -->
+          <div id="tab-following" class="db-tab-pane">
+            {% if following_list %}
             {% for fol in following_list %}
             <div class="db-user-chip">
               {% if fol.following.profile.profile_pic and fol.following.profile.profile_pic.name != 'default.jpg' %}
-                <img src="{{ fol.following.profile.profile_pic.url }}" class="db-user-av" alt="{{ fol.following.username }}">
+              <img src="{{ fol.following.profile.profile_pic.url }}" class="db-user-av"
+                alt="{{ fol.following.username }}">
               {% else %}
-                <div class="db-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{ fol.following.username|slice:":1" }}</div>
+              <div class="db-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{
+                fol.following.username|slice:":1" }}</div>
               {% endif %}
               <div class="db-user-info">
-                <a href="{% url 'profile-detail' fol.following.username %}" class="db-user-name">{{ fol.following.username }}</a>
+                <a href="{% url 'profile-detail' fol.following.username %}" class="db-user-name">{{
+                  fol.following.username }}</a>
               </div>
             </div>
             {% endfor %}
-          {% else %}
+            {% else %}
             <div class="db-empty"><i class="fas fa-user-plus"></i>Not following anyone yet.</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right sidebar -->
+      <div>
+        <!-- Quick links -->
+        <div class="db-side-card">
+          <div class="db-side-header">Quick Links</div>
+          <a href="{% url 'daily-prompt' %}" class="db-quick-link"><i class="fas fa-lightbulb"></i> Daily Prompt</a>
+          <a href="{% url 'word-of-the-day' %}" class="db-quick-link"><i class="fas fa-book-open"></i> Word of the
+            Day</a>
+          <a href="{% url 'contest-list' %}" class="db-quick-link"><i class="fas fa-trophy"></i> Contests</a>
+          <a href="{% url 'story-list' %}" class="db-quick-link"><i class="fas fa-book"></i> Collab Stories</a>
+          <a href="{% url 'writing-timer' %}" class="db-quick-link"><i class="fas fa-stopwatch"></i> Writing Timer</a>
+          <a href="{% url 'leaderboard' %}" class="db-quick-link"><i class="fas fa-medal"></i> Leaderboard</a>
+          <a href="{% url 'my-bookmarks' %}" class="db-quick-link"><i class="fas fa-bookmark"></i> Bookmarks</a>
+          <a href="{% url 'inbox' %}" class="db-quick-link"><i class="fas fa-envelope"></i> Messages</a>
+          <a href="{% url 'circle-discovery' %}" class="db-quick-link" style="background:#fef3c7; font-weight: 600;"><i
+              class="fas fa-search"></i> Discover Circles</a>
+        </div>
+
+        <!-- Your Circles -->
+        <div class="db-side-card">
+          <div class="db-side-header">Your Circles</div>
+          {% if user_circles %}
+          {% for circle in user_circles %}
+          <a href="{{ circle.get_absolute_url }}" class="db-quick-link">
+            <i class="{{ circle.icon }}" style="--c: {{ circle.color }}; color: var(--c);"></i> {{ circle.name }}
+          </a>
+          {% endfor %}
+          {% else %}
+          <div class="p-3 text-center small text-muted">
+            You haven't joined any circles yet.
+          </div>
           {% endif %}
         </div>
-      </div>
-    </div>
 
-    <!-- Right sidebar -->
-    <div>
-      <!-- Quick links -->
-      <div class="db-side-card">
-        <div class="db-side-header">Quick Links</div>
-        <a href="{% url 'daily-prompt' %}" class="db-quick-link"><i class="fas fa-lightbulb"></i> Daily Prompt</a>
-        <a href="{% url 'word-of-the-day' %}" class="db-quick-link"><i class="fas fa-book-open"></i> Word of the Day</a>
-        <a href="{% url 'contest-list' %}" class="db-quick-link"><i class="fas fa-trophy"></i> Contests</a>
-        <a href="{% url 'story-list' %}" class="db-quick-link"><i class="fas fa-book"></i> Collab Stories</a>
-        <a href="{% url 'writing-timer' %}" class="db-quick-link"><i class="fas fa-stopwatch"></i> Writing Timer</a>
-        <a href="{% url 'leaderboard' %}" class="db-quick-link"><i class="fas fa-medal"></i> Leaderboard</a>
-        <a href="{% url 'my-bookmarks' %}" class="db-quick-link"><i class="fas fa-bookmark"></i> Bookmarks</a>
-        <a href="{% url 'inbox' %}" class="db-quick-link"><i class="fas fa-envelope"></i> Messages</a>
-      </div>
-
-      <!-- Badges -->
-      {% if user_badges %}
-      <div class="db-side-card">
-        <div class="db-side-header">Your Badges</div>
-        <div class="db-badge-list">
-          {% for ub in user_badges %}
-            <div class="db-badge-chip" title="{{ ub.badge.description }}">{{ ub.badge.icon }} {{ ub.badge.get_name_display }}</div>
+        <!-- Recommended Circles -->
+        {% if recommended_circles %}
+        <div class="db-side-card">
+          <div class="db-side-header">Circles You'll Love</div>
+          {% for circle in recommended_circles %}
+          <div class="db-quick-link d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <i class="{{ circle.icon }}" style="--c: {{ circle.color }}; color: var(--c);"></i>
+              <span>{{ circle.name }}</span>
+            </div>
+            <a href="{% url 'category-posts' circle.slug %}?action=join" class="btn btn-sm btn-outline-primary"
+              style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">Join</a>
+          </div>
           {% endfor %}
         </div>
-      </div>
-      {% endif %}
+        {% endif %}
 
-      <!-- Community feed -->
-      <div class="db-side-card">
-        <div class="db-side-header">Latest from Community</div>
-        {% for post in feed_posts %}
+        <!-- Badges -->
+        {% if user_badges %}
+        <div class="db-side-card">
+          <div class="db-side-header">Your Badges</div>
+          <div class="db-badge-list">
+            {% for ub in user_badges %}
+            <div class="db-badge-chip" title="{{ ub.badge.description }}">{{ ub.badge.icon }} {{ ub.badge.get_name_display }}</div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Community feed -->
+        <div class="db-side-card">
+          <div class="db-side-header">Latest from Community</div>
+          {% for post in feed_posts %}
           <div style="padding:.65rem 1.1rem;border-bottom:1px solid var(--cream-border)">
             <a href="{% url 'post-detail' post.pk %}"
-               style="font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);text-decoration:none;display:block;margin-bottom:.15rem;font-weight:500">
+              style="font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);text-decoration:none;display:block;margin-bottom:.15rem;font-weight:500">
               {{ post.title|truncatechars:55 }}
             </a>
             <span style="font-family:'DM Sans',sans-serif;font-size:.7rem;color:var(--ink-muted)">
-              by <a href="{% url 'profile-detail' post.author.username %}" style="color:var(--accent);text-decoration:none">{{ post.author.username }}</a>
+              by <a href="{% url 'profile-detail' post.author.username %}"
+                style="color:var(--accent);text-decoration:none">{{ post.author.username }}</a>
             </span>
           </div>
-        {% empty %}
-          <div style="padding:.8rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--ink-muted);opacity:0.6">No community posts yet.</div>
-        {% endfor %}
+          {% empty %}
+          <div
+            style="padding:.8rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--ink-muted);opacity:0.6">
+            No community posts yet.</div>
+          {% endfor %}
+        </div>
       </div>
-    </div>
 
+    </div>
   </div>
-</div>
 </div>
 
 {% block extra_js %}
 <script>
-// ── Tabs ────────────────────────────────────────────────────────
-document.querySelectorAll('.db-tab').forEach(tab => {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.db-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.db-tab-pane').forEach(p => p.classList.remove('active'));
-    this.classList.add('active');
-    document.getElementById(this.dataset.tab).classList.add('active');
-  });
-});
+  // ── Tabs (Scoped to Parent) ──────────────────────────────────
+  document.querySelectorAll('.db-card').forEach(card => {
+    const tabs = card.querySelectorAll('.db-tab');
+    const panes = card.querySelectorAll('.db-tab-pane');
 
-// ── Friend request actions ───────────────────────────────────────
-const CSRF = '{{ csrf_token }}';
-function postJSON(url, cb) {
-  fetch(url, {
-    method: 'POST',
-    headers: { 'X-CSRFToken': CSRF }
-  }).then(r => r.json()).then(cb).catch(() => {});
-}
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        tabs.forEach(t => t.classList.remove('active'));
+        panes.forEach(p => p.classList.remove('active'));
 
-window.acceptReq = function(btn) {
-  const pk = btn.dataset.pk;
-  postJSON('/friend/accept/' + pk + '/', data => {
-    if (data.status === 'accepted') {
-      const chip = document.getElementById('req-' + pk);
-      if (chip) chip.style.opacity = '0.4';
-      setTimeout(() => { if (chip) chip.remove(); }, 400);
-    }
+        this.classList.add('active');
+        const target = card.querySelector('#' + this.dataset.tab);
+        if (target) target.classList.add('active');
+      });
+    });
   });
-};
 
-window.declineReq = function(btn) {
-  const pk = btn.dataset.pk;
-  postJSON('/friend/decline/' + pk + '/', data => {
-    if (data.status === 'declined') {
-      const chip = document.getElementById('req-' + pk);
-      if (chip) chip.style.opacity = '0.4';
-      setTimeout(() => { if (chip) chip.remove(); }, 400);
-    }
-  });
-};
+  // ── Friend request actions ───────────────────────────────────────
+  const CSRF = '{{ csrf_token }}';
+  function postJSON(url, cb) {
+    fetch(url, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF }
+    }).then(r => r.json()).then(cb).catch(() => { });
+  }
+
+  window.acceptReq = function (btn) {
+    const pk = btn.dataset.pk;
+    postJSON('/friend/accept/' + pk + '/', data => {
+      if (data.status === 'accepted') {
+        const chip = document.getElementById('req-' + pk);
+        if (chip) chip.style.opacity = '0.4';
+        setTimeout(() => { if (chip) chip.remove(); }, 400);
+      }
+    });
+  };
+
+  window.declineReq = function (btn) {
+    const pk = btn.dataset.pk;
+    postJSON('/friend/decline/' + pk + '/', data => {
+      if (data.status === 'declined') {
+        const chip = document.getElementById('req-' + pk);
+        if (chip) chip.style.opacity = '0.4';
+        setTimeout(() => { if (chip) chip.remove(); }, 400);
+      }
+    });
+  };
+
+  // ── Follow / Unfollow inline ────────────────────────────────────
+  window.followUserDashboard = function (username, btn) {
+    const CSRF_TOKEN = '{{ csrf_token }}';
+    btn.disabled = true;
+    fetch('/follow/' + username + '/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF_TOKEN, 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.following) {
+        btn.textContent = '✓ Following';
+        btn.style.background = 'rgba(34,197,94,.2)';
+        btn.style.color = '#4ade80';
+        btn.style.border = '1px solid rgba(34,197,94,.3)';
+      } else {
+        btn.textContent = 'Follow';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
+      }
+      btn.disabled = false;
+    })
+    .catch(() => { btn.disabled = false; });
+  };
 </script>
 {% endblock %}
 {% endblock %}

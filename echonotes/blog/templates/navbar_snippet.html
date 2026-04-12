@@ -17,6 +17,11 @@ This groups items into dropdowns so the navbar is clean.
         </a>
         <ul class="dropdown-menu" style="background:var(--ink);border:1px solid rgba(255,255,255,0.1);min-width:200px;border-radius:3px">
             <li>
+                <a class="dropdown-item" href="{% url 'circle-discovery' %}" style="color:rgba(255,255,255,0.75)">
+                    <i class="fas fa-users me-2" style="color:var(--accent)"></i>Community Circles
+                </a>
+            </li>
+            <li>
                 <a class="dropdown-item" href="{% url 'contest-list' %}" style="color:rgba(255,255,255,0.75)">
                     <i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests
                 </a>

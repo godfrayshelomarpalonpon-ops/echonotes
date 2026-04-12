@@ -51,13 +51,30 @@ class AIPersonaEngine:
     }
 
     @classmethod
-    def get_comment_for_post(cls, persona_type, post_mood):
+    def get_comment_for_post(cls, persona_type, post_content, post_mood=""):
+        """
+        Generates a comment. Uses Gemini for higher quality if possible.
+        """
+        try:
+            from blog.ai_utils import call_gemini
+            prompt = f"""You are Maria, a warm Filipino storytelling mentor on the EchoNotes platform.
+            Write a heartfelt, brief, and highly encouraging comment (2-3 sentences max) on the following piece of writing.
+            Be specific about what you liked or how it made you feel. Use a warm, literary tone.
+            Writing piece content: {post_content[:800]}
+            Comment as Maria:"""
+            
+            comment = call_gemini(prompt, max_tokens=100)
+            if "ERROR" not in comment:
+                return comment.strip()
+        except:
+            pass
+
+        # Fallback to templates
         logic = cls.PERSONA_LOGIC.get(persona_type)
         if not logic:
             return "Wonderful read. Thank you for sharing!"
         
         template = random.choice(logic['templates'])
-        # Simple string formatting for mood if mentioned
         return template.replace("{mood}", post_mood if post_mood else "this scene")
 
     @classmethod
@@ -79,10 +96,12 @@ class AIPersonaEngine:
             Like.objects.get_or_create(user=ai_user, post=post)
 
         # 2. Generate and Post Comment
-        comment_text = cls.get_comment_for_post(profile.persona_type, post.get_mood_display() if post.mood else "")
-        if not Comment.objects.filter(author=ai_user, post=post).exists():
-            Comment.objects.create(author=ai_user, post=post, content=comment_text)
-            return True
+        # 50% chance for Maria to comment ("just few")
+        if random.random() < 0.5:
+            comment_text = cls.get_comment_for_post(profile.persona_type, post.content, post.get_mood_display() if post.mood else "")
+            if not Comment.objects.filter(author=ai_user, post=post).exists():
+                Comment.objects.create(author=ai_user, post=post, content=comment_text)
+                return True
             
         return False
 

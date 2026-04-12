@@ -1,7 +1,7 @@
 """
 Management command: python manage.py ai_monitor
 Runs two tasks:
-1. Auto-generates a new writing prompt every hour using Claude AI
+1. Auto-generates a new writing prompt every hour using Gemini AI
 2. Monitors system activity and generates a "What's Hot" broadcast
 
 Run this in a separate terminal:
@@ -14,6 +14,7 @@ import time
 from datetime import date, datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from django.db.models import Q
 from django.contrib.auth.models import User
 from blog.ai_utils import call_gemini
 
@@ -74,6 +75,29 @@ Mention specific names and numbers. Keep it under 80 words.
 Just the broadcast text, nothing else.""", max_tokens=150)
 
 
+def generate_word_of_the_day_data():
+    prompt = "Generate ONE word of the day for a literary community. It should be an obscure but beautiful English word. Provide a JSON object with 'word', 'definition', and 'example'. Return ONLY the JSON object, no markdown, no other text."
+    response = call_gemini(prompt, max_tokens=150)
+    
+    # Clean up response
+    import re
+    # Remove markdown code blocks if present
+    content = re.sub(r'```(?:json)?\s*(.*?)\s*```', r'\1', response, flags=re.DOTALL)
+    # Find the first { and last } to isolate the JSON object
+    match = re.search(r'(\{.*\})', content, re.DOTALL)
+    if match:
+        json_str = match.group(1)
+    else:
+        json_str = content.strip()
+        
+    try:
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        # If still fails, try one more aggressive cleanup
+        json_str = re.sub(r'[^{]*(\{. *\}). *', r'\1', json_str, flags=re.DOTALL)
+        return json.loads(json_str)
+
+
 class Command(BaseCommand):
     help = 'AI Monitor: auto-generates prompts hourly and broadcasts hot activity'
 
@@ -91,6 +115,7 @@ class Command(BaseCommand):
             try:
                 if not options.get('broadcast_only'):
                     self.generate_prompt()
+                    self.generate_word()
                 if not options.get('prompt_only'):
                     self.generate_broadcast()
             except Exception as e:
@@ -168,15 +193,11 @@ class Command(BaseCommand):
         ).order_by('-like_count').first()
 
         most_active = User.objects.annotate(
-            recent_posts=Count('posts', filter=Post.objects.filter(
-                created_date__gte=one_hour_ago, status='published'
-            ).values('author').query.__class__())
+            recent_posts=Count('posts', filter=Q(posts__created_date__gte=one_hour_ago, posts__status='published'))
         ).order_by('-recent_posts').first()
 
         trending_cat = Category.objects.annotate(
-            recent_count=Count('posts', filter=Post.objects.filter(
-                created_date__gte=one_hour_ago
-            ).values('category').query.__class__())
+            recent_count=Count('posts', filter=Q(posts__created_date__gte=one_hour_ago))
         ).order_by('-recent_count').first()
 
         stats = {
@@ -205,3 +226,35 @@ class Command(BaseCommand):
             stats=json.dumps(stats),
         )
         self.stdout.write(self.style.SUCCESS(f'  ✓ Broadcast: "{broadcast_text[:60]}..."'))
+
+    def generate_word(self):
+        from blog.models import WordOfTheDay
+        today = date.today()
+
+        if WordOfTheDay.objects.filter(date=today).exists():
+            self.stdout.write(f'  ✓ Word of the Day already exists for today.')
+            return
+
+        try:
+            admin = User.objects.filter(is_superuser=True).first()
+            data = generate_word_of_the_day_data()
+            WordOfTheDay.objects.create(
+                word=data['word'],
+                definition=data['definition'],
+                example=data.get('example', ''),
+                created_by=admin,
+                date=today
+            )
+            self.stdout.write(self.style.SUCCESS(f"  ✓ Generated Word: {data['word']}"))
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f'  Word generation failed: {e}'))
+            # Minimal fallback
+            WordOfTheDay.objects.get_or_create(
+                date=today,
+                defaults={
+                    'word': 'Ephemeral',
+                    'definition': 'Lasting for a very short time.',
+                    'example': 'The beauty of the sunset was ephemeral.',
+                    'created_by': User.objects.filter(is_superuser=True).first()
+                }
+            )

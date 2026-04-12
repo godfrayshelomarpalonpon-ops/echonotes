@@ -1,127 +1,391 @@
 {% extends 'base.html' %}
 
-{% block title %}Leaderboard - EchoNotes{% endblock %}
+{% block title %}Leaderboard — EchoNotes{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="mb-4">
+<style>
+    .lb-wrapper { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    .lb-header { text-align: center; margin-bottom: 3rem; }
+    .lb-header h1 {
+        font-family: var(--font-display); font-size: 3rem;
+        letter-spacing: -1px; color: var(--ink); margin-bottom: 0.5rem;
+    }
+    .lb-header p { color: var(--ink-muted); font-size: 1rem; max-width: 480px; margin: 0 auto 2rem; }
+
+    /* ── Period Tabs ── */
+    .period-tabs {
+        display: inline-flex; background: var(--cream-dark); border-radius: 50px;
+        padding: 4px; gap: 4px; margin-bottom: 3rem;
+    }
+    .period-tab {
+        padding: 0.55rem 1.5rem; border-radius: 50px; font-size: 0.82rem;
+        font-weight: 600; text-decoration: none !important; color: var(--ink-muted) !important;
+        transition: all 0.25s; border: none; cursor: pointer;
+        background: transparent;
+    }
+    .period-tab:hover { color: var(--ink) !important; }
+    .period-tab.active {
+        background: white !important; color: var(--accent) !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* ── Podium ── */
+    .podium-section { margin-bottom: 3.5rem; }
+    .podium-section-title {
+        font-family: var(--font-display); font-size: 1.5rem; color: var(--ink);
+        margin-bottom: 2rem; display: flex; align-items: center; gap: 0.75rem;
+    }
+    .podium-section-title i { font-size: 1.2rem; }
+
+    .podium-row {
+        display: flex; align-items: flex-end; justify-content: center;
+        gap: 0.5rem; margin-bottom: 1rem;
+        width: 100%; padding: 2rem 0.5rem 0.5rem;
+    }
+
+    .podium-card {
+        background: white; border-radius: 20px; padding: 1.5rem 0.75rem;
+        text-align: center; position: relative;
+        border: 1px solid var(--cream-border);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        flex: 1; min-width: 80px; max-width: 140px;
+        display: flex; flex-direction: column;
+    }
+    .podium-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+    }
+
+    .podium-card.gold {
+        min-height: 260px; flex: 1.2 1 100px; max-width: 160px;
+        border-color: rgba(180,83,9,0.3);
+        background: linear-gradient(180deg, rgba(251,191,36,0.06), white);
+    }
+    .podium-card.gold::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+        background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+    }
+
+    .podium-card.silver {
+        min-height: 220px;
+        border-color: rgba(156,163,175,0.3);
+        background: linear-gradient(180deg, rgba(156,163,175,0.06), white);
+    }
+    .podium-card.silver::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, #9ca3af, #d1d5db, #9ca3af);
+    }
+
+    .podium-card.bronze {
+        min-height: 200px;
+        border-color: rgba(180,83,9,0.15);
+        background: linear-gradient(180deg, rgba(180,83,9,0.04), white);
+    }
+    .podium-card.bronze::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, #b45309, #d97706, #b45309);
+    }
+
+    .podium-rank {
+        font-size: 2.2rem; margin-bottom: 0.75rem; line-height: 1;
+    }
+    .podium-avatar {
+        width: 56px; height: 56px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.3rem; font-weight: 700; color: white;
+        margin: 0 auto 0.75rem;
+        background: linear-gradient(135deg, var(--ink), #2d2d44);
+    }
+    .gold .podium-avatar { background: linear-gradient(135deg, #b45309, #f59e0b); }
+    .silver .podium-avatar { background: linear-gradient(135deg, #6b7280, #9ca3af); }
+    .bronze .podium-avatar { background: linear-gradient(135deg, #92400e, #b45309); }
+
+    .podium-name {
+        font-family: var(--font-display); font-size: 1.05rem;
+        color: var(--ink); margin-bottom: 0.4rem;
+        word-break: break-word;
+    }
+    .podium-name a { color: var(--ink); text-decoration: none; }
+    .podium-name a:hover { color: var(--accent); }
+
+    .podium-stat {
+        font-family: var(--font-mono); font-size: 0.8rem;
+        color: var(--ink-muted); display: flex; align-items: center;
+        justify-content: center; gap: 0.4rem;
+    }
+
+    /* ── Runners Up List ── */
+    .runners-list {
+        background: white; border-radius: 16px;
+        border: 1px solid var(--cream-border);
+        overflow: hidden;
+    }
+    .runner-item {
+        display: flex; align-items: center; gap: 1rem;
+        padding: 0.85rem 1.5rem;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
+        transition: background 0.2s;
+    }
+    .runner-item:last-child { border-bottom: none; }
+    .runner-item:hover { background: rgba(190,18,60,0.02); }
+
+    .runner-rank {
+        font-family: var(--font-mono); font-size: 0.78rem;
+        color: var(--ink-muted); width: 28px; text-align: center;
+        font-weight: 600;
+    }
+    .runner-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--ink), #3d3d5c);
+        display: flex; align-items: center; justify-content: center;
+        color: white; font-size: 0.8rem; font-weight: 600; flex-shrink: 0;
+    }
+    .runner-name {
+        flex: 1; font-weight: 500; font-size: 0.9rem;
+    }
+    .runner-name a { color: var(--ink); text-decoration: none; }
+    .runner-name a:hover { color: var(--accent); }
+
+    .runner-stat {
+        font-family: var(--font-mono); font-size: 0.75rem;
+        color: var(--ink-muted); display: flex; align-items: center; gap: 0.35rem;
+    }
+
+    .lb-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+
+    .lb-section-card {
+        background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+        border-radius: 20px; border: 1px solid var(--cream-border);
+    }
+    .lb-section-header {
+        padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--cream-border);
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+    .lb-section-header h3 {
+        font-family: var(--font-display); font-size: 1.15rem; margin: 0;
+    }
+    .lb-section-header i { font-size: 1.1rem; }
+
+    .lb-empty {
+        text-align: center; padding: 3rem 1.5rem; color: var(--ink-muted);
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .podium-row { flex-wrap: wrap; }
+        .podium-card { flex: 0 0 calc(50% - 1rem); max-width: none; }
+        .podium-card.gold { flex: 0 0 100%; }
+        .lb-columns { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="lb-wrapper">
+    <div class="lb-header">
         <span class="section-eyebrow">Community Rankings</span>
-        <h1 class="section-title">Leaderboard</h1>
-        <hr class="section-divider">
+        <h1>Leaderboard</h1>
+        <p>Celebrating the most active and loved voices in our community.</p>
+
+        <div class="period-tabs">
+            <a href="?period=weekly" class="period-tab {% if period == 'weekly' %}active{% endif %}">This Week</a>
+            <a href="?period=monthly" class="period-tab {% if period == 'monthly' %}active{% endif %}">This Month</a>
+            <a href="?period=alltime" class="period-tab {% if period == 'alltime' %}active{% endif %}">All Time</a>
+        </div>
     </div>
 
-    <!-- Period Tabs -->
-    <div class="d-flex gap-2 mb-4">
-        <a href="?period=weekly" class="btn {% if period == 'weekly' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-            This Week
-        </a>
-        <a href="?period=monthly" class="btn {% if period == 'monthly' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-            This Month
-        </a>
-        <a href="?period=alltime" class="btn {% if period == 'alltime' %}btn-primary{% else %}btn-outline-primary{% endif %}">
-            All Time
-        </a>
-    </div>
+    <div class="lb-columns">
 
-    <div class="row g-4">
-        <!-- Most Liked -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-heart me-2" style="color:#ff8080"></i>Most Liked Writers</h5>
+        <!-- Most Liked Writers -->
+        <div class="lb-section-card">
+            <div class="lb-section-header">
+                <i class="fas fa-heart" style="color:var(--accent)"></i>
+                <h3>Most Liked</h3>
+            </div>
+            {% if most_liked %}
+            <!-- Podium for top 3 -->
+            {% with top=most_liked|slice:":3" %}
+            {% if top|length >= 3 %}
+            <div class="podium-row" style="padding: 2rem 1rem 0.5rem;">
+                <!-- 2nd place -->
+                <div class="podium-card silver" style="order:1">
+                    <div class="podium-rank">🥈</div>
+                    <div class="podium-avatar">{{ top.1.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.1.username %}">{{ top.1.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-heart"></i> {{ top.1.total_likes }}</div>
                 </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for user in most_liked %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-2">
-                                <span style="font-family:var(--font-display);font-size:1.2rem;color:var(--cream-border);width:24px">
-                                    {% if forloop.counter == 1 %}👑
-                                    {% elif forloop.counter == 2 %}🥈
-                                    {% elif forloop.counter == 3 %}🥉
-                                    {% else %}{{ forloop.counter }}{% endif %}
-                                </span>
-                                <a href="{% url 'profile-detail' user.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">
-                                    {{ user.username }}
-                                </a>
-                            </div>
-                            <span class="badge" style="background:rgba(200,71,43,0.1);color:var(--accent)">
-                                <i class="fas fa-heart me-1"></i>{{ user.total_likes }}
-                            </span>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-center text-muted py-3">No data yet</li>
-                        {% endfor %}
-                    </ul>
+                <!-- 1st place -->
+                <div class="podium-card gold" style="order:0">
+                    <div class="podium-rank">👑</div>
+                    <div class="podium-avatar">{{ top.0.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.0.username %}">{{ top.0.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-heart"></i> {{ top.0.total_likes }}</div>
+                </div>
+                <!-- 3rd place -->
+                <div class="podium-card bronze" style="order:2">
+                    <div class="podium-rank">🥉</div>
+                    <div class="podium-avatar">{{ top.2.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.2.username %}">{{ top.2.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-heart"></i> {{ top.2.total_likes }}</div>
                 </div>
             </div>
+            {% elif top|length >= 1 %}
+            <div style="padding: 2rem 1rem; text-align:center;">
+                {% for u in top %}
+                <div class="podium-card gold" style="display:inline-block; margin: 0.5rem;">
+                    <div class="podium-rank">{% if forloop.counter == 1 %}👑{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}</div>
+                    <div class="podium-avatar">{{ u.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' u.username %}">{{ u.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-heart"></i> {{ u.total_likes }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Runners up (4-10) -->
+            {% with runners=most_liked|slice:"3:" %}
+            {% if runners %}
+            <div class="runners-list" style="margin: 0 1rem 1rem; border-radius: 12px;">
+                {% for user in runners %}
+                <div class="runner-item">
+                    <span class="runner-rank">{{ forloop.counter|add:3 }}</span>
+                    <div class="runner-avatar">{{ user.username|make_list|first|upper }}</div>
+                    <span class="runner-name"><a href="{% url 'profile-detail' user.username %}">{{ user.username }}</a></span>
+                    <span class="runner-stat"><i class="fas fa-heart" style="color:var(--accent)"></i> {{ user.total_likes }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            {% else %}
+            <div class="lb-empty"><i class="fas fa-heart fa-2x mb-2" style="color:var(--cream-border);display:block"></i>No data yet</div>
+            {% endif %}
         </div>
 
-        <!-- Most Posts -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-pen-fancy me-2" style="color:#ffd700"></i>Most Active Writers</h5>
+        <!-- Most Active Writers -->
+        <div class="lb-section-card">
+            <div class="lb-section-header">
+                <i class="fas fa-pen-fancy" style="color:var(--gold)"></i>
+                <h3>Most Active</h3>
+            </div>
+            {% if most_posts %}
+            {% with top=most_posts|slice:":3" %}
+            {% if top|length >= 3 %}
+            <div class="podium-row" style="padding: 2rem 1rem 0.5rem;">
+                <div class="podium-card silver" style="order:1">
+                    <div class="podium-rank">🥈</div>
+                    <div class="podium-avatar">{{ top.1.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.1.username %}">{{ top.1.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-pen"></i> {{ top.1.post_count }}</div>
                 </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for user in most_posts %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-2">
-                                <span style="font-family:var(--font-display);font-size:1.2rem;color:var(--cream-border);width:24px">
-                                    {% if forloop.counter == 1 %}👑
-                                    {% elif forloop.counter == 2 %}🥈
-                                    {% elif forloop.counter == 3 %}🥉
-                                    {% else %}{{ forloop.counter }}{% endif %}
-                                </span>
-                                <a href="{% url 'profile-detail' user.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">
-                                    {{ user.username }}
-                                </a>
-                            </div>
-                            <span class="badge" style="background:rgba(212,168,67,0.1);color:var(--gold)">
-                                <i class="fas fa-pen me-1"></i>{{ user.post_count }}
-                            </span>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-center text-muted py-3">No data yet</li>
-                        {% endfor %}
-                    </ul>
+                <div class="podium-card gold" style="order:0">
+                    <div class="podium-rank">👑</div>
+                    <div class="podium-avatar">{{ top.0.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.0.username %}">{{ top.0.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-pen"></i> {{ top.0.post_count }}</div>
+                </div>
+                <div class="podium-card bronze" style="order:2">
+                    <div class="podium-rank">🥉</div>
+                    <div class="podium-avatar">{{ top.2.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.2.username %}">{{ top.2.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-pen"></i> {{ top.2.post_count }}</div>
                 </div>
             </div>
+            {% elif top|length >= 1 %}
+            <div style="padding: 2rem 1rem; text-align:center;">
+                {% for u in top %}
+                <div class="podium-card gold" style="display:inline-block; margin: 0.5rem;">
+                    <div class="podium-rank">{% if forloop.counter == 1 %}👑{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}</div>
+                    <div class="podium-avatar">{{ u.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' u.username %}">{{ u.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-pen"></i> {{ u.post_count }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% with runners=most_posts|slice:"3:" %}
+            {% if runners %}
+            <div class="runners-list" style="margin: 0 1rem 1rem; border-radius: 12px;">
+                {% for user in runners %}
+                <div class="runner-item">
+                    <span class="runner-rank">{{ forloop.counter|add:3 }}</span>
+                    <div class="runner-avatar">{{ user.username|make_list|first|upper }}</div>
+                    <span class="runner-name"><a href="{% url 'profile-detail' user.username %}">{{ user.username }}</a></span>
+                    <span class="runner-stat"><i class="fas fa-pen" style="color:var(--gold)"></i> {{ user.post_count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            {% else %}
+            <div class="lb-empty"><i class="fas fa-pen-fancy fa-2x mb-2" style="color:var(--cream-border);display:block"></i>No data yet</div>
+            {% endif %}
         </div>
 
-        <!-- Most Comments -->
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-comments me-2" style="color:#80c0ff"></i>Top Commenters</h5>
+        <!-- Top Commenters -->
+        <div class="lb-section-card">
+            <div class="lb-section-header">
+                <i class="fas fa-comments" style="color:#7c3aed"></i>
+                <h3>Top Commenters</h3>
+            </div>
+            {% if most_comments %}
+            {% with top=most_comments|slice:":3" %}
+            {% if top|length >= 3 %}
+            <div class="podium-row" style="padding: 2rem 1rem 0.5rem;">
+                <div class="podium-card silver" style="order:1">
+                    <div class="podium-rank">🥈</div>
+                    <div class="podium-avatar">{{ top.1.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.1.username %}">{{ top.1.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-comment"></i> {{ top.1.comment_count }}</div>
                 </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for user in most_comments %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-2">
-                                <span style="font-family:var(--font-display);font-size:1.2rem;color:var(--cream-border);width:24px">
-                                    {% if forloop.counter == 1 %}👑
-                                    {% elif forloop.counter == 2 %}🥈
-                                    {% elif forloop.counter == 3 %}🥉
-                                    {% else %}{{ forloop.counter }}{% endif %}
-                                </span>
-                                <a href="{% url 'profile-detail' user.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">
-                                    {{ user.username }}
-                                </a>
-                            </div>
-                            <span class="badge" style="background:rgba(44,111,173,0.1);color:#2c6fad">
-                                <i class="fas fa-comment me-1"></i>{{ user.comment_count }}
-                            </span>
-                        </li>
-                        {% empty %}
-                        <li class="list-group-item text-center text-muted py-3">No data yet</li>
-                        {% endfor %}
-                    </ul>
+                <div class="podium-card gold" style="order:0">
+                    <div class="podium-rank">👑</div>
+                    <div class="podium-avatar">{{ top.0.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.0.username %}">{{ top.0.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-comment"></i> {{ top.0.comment_count }}</div>
+                </div>
+                <div class="podium-card bronze" style="order:2">
+                    <div class="podium-rank">🥉</div>
+                    <div class="podium-avatar">{{ top.2.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' top.2.username %}">{{ top.2.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-comment"></i> {{ top.2.comment_count }}</div>
                 </div>
             </div>
+            {% elif top|length >= 1 %}
+            <div style="padding: 2rem 1rem; text-align:center;">
+                {% for u in top %}
+                <div class="podium-card gold" style="display:inline-block; margin: 0.5rem;">
+                    <div class="podium-rank">{% if forloop.counter == 1 %}👑{% elif forloop.counter == 2 %}🥈{% else %}🥉{% endif %}</div>
+                    <div class="podium-avatar">{{ u.username|make_list|first|upper }}</div>
+                    <div class="podium-name"><a href="{% url 'profile-detail' u.username %}">{{ u.username }}</a></div>
+                    <div class="podium-stat"><i class="fas fa-comment"></i> {{ u.comment_count }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% with runners=most_comments|slice:"3:" %}
+            {% if runners %}
+            <div class="runners-list" style="margin: 0 1rem 1rem; border-radius: 12px;">
+                {% for user in runners %}
+                <div class="runner-item">
+                    <span class="runner-rank">{{ forloop.counter|add:3 }}</span>
+                    <div class="runner-avatar">{{ user.username|make_list|first|upper }}</div>
+                    <span class="runner-name"><a href="{% url 'profile-detail' user.username %}">{{ user.username }}</a></span>
+                    <span class="runner-stat"><i class="fas fa-comment" style="color:#7c3aed"></i> {{ user.comment_count }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            {% else %}
+            <div class="lb-empty"><i class="fas fa-comments fa-2x mb-2" style="color:var(--cream-border);display:block"></i>No data yet</div>
+            {% endif %}
         </div>
+
     </div>
 </div>
 {% endblock %}

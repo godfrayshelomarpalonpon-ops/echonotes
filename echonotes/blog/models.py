@@ -14,6 +14,10 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    icon = models.CharField(max_length=50, default='fas fa-circle', help_text="FontAwesome class (e.g., 'fas fa-feather')")
+    color = models.CharField(max_length=20, default='#7c3aed', help_text="Brand color hex code")
+    subscribers = models.ManyToManyField(User, related_name='subscribed_circles', blank=True)
+    created_date = models.DateTimeField(default=timezone.now)
 
     class Meta:
         verbose_name_plural = 'Categories'
@@ -21,6 +25,12 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    def total_members(self):
+        return self.subscribers.count()
+
+    def get_absolute_url(self):
+        return reverse('category-posts', kwargs={'slug': self.slug})
 
 
 # ─── Post ─────────────────────────────────────────────────────────────────────
@@ -654,52 +664,62 @@ class UserProfile(models.Model):
 # ─── Signals ──────────────────────────────────────────────────────────────────
 
 @receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
+def handle_user_onboarding(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance)
-        WritingStreak.objects.create(user=instance)
-
-
-# ─── AI Interaction Signal ───────────────────────────────────────────────────
+        UserProfile.objects.get_or_create(user=instance)
+        # Writing streak is initialized here too
+        from .models import WritingStreak
+        WritingStreak.objects.get_or_create(user=instance)
+    else:
+        if hasattr(instance, 'profile'):
+            instance.profile.save()
 
 @receiver(post_save, sender=Post)
-def ai_auto_interact(sender, instance, created, **kwargs):
+def handle_ai_post_interactions(sender, instance, created, **kwargs):
     """
-    When a new post is published, have 1-2 random AI personas interact with it.
+    Manages all AI-driven activities after a post is saved.
+    Safe from recursion and redundant calls.
     """
-    if created and instance.status == 'published':
-        try:
-            from blog.ai_service import AIPersonaEngine
-            from django.contrib.auth.models import User
-            import random
-            
-            ai_users = User.objects.filter(profile__is_ai=True)
-            if not ai_users.exists():
-                return
-            
-            num_to_pick = min(ai_users.count(), random.randint(1, 2))
-            interactors = random.sample(list(ai_users), num_to_pick)
-            
-            for ai in interactors:
-                AIPersonaEngine.interact_with_post(ai, instance)
-        except Exception as e:
-            print(f"AI Interaction failed: {e}")
+    if not created or instance.status != 'published':
+        return
 
-    # Generate Summary and Moderate
-    if not instance.ai_summary and instance.status == 'published':
-        try:
-            from blog.ai_service import AIService
-            instance.ai_summary = AIService.generate_summary(instance.content)
-            instance.is_flagged, instance.toxicity_score = AIService.moderate_content(instance.content)
-            instance.save(update_fields=['ai_summary', 'is_flagged', 'toxicity_score'])
-        except Exception as e:
-            print(f"AI Summary generation failed: {e}")
+    author_profile = getattr(instance.author, 'profile', None)
+    if not author_profile or author_profile.is_ai:
+        return
+
+    try:
+        from blog.ai_service import AIPersonaEngine, AIService
+        from django.contrib.auth.models import User
+        import random
+
+        # AI Enrichment (Summary & Moderation) via update() to avoid recursion
+        if not instance.ai_summary:
+            summary = AIService.generate_summary(instance.content)
+            is_flagged, score = AIService.moderate_content(instance.content)
+            # Use instance.__class__ to avoid sender name collisions
+            instance.__class__.objects.filter(pk=instance.pk).update(
+                ai_summary=summary,
+                is_flagged=is_flagged,
+                toxicity_score=score
+            )
+
+        # Maria Bot Interaction
+        maria = User.objects.filter(profile__is_ai=True, username='Maria').first()
+        if maria:
+            AIPersonaEngine.interact_with_post(maria, instance)
+
+        # Random Secondary Interaction
+        other_ai = User.objects.filter(profile__is_ai=True).exclude(username='Maria')
+        if other_ai.exists() and random.random() < 0.2:
+            random_ai = random.choice(list(other_ai))
+            AIPersonaEngine.interact_with_post(random_ai, instance)
+
+    except Exception as e:
+        print(f"DEBUG: Background AI Interaction Error: {e}")
 
 @receiver(post_save, sender=Comment)
-def ai_comment_moderation(sender, instance, created, **kwargs):
-    """
-    Automated moderation for new comments.
-    """
+def handle_comment_moderation(sender, instance, created, **kwargs):
+    """Automated moderation for new comments."""
     if created:
         try:
             from blog.ai_service import AIService
@@ -708,13 +728,4 @@ def ai_comment_moderation(sender, instance, created, **kwargs):
                 instance.is_flagged = True
                 instance.save(update_fields=['is_flagged'])
         except Exception as e:
-            print(f"Comment moderation failed: {e}")
-
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    try:
-        if hasattr(instance, 'profile'):
-            instance.profile.save()
-    except UserProfile.DoesNotExist:
-        UserProfile.objects.create(user=instance)
+            print(f"DEBUG: Comment moderation background error: {e}")

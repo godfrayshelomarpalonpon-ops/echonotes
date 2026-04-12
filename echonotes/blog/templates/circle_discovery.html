@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Discover Circles — EchoNotes{% endblock %}
+
+{% block content %}
+<style>
+    .discovery-wrapper { max-width: 1240px; margin: 3rem auto; padding: 0 1.5rem; }
+    
+    /* ── Header & Search ── */
+    .discovery-header { text-align: center; margin-bottom: 5rem; }
+    .discovery-title {
+        font-family: var(--font-display); font-size: 3.5rem; color: var(--ink);
+        margin-bottom: 1rem; letter-spacing: -1px;
+    }
+    .discovery-subtitle { font-family: var(--font-body); font-size: 1.15rem; color: var(--ink-muted); max-width: 650px; margin: 0 auto 3rem; line-height: 1.6; }
+    
+    .search-container { max-width: 550px; margin: 0 auto; position: relative; }
+    .search-input {
+        width: 100%; padding: 1.25rem 1.5rem 1.25rem 4rem;
+        border-radius: 16px; border: 1px solid var(--cream-border);
+        background: rgba(255,255,255,0.85); font-family: var(--font-body);
+        box-shadow: var(--shadow-md); transition: all 0.3s;
+        backdrop-filter: blur(10px);
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(190, 18, 60, 0.1), 0 10px 40px rgba(0,0,0,0.08); }
+    .search-icon { position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); color: var(--ink-muted); font-size: 1.2rem; }
+
+    /* ── Grid ── */
+    .circle-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+        gap: 2rem; 
+        align-items: stretch;
+    }
+
+    /* ── Glassmorphism Card ── */
+    .circle-card {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-radius: 20px; overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column; position: relative;
+        min-height: 400px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
+    }
+    .circle-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(190, 18, 60, 0.15);
+        border-color: rgba(190, 18, 60, 0.25);
+    }
+    
+    .circle-card-bg {
+        height: 130px; min-height: 130px; width: 100%; position: relative; flex-shrink: 0;
+        overflow: hidden;
+    }
+    .circle-card-bg::after {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.15));
+    }
+    .circle-card-icon {
+        width: 72px; height: 72px; border-radius: 20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 3px solid rgba(255, 255, 255, 0.9);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.8rem; position: absolute; left: 1.5rem; bottom: -36px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        z-index: 5;
+        transition: transform 0.3s ease;
+    }
+    .circle-card:hover .circle-card-icon { transform: scale(1.08) rotate(-3deg); }
+    
+    .circle-card-body { padding: 3.5rem 1.5rem 1.75rem; flex: 1 1 auto; display: flex; flex-direction: column; min-height: 200px; }
+    .circle-card-name {
+        font-family: var(--font-display); font-size: 1.5rem; color: var(--ink);
+        text-decoration: none !important; margin-bottom: 0.5rem; display: block;
+        font-weight: 700; transition: color 0.25s; letter-spacing: -0.3px;
+    }
+    .circle-card-name:hover { color: var(--accent); }
+    .circle-card-desc { 
+        font-family: var(--font-body); font-size: 0.92rem; color: var(--ink-muted); line-height: 1.65; 
+        margin-bottom: 1.5rem;
+        word-break: break-word;
+        flex: 1;
+    }
+    
+    .circle-card-footer { 
+        display: flex; align-items: center; justify-content: space-between; 
+        padding-top: 1.25rem; border-top: 1px solid rgba(0,0,0,0.06);
+        margin-top: auto; flex-shrink: 0;
+    }
+    .circle-stat {
+        font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-muted);
+        display: flex; align-items: center; gap: 0.5rem;
+        text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    
+    .btn-circle-join {
+        padding: 0.5rem 1.25rem; border-radius: 50px; font-weight: 600; font-size: 0.82rem;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); text-decoration: none !important;
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        flex-shrink: 0; cursor: pointer;
+    }
+    .btn-join {
+        background: linear-gradient(135deg, var(--ink), #2d2d44);
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(18, 18, 30, 0.2);
+    }
+    .btn-join:hover { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); transform: scale(1.06); box-shadow: 0 6px 20px rgba(190, 18, 60, 0.3); }
+    .btn-member {
+        background: rgba(255, 255, 255, 0.8); color: var(--ink-muted) !important;
+        border: 1px solid rgba(0,0,0,0.08);
+        backdrop-filter: blur(4px);
+    }
+    .btn-member:hover { background: #fee2e2; color: #be123c !important; border-color: #fecaca; }
+    .btn-member:hover .member-text { display: none; }
+    .btn-member:hover .leave-text { display: inline; }
+    .leave-text { display: none; }
+
+    .empty-state { text-align: center; padding: 6rem 0; color: var(--ink-muted); }
+
+    /* ── Sections ── */
+    .section-title-disc {
+        font-family: var(--font-display); font-size: 2rem; margin: 4rem 0 2rem;
+        display: flex; align-items: center; gap: 1rem; color: var(--ink);
+        letter-spacing: -0.5px;
+    }
+    .section-title-disc i { font-size: 1.5rem; color: var(--accent); }
+    
+    .horizontal-scroll {
+        display: flex; gap: 1.5rem; 
+        flex-wrap: nowrap;
+        overflow-x: auto; overflow-y: visible; 
+        padding: 1rem 1.5rem 3rem;
+        margin: 0 -1.5rem;
+        width: calc(100% + 3rem);
+        scrollbar-width: thin; 
+        -ms-overflow-style: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .horizontal-scroll::-webkit-scrollbar { display: block; height: 6px; }
+    .horizontal-scroll::-webkit-scrollbar-track { background: transparent; }
+    .horizontal-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+    
+    .scroll-card { 
+        flex: 0 0 320px; 
+        width: 320px;
+        min-width: 320px;
+        max-width: 320px;
+        min-height: 400px;
+    }
+
+    .trending-badge {
+        position: absolute; top: 1.25rem; right: 1.25rem;
+        background: rgba(190, 12, 60, 0.92); color: white;
+        padding: 0.3rem 0.9rem; border-radius: 50px;
+        font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.06em; z-index: 10;
+        backdrop-filter: blur(8px);
+        box-shadow: 0 4px 12px rgba(190, 12, 60, 0.3);
+        display: flex; align-items: center; gap: 0.35rem;
+    }
+
+    /* ── Animated gradient bg ── */
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    .circle-card-bg[style] {
+        background-size: 200% 200% !important;
+        animation: gradientShift 6s ease infinite;
+    }
+</style>
+
+<div class="discovery-wrapper">
+    <div class="discovery-header">
+        <h1 class="discovery-title">Explore Circles</h1>
+        <p class="discovery-subtitle">Join specific communities to personalize your EchoNotes experience and find writers who share your passion.</p>
+        
+        <form method="GET" action="{% url 'circle-discovery' %}" class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" name="q" value="{{ query }}" class="search-input" placeholder="Search for a community (e.g. poetry, sci-fi)...">
+        </form>
+    </div>
+
+    <!-- Trending Section -->
+    {% if not query and trending_circles %}
+    <h2 class="section-title-disc"><i class="fas fa-fire"></i> Trending This Week</h2>
+    <div class="horizontal-scroll">
+        {% for cat in trending_circles %}
+        <div class="circle-card scroll-card">
+            <span class="trending-badge"><i class="fas fa-chart-line"></i> Rising</span>
+            <div class="circle-card-bg" style="--cat-color: {{ cat.color }}; background: linear-gradient(135deg, var(--cat-color), #1a1a2e, var(--cat-color));">
+                <div class="circle-card-icon" style="color: var(--cat-color);">
+                    <i class="{{ cat.icon }}"></i>
+                </div>
+            </div>
+            <div class="circle-card-body">
+                <a href="{{ cat.get_absolute_url }}" class="circle-card-name">{{ cat.name }}</a>
+                <p class="circle-card-desc">{{ cat.description|truncatechars:60 }}</p>
+                <div class="circle-card-footer">
+                    <div class="circle-stat"><i class="fas fa-users"></i> {{ cat.member_count }}</div>
+                    {% if user.is_authenticated %}
+                        {% if cat.id in user_circles_ids %}
+                            <span class="text-success small fw-bold"><i class="fas fa-check"></i> Joined</span>
+                        {% else %}
+                            <a href="{% url 'category-posts' cat.slug %}?action=join" class="btn-circle-join btn-join py-1 px-3" style="font-size:0.75rem">Join</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- New Circles Section -->
+    {% if not query and new_circles %}
+    <h2 class="section-title-disc"><i class="fas fa-seedling"></i> New Communities</h2>
+    <div class="horizontal-scroll">
+        {% for cat in new_circles %}
+        <div class="circle-card scroll-card">
+            <div class="circle-card-bg" style="--cat-color: {{ cat.color }}; background: linear-gradient(135deg, var(--cat-color), #1a1a2e, var(--cat-color));">
+                <div class="circle-card-icon" style="color: var(--cat-color);">
+                    <i class="{{ cat.icon }}"></i>
+                </div>
+            </div>
+            <div class="circle-card-body">
+                <a href="{{ cat.get_absolute_url }}" class="circle-card-name">{{ cat.name }}</a>
+                <p class="circle-card-desc">{{ cat.description|truncatechars:60 }}</p>
+                <div class="circle-card-footer">
+                     <span class="text-muted small">Added {{ cat.created_date|timesince }} ago</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <h2 class="section-title-disc"><i class="fas fa-th-large"></i> {% if query %}Search Results{% else %}Browse All Collections{% endif %}</h2>
+
+    {% if categories %}
+    <div class="circle-grid">
+        {% for cat in categories %}
+        <div class="circle-card">
+            <div class="circle-card-bg" style="--cat-color: {{ cat.color }}; background: linear-gradient(135deg, var(--cat-color), #1a1a2e, var(--cat-color));">
+                <div class="circle-card-icon" style="color: var(--cat-color);">
+                    <i class="{{ cat.icon }}"></i>
+                </div>
+            </div>
+            <div class="circle-card-body">
+                <a href="{{ cat.get_absolute_url }}" class="circle-card-name">{{ cat.name }}</a>
+                <p class="circle-card-desc">{{ cat.description|default:"A gathering place for shared echoes and silent stories."|truncatechars:100 }}</p>
+                
+                <div class="circle-card-footer">
+                    <div class="d-flex gap-3">
+                        <div class="circle-stat"><i class="fas fa-users"></i> {{ cat.member_count }}</div>
+                        <div class="circle-stat"><i class="fas fa-file-alt"></i> {{ cat.post_count }}</div>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                        {% if cat.id in user_circles_ids %}
+                            <a href="{% url 'category-posts' cat.slug %}?action=leave" class="btn-circle-join btn-member">
+                                <i class="fas fa-check"></i>
+                                <span class="member-text">Joined</span>
+                                <span class="leave-text">Leave</span>
+                            </a>
+                        {% else %}
+                            <a href="{% url 'category-posts' cat.slug %}?action=join" class="btn-circle-join btn-join">
+                                <i class="fas fa-plus"></i> Join
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}?next={% url 'circle-discovery' %}" class="btn-circle-join btn-join">
+                            Join
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-feather-alt fa-3x mb-3"></i>
+        <h3>No circles found matching your search.</h3>
+        <p>Try different keywords or browse all communities.</p>
+        <a href="{% url 'circle-discovery' %}" class="btn btn-primary mt-3 rounded-pill">View All Circles</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
