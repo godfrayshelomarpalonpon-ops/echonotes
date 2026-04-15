@@ -245,7 +245,11 @@ function saveSession(completed) {
     const mins = Math.round(duration / 60);
     fetch('/timer/save/', {
         method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': getCsrf()},
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': getCsrf(),
+            'X-Requested-With': 'XMLHttpRequest'
+        },
         body: `duration=${mins}&words=${words}&completed=${completed}`
     });
 }

@@ -156,7 +156,10 @@ document.querySelectorAll('.like-word-btn').forEach(btn => {
         const id = this.dataset.entryId;
         fetch(`/word/like/${id}/`, {
             method: 'POST',
-            headers: {'X-CSRFToken': '{{ csrf_token }}'}
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         })
         .then(r => r.json())
         .then(data => {

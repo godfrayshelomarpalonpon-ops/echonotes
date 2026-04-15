@@ -1046,7 +1046,11 @@
   function post(url, cb, err_cb) {
     fetch(url, {
       method: 'POST',
-      headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/x-www-form-urlencoded' }
+      headers: { 
+        'X-CSRFToken': CSRF, 
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
     }).then(r => {
       if (!r.ok) throw new Error('Server returned ' + r.status);
       return r.json();

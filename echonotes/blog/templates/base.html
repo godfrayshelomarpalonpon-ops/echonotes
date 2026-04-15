@@ -676,7 +676,8 @@
         method: 'POST',
         headers: {
           'X-CSRFToken': '{{ csrf_token }}',
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
         }
       }).then(r => {
         if (r.status === 403) {
