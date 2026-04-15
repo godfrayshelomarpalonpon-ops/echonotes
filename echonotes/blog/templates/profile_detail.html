@@ -3,7 +3,7 @@
 
 {% block title %}{{ profile_user.username }} — EchoNotes{% endblock %}
 
-{% block meta_description %}{{ profile_user.profile.bio|default:"Read the latest echoes and stories from " |add:profile_user.username|add:" on EchoNotes." }}{% endblock %}
+{% block meta_description %}{{ profile_user.profile.bio|default:"Read the latest echoes and stories from "|add:profile_user.username|add:" on EchoNotes." }}{% endblock %}
 
 {% block og_title %}{{ profile_user.username }}'s Echoes{% endblock %}
 {% block og_description %}{{ profile_user.profile.bio|default:"Check out my writing and stories on the EchoNotes literary community." }}{% endblock %}
@@ -11,7 +11,7 @@
 
 {% block content %}
 <style>
-  .pd-wrapper { max-width: 960px; margin: 2rem auto; padding: 0 1rem; }
+  .pd-wrapper { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
 
   /* Hero card */
   .pd-hero {
@@ -122,9 +122,9 @@
   }
   .pd-btn-yellow:hover { background: rgba(245,158,11,0.22); color: var(--ink); }
 
-  /* Bottom grid */
-  .pd-grid { display: grid; grid-template-columns: 1fr 280px; gap: 1.2rem; }
-  @media(max-width:768px) { .pd-grid { grid-template-columns: 1fr; } }
+  /* Layout grid */
+  .pd-grid { display: grid; grid-template-columns: 1fr 300px; gap: 1.2rem; }
+  @media(max-width:900px) { .pd-grid { grid-template-columns: 1fr; } }
 
   /* Card shared */
   .pd-card {
@@ -133,6 +133,7 @@
     border-radius: 18px;
     backdrop-filter: blur(12px);
     overflow: hidden;
+    margin-bottom: 1.2rem;
   }
   .pd-card-header {
     padding: 1rem 1.4rem;
@@ -141,6 +142,34 @@
     font-size: 1rem; color: var(--ink);
     display: flex; align-items: center; gap: 0.5rem;
   }
+
+  /* Tabs */
+  .pd-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--cream-border);
+    overflow-x: auto;
+    gap: 0;
+  }
+  .pd-tab {
+    padding: 0.65rem 1.1rem;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--ink-muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.18s;
+    white-space: nowrap;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+  }
+  .pd-tab:hover { color: var(--ink); }
+  .pd-tab.active {
+    color: #a78bfa;
+    border-bottom-color: #7c3aed;
+  }
+  .pd-tab-pane { display: none; padding: 0.8rem 0; }
+  .pd-tab-pane.active { display: block; }
 
   /* Post row */
   .pd-post-item {
@@ -160,6 +189,96 @@
     display: flex; gap: 0.8rem; align-items: center;
   }
 
+  .pd-post-actions {
+    display: flex; gap: 0.4rem; align-items: center; flex-shrink: 0;
+    margin-left: auto;
+  }
+  .pd-post-action {
+    padding: 0.25rem 0.6rem; border-radius: 7px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.72rem;
+    text-decoration: none; transition: all 0.15s;
+  }
+  .pd-post-action.edit {
+    background: rgba(124,58,237,.15); color: #a78bfa;
+    border: 1px solid rgba(124,58,237,.25);
+  }
+  .pd-post-action.edit:hover { background: rgba(124,58,237,.25); color: white; }
+  .pd-post-action.del {
+    background: rgba(239,68,68,.1); color: #f87171;
+    border: 1px solid rgba(239,68,68,.2);
+  }
+  .pd-post-action.del:hover { background: rgba(239,68,68,.2); color: white; }
+
+  .pd-post-badge {
+    font-size: 0.65rem; padding: 0.15rem 0.5rem; border-radius: 5px;
+    font-weight: 600; background: rgba(245,158,11,0.2);
+    color: #fbbf24; border: 1px solid rgba(245,158,11,0.3);
+  }
+
+  /* Activity item */
+  .pd-activity-item {
+    padding: 0.8rem 1.4rem;
+    border-bottom: 1px solid var(--cream-border);
+    display: flex; align-items: flex-start; gap: 0.8rem;
+  }
+  .pd-activity-item:last-child { border-bottom: none; }
+  .pd-activity-icon {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    background: rgba(124,58,237,.1); color: #7c3aed; font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  /* User chip */
+  .pd-user-chip {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.65rem 1.2rem;
+    border-bottom: 1px solid var(--cream-border);
+    transition: background 0.18s;
+  }
+  .pd-user-chip:last-child { border-bottom: none; }
+  .pd-user-chip:hover { background: white; }
+
+  .pd-user-av {
+    width: 36px; height: 36px; border-radius: 50%;
+    object-fit: cover; flex-shrink: 0;
+    border: 2px solid var(--cream-border);
+  }
+  .pd-user-av-ph {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 700; color: white;
+    font-family: 'DM Sans', sans-serif; text-transform: uppercase;
+    flex-shrink: 0; border: 2px solid var(--cream-border);
+  }
+  .pd-user-info { flex: 1; min-width: 0; }
+  .pd-user-name {
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+    font-weight: 600; color: var(--ink); text-decoration: none; display: block;
+  }
+  .pd-user-name:hover { color: #a78bfa; }
+  .pd-user-sub {
+    font-family: 'DM Sans', sans-serif; font-size: 0.72rem; color: var(--ink-muted);
+  }
+
+  /* Request actions */
+  .pd-req-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
+  .pd-req-btn {
+    padding: 0.28rem 0.65rem; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.72rem; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .pd-req-accept {
+    background: rgba(34,197,94,.2); color: #4ade80;
+    border: 1px solid rgba(34,197,94,.3);
+  }
+  .pd-req-accept:hover { background: rgba(34,197,94,.35); color: var(--ink); }
+  .pd-req-decline {
+    background: rgba(239,68,68,.12); color: #f87171;
+    border: 1px solid rgba(239,68,68,.2);
+  }
+  .pd-req-decline:hover { background: rgba(239,68,68,.25); color: var(--ink); }
+
   /* Badges */
   .pd-badge-grid {
     display: flex; flex-wrap: wrap; gap: 0.5rem;
@@ -176,9 +295,87 @@
   }
 
   .pd-empty {
-    padding: 2rem; text-align: center;
+    padding: 2.5rem; text-align: center;
     font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
     color: var(--ink-muted);
+  }
+  .pd-empty i { font-size: 2rem; opacity: 0.15; display: block; margin-bottom: .6rem; }
+
+  /* Side cards */
+  .pd-side-card {
+    background: white;
+    border: 1px solid var(--cream-border);
+    border-radius: 16px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    margin-bottom: 1rem;
+  }
+  .pd-side-header {
+    padding: 0.75rem 1.1rem;
+    border-bottom: 1px solid var(--cream-border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--ink-muted);
+  }
+  .pd-quick-link {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.65rem 1.1rem;
+    border-bottom: 1px solid var(--cream-border);
+    text-decoration: none; color: var(--ink);
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    transition: all 0.18s;
+  }
+  .pd-quick-link:last-child { border-bottom: none; }
+  .pd-quick-link:hover { background: var(--cream-dark); color: var(--accent); }
+  .pd-quick-link i { width: 16px; text-align: center; color: var(--accent, #7c3aed); }
+
+  /* Stats row (own profile) */
+  .pd-stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+    gap: 0.8rem; margin-bottom: 1.5rem;
+  }
+  .pd-stat-card-item {
+    background: white; border: 1px solid var(--cream-border);
+    border-radius: 16px; padding: 1.1rem 1.3rem;
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .pd-stat-card-icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; flex-shrink: 0;
+  }
+  .pd-stat-card-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem; color: var(--ink);
+    margin: 0; line-height: 1;
+  }
+  .pd-stat-card-label {
+    font-family: 'DM Sans', sans-serif; font-size: 0.65rem;
+    color: var(--ink-muted); text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Settings form */
+  .pd-settings-form {
+    padding: 1.4rem;
+  }
+  .pd-settings-form label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--ink); margin-bottom: 0.3rem;
+    display: block;
+  }
+  .pd-settings-form .form-control {
+    border: 1px solid var(--cream-border);
+    border-radius: 10px; padding: 0.6rem 1rem;
+    font-size: 0.85rem; background: var(--cream-dark);
+    color: var(--ink);
+  }
+  .pd-settings-form .form-control:focus {
+    border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
   }
 </style>
 
@@ -230,13 +427,26 @@
           <span class="pd-stat-num">{{ streak.current_streak }}</span>
           <span class="pd-stat-label">🔥 Streak</span>
         </div>
+        {% if is_own_profile %}
+        <div class="pd-stat">
+          <span class="pd-stat-num">{{ total_likes_received }}</span>
+          <span class="pd-stat-label">❤️ Likes</span>
+        </div>
+        <div class="pd-stat">
+          <span class="pd-stat-num">{{ friends|length }}</span>
+          <span class="pd-stat-label">Friends</span>
+        </div>
+        {% endif %}
       </div>
 
-      {% if user.is_authenticated and user == profile_user %}
+      {% if is_own_profile %}
       <div class="pd-actions">
-        <a href="{% url 'profile' %}" class="pd-btn pd-btn-primary">
-          <i class="fas fa-edit"></i> Edit Profile
+        <a href="{% url 'create-post' %}" class="pd-btn pd-btn-primary">
+          <i class="fas fa-pen"></i> Write
         </a>
+        <button class="pd-btn pd-btn-outline" onclick="openSettingsTab()">
+          <i class="fas fa-user-edit"></i> Edit Profile
+        </button>
         <a href="{% url 'logout' %}" class="pd-btn pd-btn-danger">
           <i class="fas fa-sign-out-alt"></i> Logout
         </a>
@@ -293,8 +503,404 @@
     </div>
   </div>
 
-  <!-- Grid -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- OWN PROFILE: Full dashboard content -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  {% if is_own_profile %}
+
+  <!-- Main layout -->
   <div class="pd-grid">
+    <!-- Left: Feeds + Social -->
+    <div>
+      <!-- Feeds -->
+      <div class="pd-card">
+        <div class="pd-card-header" style="padding-bottom:0;border-bottom:none">
+          <i class="fas fa-rss" style="color:var(--accent,#7c3aed)"></i> Echo Feeds
+        </div>
+        <div class="pd-tabs">
+          <button class="pd-tab active" data-tab="tab-activity">🔥 Activity</button>
+          <button class="pd-tab" data-tab="tab-circle-feed">✨ Circle Feed</button>
+          <button class="pd-tab" data-tab="tab-global-feed">🌍 Global</button>
+          <button class="pd-tab" data-tab="tab-your-posts">✍️ Your Posts</button>
+          <button class="pd-tab" data-tab="tab-settings">⚙️ Settings</button>
+        </div>
+
+        <!-- Activity Feed -->
+        <div id="tab-activity" class="pd-tab-pane active">
+          {% if activity_items %}
+          {% for item in activity_items %}
+          <div class="pd-activity-item">
+            <div class="pd-activity-icon">
+              {% if item.type == 'post' %}<i class="fas fa-feather-alt"></i>{% elif item.type == 'like' %}<i class="fas fa-heart" style="color:#ef4444"></i>{% else %}<i class="fas fa-comment" style="color:#3b82f6"></i>{% endif %}
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div class="pd-post-meta">
+                <a href="{% url 'profile-detail' item.user.username %}" class="fw-bold text-decoration-none" style="color:var(--ink)">{{ item.user.username }}</a>
+                <span>{{ item.text }}</span>
+              </div>
+              <div class="pd-post-meta mt-1">
+                <span style="font-size:0.65rem;color:var(--ink-muted)">{{ item.timestamp|timesince }} ago</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="text-center py-5">
+            <div class="mb-3" style="font-size: 2.5rem; opacity: 0.4;">🚀</div>
+            <h6 style="color:var(--ink); font-weight: 600;">Your activity feed is empty</h6>
+            <p class="text-muted small px-4 mb-4">Follow writers to see their latest echoes here.</p>
+            {% if suggested_users %}
+            <div class="d-flex flex-column gap-2 px-4 text-start">
+              {% for sug in suggested_users %}
+              <div class="pd-user-chip p-2 border rounded-3" style="background:var(--cream-dark)">
+                {% if sug.profile.profile_pic and sug.profile.profile_pic.name != 'default.jpg' %}
+                <img src="{{ sug.profile.profile_pic.url }}" class="pd-user-av" alt="{{ sug.username }}">
+                {% else %}
+                <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{ sug.username|slice:":1" }}</div>
+                {% endif %}
+                <div class="pd-user-info">
+                  <a href="{% url 'profile-detail' sug.username %}" class="pd-user-name" style="font-size:0.85rem">{{ sug.username }}</a>
+                  <div class="pd-user-sub" style="font-size:0.65rem">{{ sug.post_count }} echoes</div>
+                </div>
+                <button class="pd-btn pd-btn-primary ms-auto py-1 px-3" style="font-size:0.75rem"
+                  onclick="followUserInline('{{ sug.username }}', this)">
+                  Follow
+                </button>
+              </div>
+              {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Circle Feed -->
+        <div id="tab-circle-feed" class="pd-tab-pane">
+          {% if circle_feed %}
+          {% for post in circle_feed %}
+          <div class="pd-activity-item">
+            <div style="flex:1;min-width:0;">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge" style="--bg: {{ post.category.color|default:'#7c3aed' }}; background: var(--bg); font-size: 0.6rem; text-transform: uppercase;">{{ post.category.name }}</span>
+                <span style="font-size:0.7rem; color:var(--ink-muted)">by {{ post.author.username }}</span>
+              </div>
+              <a href="{% url 'post-detail' post.pk %}" class="pd-post-title" style="text-decoration:none;display:block">{{ post.title }}</a>
+              <div class="pd-post-meta">
+                <span>{{ post.created_date|date:"M d" }}</span>
+                <span>❤️ {{ post.total_likes }}</span>
+                <span>💬 {{ post.total_comments }}</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="p-3 text-center">
+            <a href="{% url 'circle-discovery' %}" class="text-muted small text-decoration-none">Discover more circles <i class="fas fa-arrow-right ms-1"></i></a>
+          </div>
+          {% else %}
+          <div class="pd-empty">
+            <i class="fas fa-users"></i>
+            Your circle feed is quiet. <br>Join communities to see personalized echoes!
+            <div class="mt-3">
+              <a href="{% url 'circle-discovery' %}" class="pd-btn pd-btn-primary">Discover Circles</a>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Global Feed -->
+        <div id="tab-global-feed" class="pd-tab-pane">
+          {% if global_feed %}
+          {% for post in global_feed %}
+          <div class="pd-activity-item">
+            <div style="flex:1;min-width:0;">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                {% if post.category %}
+                <span class="badge" style="--bg: {{ post.category.color|default:'#7c3aed' }}; background: var(--bg); font-size: 0.6rem; text-transform: uppercase;">{{ post.category.name }}</span>
+                {% endif %}
+                <span style="font-size:0.7rem; color:var(--ink-muted)">by
+                  <a href="{% url 'profile-detail' post.author.username %}" class="text-decoration-none fw-bold" style="color:var(--ink)">{{ post.author.username }}</a>
+                  {% if post.author != user %}
+                  <button class="btn btn-sm {% if post.author.id in following_user_ids %}btn-success text-white{% else %}btn-outline-primary text-primary{% endif %}"
+                    style="font-size: 0.65rem; padding: 0.1rem 0.5rem; border-radius: 12px;"
+                    onclick="event.preventDefault(); followUserInline('{{ post.author.username }}', this)">
+                    {% if post.author.id in following_user_ids %}<i class="fas fa-check"></i> Following{% else %}<i class="fas fa-plus"></i> Follow{% endif %}
+                  </button>
+                  {% endif %}
+                </span>
+              </div>
+              <a href="{% url 'post-detail' post.pk %}" class="pd-post-title" style="text-decoration:none;display:block">{{ post.title }}</a>
+              <div class="pd-post-meta">
+                <span>{{ post.created_date|date:"M d" }}</span>
+                <span>❤️ {{ post.total_likes }}</span>
+                <span>💬 {{ post.total_comments }}</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="pd-empty"><i class="fas fa-globe"></i>No global echoes found.</div>
+          {% endif %}
+        </div>
+
+        <!-- Your Posts -->
+        <div id="tab-your-posts" class="pd-tab-pane">
+          {% if user_posts %}
+          {% for post in user_posts %}
+          <div style="padding:1rem 1.4rem;border-bottom:1px solid var(--cream-border);display:flex;align-items:flex-start;gap:1rem;">
+            <div style="flex:1;min-width:0;">
+              <a href="{% url 'post-detail' post.pk %}" class="pd-post-title" style="text-decoration:none;display:block">
+                {{ post.title }}
+                {% if post.status == 'draft' %}<span class="pd-post-badge">Draft</span>{% endif %}
+              </a>
+              <div class="pd-post-meta">
+                <span>{{ post.created_date|date:"M d, Y" }}</span>
+                <span>❤️ {{ post.total_likes }}</span>
+                <span>💬 {{ post.total_comments }}</span>
+                <span>⏱ {{ post.reading_time }} min</span>
+              </div>
+            </div>
+            <div class="pd-post-actions">
+              <a href="{% url 'update-post' post.pk %}" class="pd-post-action edit">Edit</a>
+              <a href="{% url 'delete-post' post.pk %}" class="pd-post-action del">Del</a>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="pd-empty">
+            <i class="fas fa-pen-fancy"></i>
+            No posts yet. <a href="{% url 'create-post' %}" style="color:var(--accent,#7c3aed)">Write your first!</a>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Settings -->
+        <div id="tab-settings" class="pd-tab-pane">
+          <div class="pd-settings-form">
+            <form method="POST" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label for="id_username">Username</label>
+                  {{ u_form.username }}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_email">Email</label>
+                  {{ u_form.email }}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_first_name">First Name</label>
+                  {{ u_form.first_name }}
+                </div>
+                <div class="col-md-6">
+                  <label for="id_last_name">Last Name</label>
+                  {{ u_form.last_name }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="id_bio">Bio</label>
+                {{ p_form.bio }}
+              </div>
+              <div class="mb-3">
+                <label for="id_profile_pic">Profile Picture</label>
+                {{ p_form.profile_pic }}
+              </div>
+              <button type="submit" class="pd-btn pd-btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social Tabs -->
+      <div class="pd-card">
+        <div class="pd-card-header" style="padding-bottom:0;border-bottom:none">
+          <i class="fas fa-users" style="color:var(--accent,#7c3aed)"></i> Social
+          {% if pending_requests|length > 0 %}
+          <span style="background:#ef4444;color:white;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700">{{ pending_requests|length }}</span>
+          {% endif %}
+        </div>
+        <div class="pd-tabs">
+          <button class="pd-tab active" data-tab="tab-pending">
+            🤝 Requests {% if pending_requests|length > 0 %}({{ pending_requests|length }}){% endif %}
+          </button>
+          <button class="pd-tab" data-tab="tab-friends">👥 Friends ({{ friends|length }})</button>
+          <button class="pd-tab" data-tab="tab-followers">📣 Followers ({{ followers|length }})</button>
+          <button class="pd-tab" data-tab="tab-following">➡️ Following ({{ following_list|length }})</button>
+        </div>
+
+        <!-- Pending Requests -->
+        <div id="tab-pending" class="pd-tab-pane active">
+          {% if pending_requests %}
+          {% for req in pending_requests %}
+          <div class="pd-user-chip" id="req-{{ req.pk }}">
+            {% if req.sender.profile.profile_pic and req.sender.profile.profile_pic.name != 'default.jpg' %}
+            <img src="{{ req.sender.profile.profile_pic.url }}" class="pd-user-av" alt="{{ req.sender.username }}">
+            {% else %}
+            <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{ req.sender.username|slice:":1" }}</div>
+            {% endif %}
+            <div class="pd-user-info">
+              <a href="{% url 'profile-detail' req.sender.username %}" class="pd-user-name">{{ req.sender.username }}</a>
+              <div class="pd-user-sub">{{ req.created_date|timesince }} ago</div>
+            </div>
+            <div class="pd-req-actions">
+              <button class="pd-req-btn pd-req-accept" data-pk="{{ req.pk }}" onclick="acceptReq(this)">✓ Accept</button>
+              <button class="pd-req-btn pd-req-decline" data-pk="{{ req.pk }}" onclick="declineReq(this)">✕ Decline</button>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="pd-empty"><i class="fas fa-inbox"></i>No pending requests.</div>
+          {% endif %}
+        </div>
+
+        <!-- Friends -->
+        <div id="tab-friends" class="pd-tab-pane">
+          {% if friends %}
+          {% for u in friends %}
+          <div class="pd-user-chip">
+            {% if u.profile.profile_pic and u.profile.profile_pic.name != 'default.jpg' %}
+            <img src="{{ u.profile.profile_pic.url }}" class="pd-user-av" alt="{{ u.username }}">
+            {% else %}
+            <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">{{ u.username|slice:":1" }}</div>
+            {% endif %}
+            <div class="pd-user-info">
+              <a href="{% url 'profile-detail' u.username %}" class="pd-user-name">{{ u.username }}</a>
+            </div>
+            <a href="{% url 'conversation' u.username %}"
+              style="font-size:.75rem;color:var(--accent);padding:0.25rem 0.6rem;border-radius:7px;background:var(--cream-dark);text-decoration:none;font-weight:500">💬 Message</a>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="pd-empty"><i class="fas fa-user-friends"></i>No friends yet. Visit profiles to add friends!</div>
+          {% endif %}
+        </div>
+
+        <!-- Followers -->
+        <div id="tab-followers" class="pd-tab-pane">
+          {% if followers %}
+          {% for fol in followers %}
+          <div class="pd-user-chip">
+            {% if fol.follower.profile.profile_pic and fol.follower.profile.profile_pic.name != 'default.jpg' %}
+            <img src="{{ fol.follower.profile.profile_pic.url }}" class="pd-user-av" alt="{{ fol.follower.username }}">
+            {% else %}
+            <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">{{ fol.follower.username|slice:":1" }}</div>
+            {% endif %}
+            <div class="pd-user-info">
+              <a href="{% url 'profile-detail' fol.follower.username %}" class="pd-user-name">{{ fol.follower.username }}</a>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="pd-empty"><i class="fas fa-users"></i>No followers yet.</div>
+          {% endif %}
+        </div>
+
+        <!-- Following -->
+        <div id="tab-following" class="pd-tab-pane">
+          {% if following_list %}
+          {% for fol in following_list %}
+          <div class="pd-user-chip">
+            {% if fol.following.profile.profile_pic and fol.following.profile.profile_pic.name != 'default.jpg' %}
+            <img src="{{ fol.following.profile.profile_pic.url }}" class="pd-user-av" alt="{{ fol.following.username }}">
+            {% else %}
+            <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{ fol.following.username|slice:":1" }}</div>
+            {% endif %}
+            <div class="pd-user-info">
+              <a href="{% url 'profile-detail' fol.following.username %}" class="pd-user-name">{{ fol.following.username }}</a>
+            </div>
+          </div>
+          {% endfor %}
+          {% else %}
+          <div class="pd-empty"><i class="fas fa-user-plus"></i>Not following anyone yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right sidebar -->
+    <div>
+      <!-- Quick links -->
+      <div class="pd-side-card">
+        <div class="pd-side-header">Quick Links</div>
+        <a href="{% url 'daily-prompt' %}" class="pd-quick-link"><i class="fas fa-lightbulb"></i> Daily Prompt</a>
+        <a href="{% url 'word-of-the-day' %}" class="pd-quick-link"><i class="fas fa-book-open"></i> Word of the Day</a>
+        <a href="{% url 'contest-list' %}" class="pd-quick-link"><i class="fas fa-trophy"></i> Contests</a>
+        <a href="{% url 'story-list' %}" class="pd-quick-link"><i class="fas fa-book"></i> Collab Stories</a>
+        <a href="{% url 'writing-timer' %}" class="pd-quick-link"><i class="fas fa-stopwatch"></i> Writing Timer</a>
+        <a href="{% url 'leaderboard' %}" class="pd-quick-link"><i class="fas fa-medal"></i> Leaderboard</a>
+        <a href="{% url 'my-bookmarks' %}" class="pd-quick-link"><i class="fas fa-bookmark"></i> Bookmarks</a>
+        <a href="{% url 'inbox' %}" class="pd-quick-link"><i class="fas fa-envelope"></i> Messages</a>
+        <a href="{% url 'circle-discovery' %}" class="pd-quick-link" style="background:#fef3c7; font-weight: 600;"><i class="fas fa-search"></i> Discover Circles</a>
+      </div>
+
+      <!-- Your Circles -->
+      <div class="pd-side-card">
+        <div class="pd-side-header">Your Circles</div>
+        {% if user_circles %}
+        {% for circle in user_circles %}
+        <a href="{{ circle.get_absolute_url }}" class="pd-quick-link">
+          <i class="{{ circle.icon }}" style="--c: {{ circle.color }}; color: var(--c);"></i> {{ circle.name }}
+        </a>
+        {% endfor %}
+        {% else %}
+        <div class="p-3 text-center small text-muted">You haven't joined any circles yet.</div>
+        {% endif %}
+      </div>
+
+      <!-- Recommended Circles -->
+      {% if recommended_circles %}
+      <div class="pd-side-card">
+        <div class="pd-side-header">Circles You'll Love</div>
+        {% for circle in recommended_circles %}
+        <div class="pd-quick-link d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="{{ circle.icon }}" style="--c: {{ circle.color }}; color: var(--c);"></i>
+            <span>{{ circle.name }}</span>
+          </div>
+          <a href="{% url 'category-posts' circle.slug %}?action=join" class="btn btn-sm btn-outline-primary" style="font-size: 0.65rem; padding: 0.1rem 0.4rem;">Join</a>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Badges -->
+      {% if user_badges %}
+      <div class="pd-side-card">
+        <div class="pd-side-header">Your Badges</div>
+        <div class="pd-badge-grid">
+          {% for ub in user_badges %}
+          <div class="pd-badge-chip" title="{{ ub.badge.description }}">{{ ub.badge.icon }} {{ ub.badge.get_name_display }}</div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Community feed -->
+      <div class="pd-side-card">
+        <div class="pd-side-header">Latest from Community</div>
+        {% for post in feed_posts %}
+        <div style="padding:.65rem 1.1rem;border-bottom:1px solid var(--cream-border)">
+          <a href="{% url 'post-detail' post.pk %}"
+            style="font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--ink);text-decoration:none;display:block;margin-bottom:.15rem;font-weight:500">
+            {{ post.title|truncatechars:55 }}
+          </a>
+          <span style="font-family:'DM Sans',sans-serif;font-size:.7rem;color:var(--ink-muted)">
+            by <a href="{% url 'profile-detail' post.author.username %}" style="color:var(--accent);text-decoration:none">{{ post.author.username }}</a>
+          </span>
+        </div>
+        {% empty %}
+        <div style="padding:.8rem 1.1rem;font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--ink-muted);opacity:0.6">No community posts yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- OTHER USER'S PROFILE: Public view -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div class="pd-grid" style="grid-template-columns: 1fr 280px;">
     <!-- Posts -->
     <div class="pd-card">
       <div class="pd-card-header">
@@ -320,6 +926,77 @@
 
     <!-- Sidebar -->
     <div style="display:flex;flex-direction:column;gap:1.2rem;">
+      <!-- Social Connections -->
+      <div class="pd-card">
+        <div class="pd-card-header" style="border-bottom:none;padding-bottom:0">
+          <i class="fas fa-users" style="color:var(--accent,#7c3aed)"></i> Connections
+        </div>
+        <div class="pd-tabs" style="font-size:0.7rem;">
+          <button class="pd-tab active" data-tab="vis-friends">Friends ({{ friends|length }})</button>
+          <button class="pd-tab" data-tab="vis-followers">Followers ({{ follower_count }})</button>
+          <button class="pd-tab" data-tab="vis-following">Following ({{ following_count }})</button>
+        </div>
+        
+        <div id="vis-friends" class="pd-tab-pane active">
+          {% if friends %}
+            {% for u in friends|slice:":5" %}
+              <div class="pd-user-chip">
+                {% if u.profile.profile_pic and u.profile.profile_pic.name != 'default.jpg' %}
+                  <img src="{{ u.profile.profile_pic.url }}" class="pd-user-av" alt="{{ u.username }}">
+                {% else %}
+                  <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#0ea5e9,#38bdf8)">{{ u.username|slice:":1" }}</div>
+                {% endif %}
+                <div class="pd-user-info">
+                  <a href="{% url 'profile-detail' u.username %}" class="pd-user-name">{{ u.username }}</a>
+                </div>
+              </div>
+            {% endfor %}
+            {% if friends|length > 5 %}<div class="p-2 text-center small text-muted">+ {{ friends|length|add:"-5" }} more</div>{% endif %}
+          {% else %}
+            <div class="pd-empty" style="padding:1.5rem">No friends yet.</div>
+          {% endif %}
+        </div>
+
+        <div id="vis-followers" class="pd-tab-pane">
+          {% if followers %}
+            {% for fol in followers|slice:":5" %}
+              <div class="pd-user-chip">
+                {% if fol.follower.profile.profile_pic and fol.follower.profile.profile_pic.name != 'default.jpg' %}
+                  <img src="{{ fol.follower.profile.profile_pic.url }}" class="pd-user-av" alt="{{ fol.follower.username }}">
+                {% else %}
+                  <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">{{ fol.follower.username|slice:":1" }}</div>
+                {% endif %}
+                <div class="pd-user-info">
+                  <a href="{% url 'profile-detail' fol.follower.username %}" class="pd-user-name">{{ fol.follower.username }}</a>
+                </div>
+              </div>
+            {% endfor %}
+            {% if followers|length > 5 %}<div class="p-2 text-center small text-muted">+ {{ followers|length|add:"-5" }} more</div>{% endif %}
+          {% else %}
+            <div class="pd-empty" style="padding:1.5rem">No followers yet.</div>
+          {% endif %}
+        </div>
+
+        <div id="vis-following" class="pd-tab-pane">
+          {% if following_list %}
+            {% for fol in following_list|slice:":5" %}
+              <div class="pd-user-chip">
+                {% if fol.following.profile.profile_pic and fol.following.profile.profile_pic.name != 'default.jpg' %}
+                  <img src="{{ fol.following.profile.profile_pic.url }}" class="pd-user-av" alt="{{ fol.following.username }}">
+                {% else %}
+                  <div class="pd-user-av-ph" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">{{ fol.following.username|slice:":1" }}</div>
+                {% endif %}
+                <div class="pd-user-info">
+                  <a href="{% url 'profile-detail' fol.following.username %}" class="pd-user-name">{{ fol.following.username }}</a>
+                </div>
+              </div>
+            {% endfor %}
+            {% if following_list|length > 5 %}<div class="p-2 text-center small text-muted">+ {{ following_list|length|add:"-5" }} more</div>{% endif %}
+          {% else %}
+            <div class="pd-empty" style="padding:1.5rem">Not following anyone.</div>
+          {% endif %}
+        </div>
+      </div>
       <!-- Badges -->
       <div class="pd-card">
         <div class="pd-card-header">
@@ -356,6 +1033,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
 </div>
 </div>
@@ -378,13 +1056,43 @@
     });
   }
 
-  // Follow / Unfollow
+  // ── Tab Navigation (Global helper) ──
+  window.switchToTab = function(tabId) {
+    const btn = document.querySelector(`.pd-tab[data-tab="${tabId}"]`);
+    if (btn) btn.click();
+  };
+
+  window.openSettingsTab = function() {
+    // Scroll to the cards section if needed
+    const card = document.querySelector('.pd-card:has(#tab-settings)');
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth' });
+      switchToTab('tab-settings');
+    }
+  };
+
+  // ── Tabs (Scoped to Parent) ──
+  document.querySelectorAll('.pd-card').forEach(card => {
+    const tabs = card.querySelectorAll('.pd-tab');
+    const panes = card.querySelectorAll('.pd-tab-pane');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        tabs.forEach(t => t.classList.remove('active'));
+        panes.forEach(p => p.classList.remove('active'));
+
+        this.classList.add('active');
+        const target = document.getElementById(this.dataset.tab);
+        if (target) target.classList.add('active');
+      });
+    });
+  });
+
+  // Follow / Unfollow (profile button)
   const followBtn = document.getElementById('pd-follow-btn');
   if (followBtn) {
     followBtn.addEventListener('click', function() {
       const uname = this.dataset.username;
-      
-      // Add a loading state to prevent double clicks
       if (this.classList.contains('loading')) return;
       this.classList.add('loading');
       this.style.opacity = '0.7';
@@ -402,12 +1110,9 @@
           this.classList.remove('pd-btn-outline');
           this.classList.add('pd-btn-primary');
         }
-        
+
         const countEl = document.getElementById('pd-follower-count');
-        if (countEl) {
-          countEl.textContent = data.follower_count;
-          console.log('Updated follower count to:', data.follower_count);
-        }
+        if (countEl) countEl.textContent = data.follower_count;
       }, err => {
         this.classList.remove('loading');
         this.style.opacity = '1';
@@ -437,9 +1142,7 @@
   if (acceptBtn) {
     acceptBtn.addEventListener('click', function() {
       post('/friend/accept/' + this.dataset.pk + '/', data => {
-        if (data.status === 'accepted') {
-          location.reload();
-        }
+        if (data.status === 'accepted') location.reload();
       });
     });
   }
@@ -464,6 +1167,54 @@
       post('/friend/remove/' + this.dataset.username + '/', () => location.reload());
     });
   }
+
+  // ── Friend request actions (own profile - dashboard social tab) ──
+  window.acceptReq = function(btn) {
+    const pk = btn.dataset.pk;
+    post('/friend/accept/' + pk + '/', data => {
+      if (data.status === 'accepted') {
+        const chip = document.getElementById('req-' + pk);
+        if (chip) chip.style.opacity = '0.4';
+        setTimeout(() => { if (chip) chip.remove(); }, 400);
+      }
+    });
+  };
+
+  window.declineReq = function(btn) {
+    const pk = btn.dataset.pk;
+    post('/friend/decline/' + pk + '/', data => {
+      if (data.status === 'declined') {
+        const chip = document.getElementById('req-' + pk);
+        if (chip) chip.style.opacity = '0.4';
+        setTimeout(() => { if (chip) chip.remove(); }, 400);
+      }
+    });
+  };
+
+  // ── Follow inline (for feeds) ──
+  window.followUserInline = function(username, btn) {
+    btn.disabled = true;
+    fetch('/follow/' + username + '/', {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.following) {
+        btn.textContent = '✓ Following';
+        btn.style.background = 'rgba(34,197,94,.2)';
+        btn.style.color = '#4ade80';
+        btn.style.border = '1px solid rgba(34,197,94,.3)';
+      } else {
+        btn.textContent = 'Follow';
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.style.border = '';
+      }
+      btn.disabled = false;
+    })
+    .catch(() => { btn.disabled = false; });
+  };
 })();
 </script>
 {% endblock %}

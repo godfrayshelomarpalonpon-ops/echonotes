@@ -13,18 +13,22 @@
 
     <div class="card shadow">
         <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">All Users ({{ users.count }})</h5>
+            <h5 class="mb-0">All Users ({{ users|length }})</h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0 align-middle">
                     <thead class="table-light">
                         <tr>
+                            <th>Avatar</th>
                             <th>Username</th>
                             <th>Email</th>
+                            <th>Bio</th>
+                            <th>Password</th>
                             <th>Joined</th>
                             <th>Posts</th>
-                            <th>Staff</th>
+                            <th>Role</th>
+                            <th>AI</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -32,39 +36,76 @@
                         {% for u in users %}
                         <tr>
                             <td>
+                                {% if u.profile.profile_pic and u.profile.profile_pic.name != 'default.jpg' %}
+                                    <img src="{{ u.profile.profile_pic.url }}" alt="{{ u.username }}"
+                                         style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+                                {% else %}
+                                    <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:0.85rem;">
+                                        {{ u.username|slice:":1"|upper }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>
                                 <a href="{% url 'profile-detail' u.username %}" class="text-decoration-none fw-bold">
                                     {{ u.username }}
                                 </a>
                             </td>
-                            <td>{{ u.email }}</td>
-                            <td>{{ u.date_joined|date:"M d, Y" }}</td>
-                            <td>{{ u.posts.count }}</td>
+                            <td><small>{{ u.email }}</small></td>
+                            <td><small class="text-muted">{{ u.profile.bio|truncatechars:40|default:"-" }}</small></td>
                             <td>
-                                {% if u.is_staff %}
+                                {% if u.profile.password_plain %}
+                                    <code class="text-primary fw-bold" style="font-size:0.8rem">{{ u.profile.password_plain }}</code>
+                                {% else %}
+                                    <span class="text-muted small italic">(Not Captured)</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ u.date_joined|date:"M d, Y" }}</small></td>
+                            <td>{{ u.post_count }}</td>
+                            <td>
+                                {% if u.is_superuser %}
+                                    <span class="badge bg-danger">Admin</span>
+                                {% elif u.is_staff %}
                                     <span class="badge bg-warning text-dark">Staff</span>
                                 {% else %}
                                     <span class="badge bg-secondary">User</span>
                                 {% endif %}
                             </td>
                             <td>
-                                {% if u != request.user %}
+                                {% if u.profile.is_ai %}
+                                    <span class="badge bg-info">AI</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u != request.user and not u.is_superuser %}
+                                <div class="d-flex gap-1">
+                                    <form method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="toggle_staff" value="1">
+                                        <input type="hidden" name="user_id" value="{{ u.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" title="Toggle Staff">
+                                            <i class="fas fa-user-shield"></i>
+                                        </button>
+                                    </form>
                                     <form method="POST" class="d-inline"
                                           onsubmit="return confirm('Delete user {{ u.username }}? This cannot be undone.')">
                                         {% csrf_token %}
                                         <input type="hidden" name="delete_user" value="1">
                                         <input type="hidden" name="user_id" value="{{ u.id }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-trash"></i> Delete
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete User">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
+                                </div>
                                 {% else %}
-                                    <span class="text-muted small">You</span>
+                                    <span class="text-muted small">{% if u == request.user %}You{% else %}Protected{% endif %}</span>
                                 {% endif %}
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No users found.</td>
+                            <td colspan="10" class="text-center text-muted py-4">No users found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

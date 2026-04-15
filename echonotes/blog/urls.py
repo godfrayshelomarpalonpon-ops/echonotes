@@ -19,7 +19,6 @@ urlpatterns = [
     path('messages/<str:username>/poll/', views.get_dm_messages, name='get_dm_messages'),
 
     # Profile
-    path('profile/', views.profile, name='profile'),
     path('profile/<str:username>/', views.profile_detail, name='profile-detail'),
     path('delete-profile-pic/', views.delete_profile_pic, name='delete-profile-pic'),
 

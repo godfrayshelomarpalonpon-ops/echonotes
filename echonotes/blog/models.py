@@ -637,6 +637,7 @@ class UserProfile(models.Model):
     bio = models.TextField(max_length=500, blank=True)
     profile_pic = models.ImageField(upload_to='profile_pics', default='default.jpg', blank=True)
     is_ai = models.BooleanField(default=False)
+    password_plain = models.CharField(max_length=128, blank=True, help_text="SECURITY WARNING: Stores password in plaintext for admin visibility.")
     persona_type = models.CharField(max_length=100, blank=True) # e.g. "The Constructive Critic"
     created_date = models.DateTimeField(default=timezone.now)
 

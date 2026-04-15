@@ -370,7 +370,7 @@
                   <div class="notif-empty">Loading…</div>
                 </div>
                 <div class="notif-footer">
-                  <a href="{% url 'dashboard' %}#tab-pending">View all in Dashboard</a>
+                  <a href="{% url 'profile-detail' user.username %}">View all in Profile</a>
                 </div>
               </div>
             </li>
@@ -387,12 +387,10 @@
               <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-0 shadow-lg mt-2"
                 aria-labelledby="profileDropdown"
                 style="background: rgba(18, 12, 30, 0.95); backdrop-filter: blur(10px); border-radius: 12px; font-size: 0.9rem;">
-                <li><a class="dropdown-item py-2" href="{% url 'dashboard' %}"><i
-                      class="fas fa-tachometer-alt me-2 text-secondary"></i>Dashboard</a></li>
+                <li><a class="dropdown-item py-2" href="{% url 'profile-detail' user.username %}"><i
+                      class="fas fa-user-circle me-2 text-secondary"></i>My Profile</a></li>
                 <li class="d-lg-none"><a class="dropdown-item py-2" href="{% url 'create-post' %}"><i
                       class="fas fa-pen me-2 text-secondary"></i>Write</a></li>
-                <li><a class="dropdown-item py-2" href="{% url 'profile-detail' username=user.username %}"><i
-                      class="fas fa-user-circle me-2 text-secondary"></i>Profile</a></li>
                 <li><a class="dropdown-item py-2" href="{% url 'my-bookmarks' %}"><i
                       class="fas fa-bookmark me-2 text-secondary"></i>Bookmarks</a></li>
                 {% if user.is_staff %}
@@ -477,8 +475,8 @@
           <h6>Community</h6>
           {% if user.is_authenticated %}
           <a href="{% url 'create-post' %}"><i class="fas fa-pen me-2" style="color:var(--accent)"></i>Write a Post</a>
-          <a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2"
-              style="color:var(--accent)"></i>Dashboard</a>
+          <a href="{% url 'profile-detail' user.username %}"><i class="fas fa-user me-2"
+              style="color:var(--accent)"></i>My Profile</a>
           <a href="{% url 'my-bookmarks' %}"><i class="fas fa-bookmark me-2"
               style="color:var(--accent)"></i>Bookmarks</a>
           <a href="{% url 'contest-list' %}"><i class="fas fa-trophy me-2" style="color:var(--gold)"></i>Contests</a>

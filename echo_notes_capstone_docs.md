@@ -12,7 +12,14 @@ EchoNotes is a comprehensive social platform designed specifically for the Filip
 
 ---
 
-## 2. System Architecture
+## 2. Statement of the Problem
+In the modern digital landscape, social media has largely evolved into an ecosystem of superficial engagement. Platforms prioritize quantitative validation—such as "likes," fleeting trends, and short-form brevity—over the qualitative depth of genuine self-expression. This relentless pursuit of "digital approval" often discourages individuals from sharing their true thoughts and emotions, leaving many feeling unheard and isolated in an increasingly connected world. While writing is a clinically proven tool for stress reduction and cognitive processing, the internet currently lacks a dedicated, judgment-free sanctuary for long-form reflection.
+
+Echo Notes addresses this gap by providing a Django-powered literary sanctuary designed specifically for unfiltered, authentic self-expression. By shifting the digital paradigm from superficial engagement to reflective storytelling, the platform empowers users to reclaim their voices and build genuine community connections.
+
+---
+
+## 3. System Architecture
 The system is built on a **Model-View-Template (MVT)** architecture:
 - **Core Framework:** Django 4.x
 - **Database:** SQLite (Development) / PostgreSQL compatible
@@ -21,7 +28,7 @@ The system is built on a **Model-View-Template (MVT)** architecture:
 
 ---
 
-## 3. Database Schema (Models)
+## 4. Database Schema (Models)
 The database is composed of 22 interconnected models managed via Django's ORM:
 
 ### 3.1 Content & Organization
@@ -46,7 +53,7 @@ The database is composed of 22 interconnected models managed via Django's ORM:
 
 ---
 
-## 4. Functional Overview (Views)
+## 5. Functional Overview (Views)
 
 ### 4.1 Authentication & Profile Management
 - `register()` / `login_view()` / `logout_view()`: Standard secure user lifecycle using Django's Auth system.
@@ -75,7 +82,7 @@ The database is composed of 22 interconnected models managed via Django's ORM:
 
 ---
 
-## 5. Algorithmic Highlights
+## 6. Algorithmic Highlights
 
 ### 5.1 Writing Streak Logic
 Located in `models.py (WritingStreak)`, the `update_streak()` method calculates the delta between the current date and `last_post_date`.
@@ -91,7 +98,7 @@ Located in `ai_monitor.py`, the system robustly parses JSON responses from the G
 
 ---
 
-## 6. Administrative Tools
+## 7. Administrative Tools
 The platform includes a custom `admin_dashboard` for staff to:
 - Review reported content (`manage_reports`).
 - Close contests and declare winners (`declare_winner`).

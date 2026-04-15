@@ -127,8 +127,10 @@ class DailyPromptAdmin(admin.ModelAdmin):
     list_filter = ('is_active',)
 
     def prompt_preview(self, obj):
-        return obj.prompt[:60] + '...' if len(obj.prompt) > 60 else obj.prompt
-    prompt_preview.short_description = 'Prompt'
+        return obj.prompt[:50] + ("..." if len(obj.prompt) > 50 else "")
+
+    def total_responses(self, obj):
+        return obj.responses.count()
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -171,13 +173,15 @@ class StoryParagraphAdmin(admin.ModelAdmin):
     readonly_fields = ('story', 'author', 'order', 'created_date')
 
 
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'is_ai', 'persona_type', 'created_date')
-    list_filter = ('is_ai',)
-    search_fields = ('user__username', 'persona_type')
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    readonly_fields = ('password_plain',)
+    verbose_name_plural = 'Profile Info'
 
 
 class CustomUserAdmin(UserAdmin):
+    inlines = (UserProfileInline, )
     list_display = ('username', 'email', 'is_staff', 'account_status', 'date_joined')
     list_filter = ('is_staff', 'is_superuser', 'is_active')
     search_fields = ('username', 'email')
@@ -209,7 +213,7 @@ admin.site.register(Badge, BadgeAdmin)
 admin.site.register(WritingStreak, WritingStreakAdmin)
 admin.site.register(CollaborativeStory, CollaborativeStoryAdmin)
 admin.site.register(StoryParagraph, StoryParagraphAdmin)
-admin.site.register(UserProfile, UserProfileAdmin)
+
 admin.site.register(Follow)
 admin.site.register(Bookmark)
 

