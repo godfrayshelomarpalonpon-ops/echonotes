@@ -185,7 +185,7 @@ def delete_post(request, pk):
         post.delete()
         messages.success(request, 'Post deleted.')
         return redirect('profile-detail', username=request.user.username)
-    return render(request, 'confirm_delete.html', {'post': post})
+    return render(request, 'confirm_delete.html', {'type': 'post', 'obj': post})
 
 
 @login_required
