@@ -39,12 +39,13 @@
         background: rgba(255, 255, 255, 0.75);
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
-        border-radius: 20px; overflow: hidden;
+        border-radius: 20px;
         border: 1px solid rgba(255, 255, 255, 0.6);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex; flex-direction: column; position: relative;
         min-height: 400px;
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
+        overflow: visible; /* ← allows icon to bleed below banner */
     }
     .circle-card:hover {
         transform: translateY(-8px);
@@ -52,15 +53,32 @@
         border-color: rgba(190, 18, 60, 0.25);
     }
     
+    /* ── Banner wrapper clips gradient but not the icon ── */
     .circle-card-bg {
         height: 130px; min-height: 130px; width: 100%; position: relative; flex-shrink: 0;
-        overflow: hidden;
+        overflow: visible; /* ← was "hidden" — caused icon clipping */
+        border-radius: 20px 20px 0 0;
     }
+
+    /* Pseudo-element clips the gradient/image inside the rounded top */
+    .circle-card-bg::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: inherit;
+        border-radius: 20px 20px 0 0;
+        overflow: hidden;
+        z-index: 0;
+    }
+
     .circle-card-bg::after {
         content: '';
         position: absolute; inset: 0;
         background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.15));
+        border-radius: 20px 20px 0 0;
+        z-index: 1;
     }
+
     .circle-card-icon {
         width: 72px; height: 72px; border-radius: 20px;
         background: rgba(255, 255, 255, 0.95);
@@ -69,12 +87,13 @@
         display: flex; align-items: center; justify-content: center;
         font-size: 1.8rem; position: absolute; left: 1.5rem; bottom: -36px;
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        z-index: 5;
+        z-index: 5; /* ← sits above pseudo-elements */
         transition: transform 0.3s ease;
     }
     .circle-card:hover .circle-card-icon { transform: scale(1.08) rotate(-3deg); }
     
-    .circle-card-body { padding: 3.5rem 1.5rem 1.75rem; flex: 1 1 auto; display: flex; flex-direction: column; min-height: 200px; }
+    /* ── Extra top padding to clear the overflowing icon ── */
+    .circle-card-body { padding: 4rem 1.5rem 1.75rem; flex: 1 1 auto; display: flex; flex-direction: column; min-height: 200px; }
     .circle-card-name {
         font-family: var(--font-display); font-size: 1.5rem; color: var(--ink);
         text-decoration: none !important; margin-bottom: 0.5rem; display: block;
