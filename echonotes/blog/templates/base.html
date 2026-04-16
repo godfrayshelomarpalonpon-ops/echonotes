@@ -82,7 +82,7 @@
       min-width: 17px;
       height: 17px;
       border-radius: 50%;
-      background: #ef4444;
+      background: #c8472b;
       color: white;
       font-size: 0.6rem;
       font-weight: 700;
@@ -190,7 +190,7 @@
     }
 
     .notif-item.unread {
-      background: rgba(124, 58, 237, 0.07);
+      background: rgba(200, 71, 43, 0.12);
     }
 
     .notif-item.unread:hover {
@@ -219,7 +219,7 @@
       font-family: 'DM Sans', sans-serif;
       text-transform: uppercase;
       flex-shrink: 0;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      background: linear-gradient(135deg, #c8472b, #e06040);
     }
 
     .notif-body {
@@ -229,16 +229,20 @@
 
     .notif-text {
       font-family: 'DM Sans', sans-serif;
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.75);
+      font-size: 0.88rem !important;
+      font-weight: 500 !important;
+      color: #ffffff !important;
+      display: block !important;
+      visibility: visible !important;
       line-height: 1.4;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
+      opacity: 1 !important;
     }
 
     .notif-time {
       font-family: 'DM Mono', monospace;
       font-size: 0.65rem;
-      color: rgba(255, 255, 255, 0.28);
+      color: rgba(255, 255, 255, 0.5) !important;
     }
 
     .notif-icon-badge {
@@ -585,10 +589,18 @@
               const link = n.post_id
                 ? `/post/${n.post_id}/`
                 : `/profile/${esc(n.sender)}/`;
+              let txt = n.text_preview || "";
+              if (!txt) {
+                if (n.type === 'like_post') txt = "liked your story";
+                else if (n.type === 'follow') txt = "started following you";
+                else if (n.type === 'friend_request') txt = "sent you a friend request";
+                else if (n.type === 'friend_accept') txt = "accepted your friend request";
+                else txt = "sent you a notification";
+              }
               return `<div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="location.href='${link}'">
             ${av}
             <div class="notif-body">
-              <div class="notif-text">${esc(n.text)}</div>
+              <div class="notif-text"><strong>${esc(n.sender)}</strong> ${esc(txt)}</div>
               <div class="notif-time">${esc(n.created)}</div>
             </div>
             <span class="notif-icon-badge">${esc(n.icon)}</span>
@@ -645,7 +657,7 @@
       <div class="modal-content border-0 shadow-lg"
         style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px;">
         <div class="modal-header border-0 pb-0">
-          <h5 class="modal-title font-serif fw-bold" style="color: #7c3aed;">
+          <h5 class="modal-title font-serif fw-bold" style="color: #c8472b;">
             <i class="fas fa-magic me-2"></i>AI Creative Critique
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

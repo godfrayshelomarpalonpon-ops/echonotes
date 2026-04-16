@@ -655,6 +655,22 @@ def remove_friend(request, username):
     return redirect('profile-detail', username=username)
 
 
+@login_required
+def cancel_friend_request(request, username):
+    target = get_object_or_404(User, username=username)
+    # Only cancel if I sent it and it's active
+    cancelled_count, _ = FriendRequest.objects.filter(
+        sender=request.user, receiver=target, is_active=True
+    ).delete()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'cancelled' if cancelled_count > 0 else 'none'})
+    
+    if cancelled_count > 0:
+        messages.info(request, f'Friend request to {username} cancelled.')
+    return redirect('profile-detail', username=username)
+
+
 # ─── Notifications ────────────────────────────────────────────────────────────
 
 @login_required

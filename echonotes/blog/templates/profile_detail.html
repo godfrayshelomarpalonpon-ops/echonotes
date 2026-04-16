@@ -484,8 +484,9 @@
             <i class="fas fa-times"></i> Decline
           </button>
         {% elif friend_request_sent %}
-          <button class="pd-btn pd-btn-yellow" disabled>
-            <i class="fas fa-clock"></i> Request Sent
+          <button class="pd-btn pd-btn-yellow" id="pd-cancel-request-btn"
+                  data-username="{{ profile_user.username }}">
+            <i class="fas fa-times"></i> Cancel Request
           </button>
         {% else %}
           <button class="pd-btn pd-btn-outline" id="pd-add-friend-btn"
@@ -1132,10 +1133,20 @@
       const uname = this.dataset.username;
       post('/friend/request/' + uname + '/', data => {
         if (data.status === 'sent' || data.status === 'already_friends') {
-          this.innerHTML = '<i class="fas fa-clock"></i> Request Sent';
-          this.classList.add('pd-btn-yellow');
-          this.classList.remove('pd-btn-outline');
-          this.disabled = true;
+          location.reload(); // Simplest to reload to bind new events
+        }
+      });
+    });
+  }
+
+  // Cancel Request
+  const cancelReqBtn = document.getElementById('pd-cancel-request-btn');
+  if (cancelReqBtn) {
+    cancelReqBtn.addEventListener('click', function() {
+      const uname = this.dataset.username;
+      post('/friend/request/cancel/' + uname + '/', data => {
+        if (data.status === 'cancelled') {
+          location.reload();
         }
       });
     });

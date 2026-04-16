@@ -103,6 +103,7 @@ urlpatterns = [
 
     # ── Friend System ─────────────────────────────────────────────
     path('friend/request/<str:username>/', views.send_friend_request, name='send-friend-request'),
+    path('friend/request/cancel/<str:username>/', views.cancel_friend_request, name='cancel-friend-request'),
     path('friend/accept/<int:pk>/', views.accept_friend_request, name='accept-friend-request'),
     path('friend/decline/<int:pk>/', views.decline_friend_request, name='decline-friend-request'),
     path('friend/remove/<str:username>/', views.remove_friend, name='remove-friend'),
